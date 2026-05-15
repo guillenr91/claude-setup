@@ -1,0 +1,28 @@
+# Claude Code
+.claude/settings.local.json
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+
+# Java build output
+target/
+build/
+out/
+*.class
+
+# Gradle
+.gradle/
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
