@@ -37,27 +37,9 @@ These apply to every commit, whether or not the work belongs to a ticket.
 
 For other ticket-specific commit conventions, see the ticket skill.
 
-# Code style
+# Style Guides
 
-## Null handling — Optional chaining over if statements
+Language and tool-specific coding standards are in `.claude/style-guides/`:
 
-Use `Optional` with `.map()`, `.filter()`, `.orElse()` instead of cascading null checks. Return `Optional<T>` from helper methods that perform extraction or lookup.
-
-```java
-// CORRECT
-return extractSerialNumber(deviceId)
-        .map(sn -> dataProvider.getEligibility(sn))
-        .filter(Eligibility::isTrialUsed)
-        .filter(e -> e.getEndDate() != null && e.getEndDate() > 0)
-        .map(e -> buildDto(e))
-        .orElse(null);
-
-// WRONG
-String sn = extractSerialNumber(deviceId);
-if (sn == null) return null;
-Eligibility e = dataProvider.getEligibility(sn);
-if (e == null) return null;
-if (!e.isTrialUsed()) return null;
-if (e.getEndDate() == null) return null;
-return buildDto(e);
-```
+- [JAVA.md](.claude/style-guides/JAVA.md) — Optional chaining, service naming, DI patterns
+- [POSTMAN.md](.claude/style-guides/POSTMAN.md) — Collection structure, test scripts, environment variables
