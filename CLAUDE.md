@@ -1,11 +1,13 @@
-# Project Claude Context
+# Project Context
 
 **Before answering questions or performing tasks**, read [.claude/docs/CLAUDE.md](.claude/docs/CLAUDE.md) to determine
 which documentation file to consult.
 
-## Commit conventions
+# Commit conventions
 
 These apply to every commit, whether or not the work belongs to a ticket.
+
+**Never commit `CLAUDE.md` or any files in the `.claude/` directory.** These are local configuration files that should not be pushed to the repository.
 
 1. **Self-contained, testable commits.** Each commit must compile, pass its own verification step, and not depend on a
    later commit to make sense. Prefer small commits, but group closely-related changes when splitting them would be
@@ -34,3 +36,28 @@ These apply to every commit, whether or not the work belongs to a ticket.
    not belong to a ticket, omit the prefix.
 
 For other ticket-specific commit conventions, see the ticket skill.
+
+# Code style
+
+## Null handling — Optional chaining over if statements
+
+Use `Optional` with `.map()`, `.filter()`, `.orElse()` instead of cascading null checks. Return `Optional<T>` from helper methods that perform extraction or lookup.
+
+```java
+// CORRECT
+return extractSerialNumber(deviceId)
+        .map(sn -> dataProvider.getEligibility(sn))
+        .filter(Eligibility::isTrialUsed)
+        .filter(e -> e.getEndDate() != null && e.getEndDate() > 0)
+        .map(e -> buildDto(e))
+        .orElse(null);
+
+// WRONG
+String sn = extractSerialNumber(deviceId);
+if (sn == null) return null;
+Eligibility e = dataProvider.getEligibility(sn);
+if (e == null) return null;
+if (!e.isTrialUsed()) return null;
+if (e.getEndDate() == null) return null;
+return buildDto(e);
+```
