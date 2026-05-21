@@ -37,6 +37,19 @@ These apply to every commit, whether or not the work belongs to a ticket.
 
 For other ticket-specific commit conventions, see the ticket skill.
 
+# Dependency changes
+
+Before adding a new package, library, image dependency, CLI tool, OS package, or build/runtime dependency:
+
+1. Identify the exact behavior that requires the dependency.
+2. Verify the minimal dependency set locally whenever feasible. Vendor docs prove how to install something; they do not
+   prove every package in an example is needed for this project.
+3. Add extra packages only after proving the minimal install or existing project tooling cannot satisfy the need.
+4. Treat development headers, SDKs, compilers, `*-dev` packages, and build tools as default-reject in runtime images
+   unless a compile step or runtime behavior proves they are required.
+5. Record the proof in the ticket notes, durable docs, commit message, or final response: command run, output observed,
+   source inspected, or the explicit reason verification was not possible.
+
 # Style Guides
 
 Language and tool-specific coding standards are in `.claude/style-guides/`:
