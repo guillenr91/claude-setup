@@ -1,16 +1,17 @@
 # Postman Style Guide
 
-Directive rules for generating and reviewing Postman collections, requests, environments, and test scripts.
+Use these rules when generating or reviewing Postman collections, requests, environments, and scripts. Apply a rule only
+when its trigger matches. Prefer existing collection conventions when they are more specific.
 
 ## Collection structure
 
 ### Rule: group by purpose, not by URL path
 
-**Do:** organize folders by service or domain, then by interaction type (health, reads, writes, admin).
+**Do:** organize folders by service or domain, then by interaction type: health, reads, writes, admin, or support.
 
 **Do not:** create folders that mirror the URL path verbatim.
 
-**Why:** URLs are already in the request; folders should describe intent.
+**Why:** URLs already show the path. Folder names should show intent.
 
 ```
 Collection
@@ -57,7 +58,8 @@ Collection
 
 **Do:** set the variable in the test script. Keep extraction small.
 
-**Do not:** parse nested structures or run conditionals beyond a few lines — split the request or move logic to a collection-level script instead.
+**Do not:** parse deeply nested structures or add long conditionals. Split the request or move shared logic to a
+collection-level script instead.
 
 ```javascript
 const data = pm.response.json();
@@ -71,11 +73,11 @@ if (data?.id) {
 
 ### Rule: every request has a description with these sections in order
 
-1. **What it does** — one sentence.
-2. **Preconditions** — auth, prior requests, required data.
-3. **Body fields** — for `POST` / `PUT` / `PATCH`: each field, required vs optional.
-4. **Successful response** — status code and key fields the caller can rely on.
-5. **Failure modes** — non-obvious error conditions.
+1. **What it does**: one sentence.
+2. **Preconditions**: auth, prior requests, and required data.
+3. **Body fields**: for `POST`, `PUT`, and `PATCH`, list each field and whether it is required.
+4. **Successful response**: status code and key fields the caller can rely on.
+5. **Failure modes**: non-obvious error conditions.
 
 **Do not:** write descriptions that just restate the URL or HTTP method.
 
@@ -100,9 +102,9 @@ Errors:
 
 ### Rule: assert response shape, not just status
 
-**Do:** include at least one structural assertion alongside any status check.
+**Do:** include at least one response-shape assertion alongside any status check.
 
-**Do not:** rely on `pm.response.to.have.status(200)` alone — a 200 with a malformed body is still broken.
+**Do not:** rely on `pm.response.to.have.status(200)` alone. A 200 response with a malformed body is still broken.
 
 ```javascript
 pm.test("Status is 200", () => pm.response.to.have.status(200));
@@ -120,7 +122,7 @@ pm.test("Response has expected shape", () => {
 
 **Do:** fail the test if the source data is missing.
 
-**Do not:** silently `set` or skip — this produces cascading failures three requests later, far from the cause.
+**Do not:** silently skip setting the variable. That creates later failures far from the cause.
 
 ```javascript
 const data = pm.response.json();
@@ -138,7 +140,7 @@ if (data?.items?.length) {
 
 **Trigger:** test or pre-request script exceeds ~30 lines.
 
-**Do:** split the request, or move shared logic to a collection-level pre-request / test script.
+**Do:** split the request, or move shared logic to a collection-level pre-request or test script.
 
 ## URLs
 
@@ -156,7 +158,8 @@ if (data?.items?.length) {
 
 **Do:** define each query parameter as an entry in `query`.
 
-**Do not:** embed query parameters only in the raw URL string — they become invisible in the Postman UI and cannot be toggled.
+**Do not:** embed query parameters only in the raw URL string. They become invisible in the Postman UI and cannot be
+toggled.
 
 ```json
 {
@@ -192,7 +195,7 @@ if (data?.items?.length) {
 
 ## Pre-commit verification
 
-### Rule: a request is not done until it has been run and its tests have failed
+### Rule: a request is not done until it has run and one assertion has failed once
 
 **Before adding a request to the collection:**
 
@@ -200,4 +203,4 @@ if (data?.items?.length) {
 2. Mutate one assertion temporarily to confirm it can fail.
 3. Note any external dependencies (upstream services, seeded data) in the description.
 
-**Why:** an assertion that has never been seen to fail is documentation, not a test.
+**Why:** an assertion that has never been observed failing is documentation, not a test.

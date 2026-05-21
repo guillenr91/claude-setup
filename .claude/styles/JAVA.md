@@ -1,6 +1,7 @@
 # Java Style Guide
 
-Directive rules for generating and reviewing Java code. Each rule has a trigger, an action, and — where relevant — a rationale that lets you adjudicate edge cases.
+Use these rules when generating or reviewing Java code. Apply a rule only when its trigger matches. Prefer existing
+project patterns when they conflict with a rule here.
 
 ## Null handling
 
@@ -8,7 +9,7 @@ Directive rules for generating and reviewing Java code. Each rule has a trigger,
 
 **Trigger:** a method threads a value through two or more sequential nullable lookups, transformations, or filters.
 
-**Do:** express the flow as one `Optional` chain.
+**Do:** express the flow as one `Optional` chain when it stays readable.
 
 **Do not:** write `if (x == null) return ...;` guards in series.
 
@@ -32,13 +33,16 @@ return findUserId(request)
 
 **Do:** declare the return type as `Optional<T>`.
 
-**Exception:** public API methods whose `null` semantics are already established by an external contract (framework, downstream service, persisted schema). Do not change those without coordination.
+**Exception:** keep `null` when a public API, framework contract, downstream service, or persisted schema already
+defines `null` semantics. Do not change those contracts without coordination.
 
 ### Rule: terminate the chain only at a non-`Optional` boundary
 
 **Do:**
+
 - Return `Optional<T>` from helpers so callers can keep chaining.
-- Use `.orElse(...)` / `.orElseThrow(...)` / `.orElseGet(...)` only in methods whose return type is fixed and non-`Optional`.
+- Use `.orElse(...)` / `.orElseThrow(...)` / `.orElseGet(...)` only in methods whose return type is fixed and
+  non-`Optional`.
 
 **Do not:** end a helper's chain with `.orElse(null)` and force every caller to re-wrap with `Optional.ofNullable(...)`.
 
@@ -58,17 +62,22 @@ public UserDto getUser(Request request) {
 
 ## Comments on fluent pipelines
 
-Applies to any fluent pipeline: `Optional` chains and `Stream` chains (`.filter`, `.map`, `.flatMap`, `.reduce`, `.collect`, `.sorted`, `.takeWhile`, etc.).
+Applies to `Optional` chains and `Stream` chains, including `.filter`, `.map`, `.flatMap`, `.reduce`, `.collect`,
+`.sorted`, and `.takeWhile`.
 
 ### Rule: comment non-obvious steps; do not comment obvious ones
 
 **Add a comment above the step when any of these are true:**
-- The predicate or transform encodes a business rule not visible in the expression (authorization, compliance, soft-delete semantics, upstream-contract requirements).
+
+- The predicate or transform encodes a business rule not visible in the expression, such as authorization, compliance,
+  soft-delete behavior, or an upstream contract.
 - The step works around a quirk of upstream data (legacy values, nulls that "shouldn't" exist, off-by-one units).
 - Ordering matters and reordering would break correctness.
-- A reducer's identity or combiner does more than it appears (`BigDecimal` with a specific scale, non-commutative combine, accumulator that mutates).
+- A reducer's identity or combiner does more than it appears, such as `BigDecimal` scale, non-commutative combine logic,
+  or a mutating accumulator.
 
 **Do not add a comment when:**
+
 - It restates the predicate ("only active users", "map to DTO", "sum totals").
 - The step is a plain field access or a single-arg method reference whose name already explains it.
 
@@ -103,9 +112,9 @@ return orders.stream()
 
 ### Rule: default terminal collector is `Stream.toList()` (Java 16+)
 
-**Do:** end pipelines with `.toList()`.
+**Do:** end pipelines with `.toList()` when the project runs on Java 16 or newer and callers do not mutate the result.
 
-**Why:** unmodifiable, null-safe, modern idiom.
+**Why:** it is the modern idiom and returns an unmodifiable list.
 
 ```java
 List<UserDto> dtos = users.stream()
@@ -144,7 +153,7 @@ List<UserDto> dtos = users.stream()
 
 **Trigger:** writing arithmetic that converts between units (time, currency, bytes, etc.).
 
-**Do:** declare a named constant. The expression should read like English.
+**Do:** declare a named constant so the expression names both units.
 
 **Do not:** inline literals like `1000L`, `100`, `1024`.
 
@@ -154,4 +163,4 @@ private static final long MILLIS_PER_SECOND = 1000L;
 long expiryMillis = record.getExpirySeconds() * MILLIS_PER_SECOND;
 ```
 
-The constant name documents which side of the boundary uses which unit — usually more important than the number.
+The constant name documents which side of the boundary uses which unit.

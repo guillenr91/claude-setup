@@ -1,32 +1,32 @@
-# Documentation Guidelines
+# Context Guide
 
-All paths in this file are relative to `.claude/context/`. The referenced files (`SETUP.md`, `TECHNICAL.md`) live alongside
-this one.
+Use this file to decide which project context to load. All paths here are relative to `.claude/context/`.
 
 ## Quick Reference
 
-| Question Type           | Read                         |
-|-------------------------|------------------------------|
-| **How do I run this?**  | [SETUP.md](SETUP.md)         |
-| **How does this work?** | [TECHNICAL.md](TECHNICAL.md) |
+| Task asks about          | Read                         |
+|--------------------------|------------------------------|
+| Running or configuring   | [SETUP.md](SETUP.md)         |
+| Architecture or behavior | [TECHNICAL.md](TECHNICAL.md) |
+| Unclear root cause       | Both                         |
 
 ## Routing Rules
 
-**Read SETUP.md when the task involves:**
+Read `SETUP.md` when the task involves:
 
 - Running, building, or starting the application
 - Setting up credentials, environment variables, or external service access
 - Verifying permissions or troubleshooting startup failures
 - IDE configuration or local development setup
 
-**Read TECHNICAL.md when the task involves:**
+Read `TECHNICAL.md` when the task involves:
 
 - Debugging issues or investigating bugs
 - Understanding code flow, architecture, or integrations
 - Finding where something is configured or how components connect
 - Data store schemas, error patterns, or environment differences
 
-**Read both when:**
+Read both files when:
 
 - Onboarding to the project for the first time
 - The issue might be setup-related or code-related (unclear root cause)
@@ -35,14 +35,14 @@ this one.
 
 ## Keep Documentation In Sync
 
-These files are living documents. Update them when you discover something not already captured:
+Update durable project context when you discover information a future AI or developer will need:
 
-- New troubleshooting solution → SETUP.md troubleshooting table
-- New component behavior → TECHNICAL.md
-- Verified command that wasn't documented → add it with the verified output
-- New error and its solution → document both
+- New troubleshooting solution: add it to `SETUP.md`.
+- New component behavior: add it to `TECHNICAL.md`.
+- Verified command that was not documented: add the command and observed output.
+- New error and solution: document both the error and the fix.
 
-When you update a file, refresh its `last-verified` date in the front matter (see "Staleness" below).
+When you update `SETUP.md` or `TECHNICAL.md`, refresh its `last-verified` date only for content you re-verified.
 
 Before ending a session, check if anything learned should be persisted for future reference.
 
@@ -50,12 +50,12 @@ Before ending a session, check if anything learned should be persisted for futur
 
 ## Generating Missing Documentation
 
-If `SETUP.md` or `TECHNICAL.md` does not exist, generate it through analysis of the project. Every command, path, and
-configuration must be verified before being written, or explicitly marked unverified per "Verification Standards".
+If `SETUP.md` or `TECHNICAL.md` does not exist, generate it from verified project evidence. Every command, path, and
+configuration must either be verified before being written or marked unverified per "Verification Standards".
 
 ### SETUP.md
 
-Purpose: zero to running application in one read.
+Purpose: explain how to get from a fresh checkout to a running, verified application.
 
 Generate by:
 
@@ -74,20 +74,20 @@ Verify by:
 
 Required sections:
 
-1. Prerequisites
-2. Clone and build
-3. Credentials configuration
-4. Permission verification commands (with success and failure output)
-5. Environment variables
-6. Run commands
-7. Verify it works
-8. IDE setup
-9. Troubleshooting table
-10. Quick reference table
+1. Prerequisites.
+2. Clone and build.
+3. Credentials configuration.
+4. Permission verification commands, including success and failure output.
+5. Environment variables.
+6. Run commands.
+7. Verification steps.
+8. IDE setup.
+9. Troubleshooting table.
+10. Quick reference table.
 
 ### TECHNICAL.md
 
-Purpose: understand the system well enough to debug or extend it.
+Purpose: explain how the system works well enough to debug or extend it.
 
 Generate by:
 
@@ -107,21 +107,21 @@ Verify by:
 
 Required sections:
 
-1. Architecture overview
-2. External integrations
-3. Persistent stores (schemas, indexes)
-4. Authentication and authorization flow
-5. Environment configurations
-6. Error handling and exceptions
-7. Debugging techniques
-8. Permission barriers
+1. Architecture overview.
+2. External integrations.
+3. Persistent stores, including schemas and indexes.
+4. Authentication and authorization flow.
+5. Environment configurations.
+6. Error handling and exceptions.
+7. Debugging techniques.
+8. Permission barriers.
 
 ---
 
 ## Verification Standards
 
-Verify everything you write. When you cannot verify something - missing credentials, sandboxed environment, no access to
-a service - write the entry and mark it unverified rather than silently guessing or omitting it.
+Verify everything you write. When something cannot be verified because credentials, services, or environment access are
+missing, mark it unverified instead of guessing.
 
 | Item               | Verification Method                   | If Unverifiable                    |
 |--------------------|---------------------------------------|------------------------------------|
@@ -132,7 +132,7 @@ a service - write the entry and mark it unverified rather than silently guessing
 | Data store schemas | Describe the structure directly       | Mark `Not verified - requires <X>` |
 | Error messages     | Reproduce to capture exact text       | Mark `Not verified - requires <X>` |
 
-Unverified entries are acceptable. Unverified entries presented as fact are not.
+Unverified entries are acceptable. Unverified entries presented as fact are defects.
 
 ---
 
@@ -146,6 +146,5 @@ last-verified: YYYY-MM-DD
 ---
 ```
 
-Update this date whenever you re-verify the contents end-to-end, or when you make changes that you have re-verified. If
-the date is more than a few months old, treat the contents as suspect and re-verify before relying on them for a
-non-trivial action.
+Update this date when you re-verify the file end to end, or when every changed entry has been re-verified. If the date
+is more than a few months old, treat the file as suspect and re-verify before relying on it for a non-trivial action.

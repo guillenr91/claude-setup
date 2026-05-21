@@ -1,34 +1,36 @@
-# Project Context
+# Project Instructions
 
-**Before answering questions or performing tasks**, read [.claude/context/CLAUDE.md](.claude/context/CLAUDE.md) to determine
-which documentation file to consult.
+Use this file as the entry point for every task in this repository.
 
-# Commit conventions
+## Context routing
 
-These apply to every commit, whether or not the work belongs to a ticket.
+Before answering questions or performing tasks, read [.claude/context/CLAUDE.md](.claude/context/CLAUDE.md). Use it to
+choose which project context files to load before acting.
 
-**Never commit `CLAUDE.md` or any files in the `.claude/` directory.** These are local configuration files that should not be pushed to the repository.
+## Commit conventions
 
-1. **Self-contained, testable commits.** Each commit must compile, pass its own verification step, and not depend on a
-   later commit to make sense. Prefer small commits, but group closely-related changes when splitting them would be
-   artificial (e.g. a class and its tests, a rename and the call-site updates it forces). Do not bundle unrelated
-   changes — drive-by fixes belong in their own commit.
-2. **Concise but descriptive subject line.** Imperative mood, stating what changed.
-3. **Bulleted body listing the changes when there is more than one change.** Use one bullet per change, in
-   present-participle form. Example:
+Apply these rules to every commit, whether or not the work belongs to a ticket.
+
+**Never commit `CLAUDE.md` or any files in the `.claude/` directory.** These are local configuration files and should
+not be pushed to the repository.
+
+1. **Make each commit self-contained and testable.** Each commit must compile, pass its own verification step, and make
+   sense without a later commit. Prefer small commits. Keep tightly coupled edits together, such as a rename and the
+   references it forces. Put unrelated fixes in separate commits.
+2. **Use a concise imperative subject.** State what changed.
+3. **Use a bulleted body only when the commit has multiple changes.** Use one present-participle bullet per change.
+   Example:
    ```
    - Adding a new AuthMiddleware class to centralize token validation
    - Removing unused legacy session cookie helpers
    - Updating LoginController to call AuthMiddleware before handler dispatch
    ```
-   If the commit contains a single change, the subject line stands on its own — do not add a one-bullet body that just
-   restates it. Keep bullets concise and specific. If a change's *why* is non-obvious from the diff, add a short prose
-   paragraph below the bullets (or below the subject, for single-change commits) to capture the reasoning.
+   If the commit has one change, use only the subject. Do not add a one-bullet body that repeats the subject. If the
+   reason is not obvious from the diff, add one short paragraph after the subject or bullets.
 
-   *What counts as one change:* a self-contained, testable unit, per rule 1. A new class plus its tests is one change (
-   the empty class isn't independently testable). A rename plus the call-site updates it forces is one change (the
-   half-renamed state doesn't compile). Adding feature-flag plumbing plus the feature it gates is two changes (the
-   plumbing is testable on its own).
+   Treat a self-contained, testable unit as one change. A class plus its tests is one change. A rename plus reference
+   updates is one change. Feature-flag plumbing plus the gated feature is two changes when the plumbing is testable on
+   its own.
 4. **Prefix the subject line with the ticket ID when the commit belongs to a ticket.** Format:
    `<TICKET_ID>: <concise description>`. Example: `ABC-123: extract auth middleware into separate module`. A commit is
    considered a ticket commit if either: the ticket skill is active for a known `<TICKET_ID>`, OR the current branch
@@ -37,22 +39,22 @@ These apply to every commit, whether or not the work belongs to a ticket.
 
 For other ticket-specific commit conventions, see the ticket skill.
 
-# Dependency changes
+## Dependency changes
 
 Before adding a new package, library, image dependency, CLI tool, OS package, or build/runtime dependency:
 
 1. Identify the exact behavior that requires the dependency.
-2. Verify the minimal dependency set locally whenever feasible. Vendor docs prove how to install something; they do not
-   prove every package in an example is needed for this project.
+2. Verify the minimal dependency set locally when feasible. Vendor docs prove how to install something; they do not
+   prove every package in an example is required here.
 3. Add extra packages only after proving the minimal install or existing project tooling cannot satisfy the need.
 4. Treat development headers, SDKs, compilers, `*-dev` packages, and build tools as default-reject in runtime images
    unless a compile step or runtime behavior proves they are required.
 5. Record the proof in the ticket notes, durable docs, commit message, or final response: command run, output observed,
    source inspected, or the explicit reason verification was not possible.
 
-# Style Guides
+## Style Guides
 
-Language and tool-specific coding standards are in `.claude/styles/`:
+Load a style guide when generating or reviewing files in that domain:
 
 - [JAVA.md](.claude/styles/JAVA.md) — Optional chaining, service naming, DI patterns
 - [POSTMAN.md](.claude/styles/POSTMAN.md) — Collection structure, test scripts, environment variables
