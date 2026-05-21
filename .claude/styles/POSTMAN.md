@@ -1,4 +1,4 @@
-# Postman Style Guide (AI Instructions)
+# Postman Style Guide
 
 Directive rules for generating and reviewing Postman collections, requests, environments, and test scripts.
 

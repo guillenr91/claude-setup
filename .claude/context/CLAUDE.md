@@ -1,6 +1,6 @@
 # Documentation Guidelines
 
-All paths in this file are relative to `.claude/docs/`. The referenced files (`SETUP.md`, `TECHNICAL.md`) live alongside
+All paths in this file are relative to `.claude/context/`. The referenced files (`SETUP.md`, `TECHNICAL.md`) live alongside
 this one.
 
 ## Quick Reference

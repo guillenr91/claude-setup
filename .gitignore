@@ -1,6 +1,6 @@
 # Claude Code
 .claude/settings.local.json
-.claude/docs/tickets/
+.claude/context/tickets/
 
 # IntelliJ IDEA
 .idea/

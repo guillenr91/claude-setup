@@ -1,7 +1,7 @@
 ---
 name: ticket
 description: >-
-  Manage the ticket directory at .claude/docs/tickets/<TICKET_ID>/ (analysis file plus PLAN.md)
+  Manage the ticket directory at .claude/context/tickets/<TICKET_ID>/ (analysis file plus PLAN.md)
   across the lifecycle of a ticket — create on a new ticket, read on resumed work, update as
   findings or phases change. TRIGGER when the user explicitly invokes /ticket, OR signals
   starting a new ticket ("I have to work on a new ticket", "I was assigned a new ticket",
@@ -63,14 +63,14 @@ If the user provided a ticket ID in their message or as an argument, use it. Oth
 and stop until they provide one. Do not invent or guess an ID.
 
 Once you have the ID, refer to it as `<TICKET_ID>` for the rest of this skill. Each ticket has its own directory at
-`.claude/docs/tickets/<TICKET_ID>/`, containing two files:
+`.claude/context/tickets/<TICKET_ID>/`, containing two files:
 
 - `ANALYSIS.md` — the analysis document (problem, options, recommendation, decisions).
 - `PLAN.md` — the implementation plan (phases, current phase, branch, status).
 
 ## Step 2 — pick the mode
 
-Check whether the directory `.claude/docs/tickets/<TICKET_ID>/` exists and what is in it.
+Check whether the directory `.claude/context/tickets/<TICKET_ID>/` exists and what is in it.
 
 - **Directory does not exist** → Mode A.
 - **Directory exists and the user is starting work or asking for context** → Mode B.
@@ -119,7 +119,7 @@ Before concluding that you understand the problem space, verify you have covered
 
 ### A.3 — Write the analysis file
 
-Write `.claude/docs/tickets/<TICKET_ID>/ANALYSIS.md` using the template below. Replace `<TICKET_ID>` and `<YYYY-MM-DD>`
+Write `.claude/context/tickets/<TICKET_ID>/ANALYSIS.md` using the template below. Replace `<TICKET_ID>` and `<YYYY-MM-DD>`
 with the real values.
 
 ```markdown
@@ -207,7 +207,7 @@ proceed with.
 
 ### A.5 — Create PLAN.md once an option is chosen
 
-Once the user chooses an option, create `.claude/docs/tickets/<TICKET_ID>/PLAN.md`. Apply the same writing principle: a
+Once the user chooses an option, create `.claude/context/tickets/<TICKET_ID>/PLAN.md`. Apply the same writing principle: a
 newcomer must be able to read this file and understand exactly where the work currently stands.
 
 PLAN.md must contain at minimum:
@@ -284,8 +284,8 @@ must always reflect reality. A stale PLAN.md is worse than none.
 The user is continuing work on a ticket whose directory already exists.
 
 1. Read **both** files in full before answering, suggesting changes, or making edits:
-    - `.claude/docs/tickets/<TICKET_ID>/ANALYSIS.md` for problem, options, and decisions.
-    - `.claude/docs/tickets/<TICKET_ID>/PLAN.md` for current phase, branch, and status.
+    - `.claude/context/tickets/<TICKET_ID>/ANALYSIS.md` for problem, options, and decisions.
+    - `.claude/context/tickets/<TICKET_ID>/PLAN.md` for current phase, branch, and status.
 2. Confirm the active git branch matches the branch named in PLAN.md. If it does not, surface the discrepancy and ask
    before doing any work — do not silently switch or assume.
 3. Use these files as the source of truth for the problem, constraints, chosen option, current phase, and open
@@ -298,7 +298,7 @@ The user is continuing work on a ticket whose directory already exists.
 
 ## Mode C — Update the analysis file with new findings
 
-During work on a ticket, update `.claude/docs/tickets/<TICKET_ID>/ANALYSIS.md` whenever a **material** finding emerges.
+During work on a ticket, update `.claude/context/tickets/<TICKET_ID>/ANALYSIS.md` whenever a **material** finding emerges.
 A finding is material if it does at least one of:
 
 - Changes the **direction** of the work (different approach than what was chosen).
@@ -345,11 +345,11 @@ Examples:
 - A verified command or troubleshooting fix not already documented → project docs.
 
 To decide whether durable information goes in `SETUP.md` or `TECHNICAL.md`, follow the routing rules in
-`.claude/docs/CLAUDE.md`. If a finding is genuinely both ticket-relevant *and* durable (e.g. it shapes this ticket's
+`.claude/context/CLAUDE.md`. If a finding is genuinely both ticket-relevant *and* durable (e.g. it shapes this ticket's
 solution AND future work needs it), update **both** files: a ticket-specific framing in the ticket file, and a
 project-level entry in the appropriate project doc.
 
-If `SETUP.md` or `TECHNICAL.md` does not yet exist, follow the generation guidance in `.claude/docs/CLAUDE.md` rather
+If `SETUP.md` or `TECHNICAL.md` does not yet exist, follow the generation guidance in `.claude/context/CLAUDE.md` rather
 than skipping the update or dumping the content into the ticket file. Verify before writing, per that file's
 verification standards.
 
@@ -366,7 +366,7 @@ If you are uncertain which file a finding belongs in, ask the user before writin
 - Keep PLAN.md current — `Current phase`, `Status summary`, branch, and per-phase status markers must always reflect
   reality.
 - Keep ticket-specific analysis in the ticket file. Keep durable technical and setup information in the project docs (
-  `SETUP.md` / `TECHNICAL.md`), routed per `.claude/docs/CLAUDE.md`.
+  `SETUP.md` / `TECHNICAL.md`), routed per `.claude/context/CLAUDE.md`.
 - General commit conventions live in the project root `CLAUDE.md` and still apply.
 
 ## Ticket commit rules

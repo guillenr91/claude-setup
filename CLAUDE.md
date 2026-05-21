@@ -1,6 +1,6 @@
 # Project Context
 
-**Before answering questions or performing tasks**, read [.claude/docs/CLAUDE.md](.claude/docs/CLAUDE.md) to determine
+**Before answering questions or performing tasks**, read [.claude/context/CLAUDE.md](.claude/context/CLAUDE.md) to determine
 which documentation file to consult.
 
 # Commit conventions
@@ -52,7 +52,7 @@ Before adding a new package, library, image dependency, CLI tool, OS package, or
 
 # Style Guides
 
-Language and tool-specific coding standards are in `.claude/style-guides/`:
+Language and tool-specific coding standards are in `.claude/styles/`:
 
-- [JAVA.md](.claude/style-guides/JAVA.md) — Optional chaining, service naming, DI patterns
-- [POSTMAN.md](.claude/style-guides/POSTMAN.md) — Collection structure, test scripts, environment variables
+- [JAVA.md](.claude/styles/JAVA.md) — Optional chaining, service naming, DI patterns
+- [POSTMAN.md](.claude/styles/POSTMAN.md) — Collection structure, test scripts, environment variables

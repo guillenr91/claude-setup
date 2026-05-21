@@ -1,4 +1,4 @@
-# Java Style Guide (AI Instructions)
+# Java Style Guide
 
 Directive rules for generating and reviewing Java code. Each rule has a trigger, an action, and — where relevant — a rationale that lets you adjudicate edge cases.
 
