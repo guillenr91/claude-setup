@@ -1,5 +1,9 @@
 # Java Style Guide
 
+## Context
+
+This file is loaded into context. Keep it concise, explicit, and actionable.
+
 Use these rules when generating or reviewing Java code. Apply a rule only when its trigger matches. Prefer existing
 project patterns when they conflict with a rule here.
 

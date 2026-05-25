@@ -1,5 +1,9 @@
 # Context Guide
 
+## Context
+
+This file is loaded into context. Keep it concise, explicit, and actionable.
+
 Use this file to decide which project context to load. All paths here are relative to `.claude/context/`.
 
 ## Quick Reference
@@ -35,7 +39,7 @@ Read both files when:
 
 ## Keep Documentation In Sync
 
-Update durable project context when you discover information a future AI or developer will need:
+Update durable project context when you discover information a future assistant or developer will need:
 
 - New troubleshooting solution: add it to `SETUP.md`.
 - New component behavior: add it to `TECHNICAL.md`.
@@ -46,12 +50,36 @@ When you update `SETUP.md` or `TECHNICAL.md`, refresh its `last-verified` date o
 
 Before ending a session, check if anything learned should be persisted for future reference.
 
+## Table Of Contents Requirement
+
+`SETUP.md` and `TECHNICAL.md` must each include a table of contents near the top of the file, after the `## Context`
+header and any introductory paragraph.
+
+When generating either file, create the table of contents before the first main section. When updating either file,
+verify the table of contents still matches the headings you changed. If the file has no table of contents, add one as
+part of the same update before ending the task. Do not finish a documentation update that leaves `SETUP.md` or
+`TECHNICAL.md` without a current table of contents.
+
 ---
 
 ## Generating Missing Documentation
 
 If `SETUP.md` or `TECHNICAL.md` does not exist, generate it from verified project evidence. Every command, path, and
 configuration must either be verified before being written or marked unverified per "Verification Standards".
+
+### Required Header
+
+Generated `SETUP.md` and `TECHNICAL.md` files must start with this header pattern:
+
+```markdown
+# <Document Title>
+
+## Context
+
+This file is loaded into context. Keep it concise, explicit, and actionable.
+```
+
+After the header, add one short sentence explaining the file's purpose.
 
 ### SETUP.md
 
@@ -74,6 +102,7 @@ Verify by:
 
 Required sections:
 
+0. Context header and table of contents.
 1. Prerequisites.
 2. Clone and build.
 3. Credentials configuration.
@@ -107,6 +136,7 @@ Verify by:
 
 Required sections:
 
+0. Context header and table of contents.
 1. Architecture overview.
 2. External integrations.
 3. Persistent stores, including schemas and indexes.

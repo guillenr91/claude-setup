@@ -1,5 +1,9 @@
 # Project Instructions
 
+## Context
+
+This file is loaded into context. Keep it concise, explicit, and actionable.
+
 Use this file as the entry point for every task in this repository.
 
 ## Context routing
@@ -53,6 +57,8 @@ Before adding a new package, library, image dependency, CLI tool, OS package, or
    source inspected, or the explicit reason verification was not possible.
 
 ## Style Guides
+
+Before creating or modifying style guides, read [.claude/styles/CLAUDE.md](.claude/styles/CLAUDE.md).
 
 Load a style guide when generating or reviewing files in that domain:
 

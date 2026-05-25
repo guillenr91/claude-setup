@@ -1,5 +1,9 @@
 # Postman Style Guide
 
+## Context
+
+This file is loaded into context. Keep it concise, explicit, and actionable.
+
 Use these rules when generating or reviewing Postman collections, requests, environments, and scripts. Apply a rule only
 when its trigger matches. Prefer existing collection conventions when they are more specific.
 
