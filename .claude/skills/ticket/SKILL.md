@@ -48,6 +48,16 @@ prior conversation. Include enough verified context for that reader to understan
 
 Do not assume prior knowledge. Explain the normal behavior before explaining the change or bug.
 
+## Boundary with general context
+
+Ticket-specific facts belong in `.claude/context/tickets/<TICKET_ID>/`, not in shared project context. Keep
+`SETUP.md`, `TECHNICAL.md`, and any project-specific files they route to ticket-neutral because they are loaded for
+unrelated work.
+
+When ticket work reveals a reusable setup step, technical behavior, or troubleshooting pattern, extract the general rule
+into the appropriate shared context file. Keep the ticket ID, temporary image tags, disposable resource names,
+validation logs, and command output in the ticket files.
+
 ## Step 0 — Confirm intent on ambiguous triggers
 
 If the skill loaded because the user mentioned a ticket ID or phrasing that could be either ticket work or a

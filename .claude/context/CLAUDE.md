@@ -6,6 +6,10 @@ This file is loaded into context. Keep it concise, explicit, and actionable.
 
 Use this file to decide which project context to load. All paths here are relative to `.claude/context/`.
 
+This file is intentionally portable across projects. Keep it limited to generic routing between `SETUP.md` and
+`TECHNICAL.md`. Project-specific routing to additional context files belongs inside `SETUP.md` or `TECHNICAL.md`, not
+in this file.
+
 ## Quick Reference
 
 | Task asks about          | Read                         |
@@ -45,6 +49,8 @@ Update durable project context when you discover information a future assistant 
 - New component behavior: add it to `TECHNICAL.md`.
 - Verified command that was not documented: add the command and observed output.
 - New error and solution: document both the error and the fix.
+- Project-specific secondary context files may be referenced from `SETUP.md` or `TECHNICAL.md`; keep those routes out of
+  this portable context guide.
 
 When you update `SETUP.md` or `TECHNICAL.md`, refresh its `last-verified` date only for content you re-verified.
 

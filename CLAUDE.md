@@ -11,6 +11,10 @@ Use this file as the entry point for every task in this repository.
 Before answering questions or performing tasks, read [.claude/context/CLAUDE.md](.claude/context/CLAUDE.md). Use it to
 choose which project context files to load before acting.
 
+Keep `.claude/context/CLAUDE.md` portable across projects: it should route only to `SETUP.md` and `TECHNICAL.md`.
+Project-specific secondary runbooks, such as cluster or registry setup files, should be referenced from `SETUP.md` or
+`TECHNICAL.md` instead.
+
 ## Commit conventions
 
 Apply these rules to every commit, whether or not the work belongs to a ticket.
