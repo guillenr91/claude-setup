@@ -15,6 +15,28 @@ Keep `.claude/context/CLAUDE.md` portable across projects: it should route only 
 Project-specific secondary runbooks, such as cluster or registry setup files, should be referenced from `SETUP.md` or
 `TECHNICAL.md` instead.
 
+## Dependency changes
+
+Before adding a new package, library, image dependency, CLI tool, OS package, or build/runtime dependency:
+
+1. Identify the exact behavior that requires the dependency.
+2. Verify the minimal dependency set locally when feasible. Vendor docs prove how to install something; they do not
+   prove every package in an example is required here.
+3. Add extra packages only after proving the minimal install or existing project tooling cannot satisfy the need.
+4. Treat development headers, SDKs, compilers, `*-dev` packages, and build tools as default-reject in runtime images
+   unless a compile step or runtime behavior proves they are required.
+5. Record the proof in the ticket notes, durable docs, commit message, or final response: command run, output observed,
+   source inspected, or the explicit reason verification was not possible.
+
+## Style Guides
+
+Before creating or modifying style guides, read [.claude/styles/CLAUDE.md](.claude/styles/CLAUDE.md).
+
+Load a style guide when generating or reviewing files in that domain:
+
+- [JAVA.md](.claude/styles/JAVA.md) — Optional chaining, service naming, DI patterns
+- [POSTMAN.md](.claude/styles/POSTMAN.md) — Collection structure, test scripts, environment variables
+
 ## Commit conventions
 
 Apply these rules to every commit, whether or not the work belongs to a ticket.
@@ -47,24 +69,16 @@ not be pushed to the repository.
 
 For other ticket-specific commit conventions, see the ticket skill.
 
-## Dependency changes
+## PR Review Feedback
 
-Before adding a new package, library, image dependency, CLI tool, OS package, or build/runtime dependency:
+When reviewing a PR:
 
-1. Identify the exact behavior that requires the dependency.
-2. Verify the minimal dependency set locally when feasible. Vendor docs prove how to install something; they do not
-   prove every package in an example is required here.
-3. Add extra packages only after proving the minimal install or existing project tooling cannot satisfy the need.
-4. Treat development headers, SDKs, compilers, `*-dev` packages, and build tools as default-reject in runtime images
-   unless a compile step or runtime behavior proves they are required.
-5. Record the proof in the ticket notes, durable docs, commit message, or final response: command run, output observed,
-   source inspected, or the explicit reason verification was not possible.
-
-## Style Guides
-
-Before creating or modifying style guides, read [.claude/styles/CLAUDE.md](.claude/styles/CLAUDE.md).
-
-Load a style guide when generating or reviewing files in that domain:
-
-- [JAVA.md](.claude/styles/JAVA.md) — Optional chaining, service naming, DI patterns
-- [POSTMAN.md](.claude/styles/POSTMAN.md) — Collection structure, test scripts, environment variables
+- Calibrate review state to impact. Use `REQUEST_CHANGES` only for clear breakage, security risk, data loss, or behavior
+  likely to harm a customer workflow.
+- Treat edge cases, hardening, polish, documentation gaps, and low-risk maintainability issues as non-blocking unless
+  there is evidence they will break a supported workflow.
+- For additive PRs that do not break existing behavior, state the risk plainly and say whether it should block approval.
+- Make comments measured and actionable: observed behavior, evidence, impact, and the smallest useful fix.
+- Include concise snippets or suggested patches when they clarify small shell, YAML, or configuration fixes.
+- Do not call a change unsafe, broken, or customer-impacting unless the evidence supports that severity.
+- Prefer fewer, higher-signal comments. Combine findings that share the same root cause or fix.
