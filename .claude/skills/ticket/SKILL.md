@@ -137,6 +137,8 @@ Before concluding that you understand the problem space, verify you have covered
 ### A.3 — Write the analysis file
 
 Write `.claude/context/tickets/<TICKET_ID>/ANALYSIS.md` from the template below. Replace placeholders with real values.
+Write it so a newcomer with no project knowledge can understand the problem, current behavior, evidence, options, and
+recommendation without reading the prior conversation.
 
 ```markdown
 ---
@@ -146,6 +148,11 @@ status: analysis
 ---
 
 # <TICKET_ID>
+
+## Context
+
+This file is loaded into context. Keep it descriptive but concise, and understandable to a newcomer with no prior
+project knowledge.
 
 ## Problem
 
@@ -325,7 +332,8 @@ When you do update:
 1. Edit the relevant section in place. Preserve the existing structure.
 2. If a documented decision, direction, or scope changes, briefly note what changed and why in the "Recommendation" or
    "Open questions" section. Include enough context for a future reader to reconstruct the reasoning.
-3. Tell the user what you changed in the file and why, in one or two sentences. Do not paste the full diff.
+3. Re-read the changed section and make sure it still makes sense to a newcomer with no prior project knowledge.
+4. Tell the user what you changed in the file and why, in one or two sentences. Do not paste the full diff.
 
 ### Keeping PLAN.md current
 
