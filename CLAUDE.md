@@ -74,11 +74,21 @@ For other ticket-specific commit conventions, see the ticket skill.
 When reviewing a PR:
 
 - Calibrate review state to impact. Use `REQUEST_CHANGES` only for clear breakage, security risk, data loss, or behavior
-  likely to harm a customer workflow.
+  likely to harm a workflow.
 - Treat edge cases, hardening, polish, documentation gaps, and low-risk maintainability issues as non-blocking unless
   there is evidence they will break a supported workflow.
 - For additive PRs that do not break existing behavior, state the risk plainly and say whether it should block approval.
-- Make comments measured and actionable: observed behavior, evidence, impact, and the smallest useful fix.
-- Include concise snippets or suggested patches when they clarify small shell, YAML, or configuration fixes.
-- Do not call a change unsafe, broken, or customer-impacting unless the evidence supports that severity.
+- Put code-specific feedback directly on the relevant code. Use inline comments when the tool supports them; otherwise
+  cite the file and line.
+- Prefix every review comment title with an uppercase category in square brackets, such as `[BUG]`, `[SECURITY]`,
+  `[TEST]`, `[DOCS]`, or `[MAINTAINABILITY]`.
+- Use `[LEGACY BUG]` for issues that already existed before the PR. Legacy issues may be noted, but they must not block
+  approval unless the PR makes them worse.
+- Make each code comment measured and actionable: observed behavior, evidence, impact, and the smallest useful fix.
+- Include a concrete code-change suggestion whenever possible. For small fixes, provide a snippet or suggested patch.
+- Use a general finding only for issues that span files, tests, architecture, or release risk. Cite concrete examples.
+- After code-specific comments, add one general review comment summarizing the feedback and why it matters.
+- Before the general review comment, confirm with the user whether it should approve or request changes when that state
+  is not already explicit.
+- Do not call a change unsafe, broken, or workflow-impacting unless the evidence supports that severity.
 - Prefer fewer, higher-signal comments. Combine findings that share the same root cause or fix.
