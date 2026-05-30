@@ -12,8 +12,8 @@ Before answering questions or performing tasks, read [.claude/context/CLAUDE.md]
 choose which project context files to load before acting.
 
 Keep `.claude/context/CLAUDE.md` portable across projects: it should route only to `SETUP.md` and `TECHNICAL.md`.
-Project-specific secondary runbooks, such as cluster or registry setup files, should be referenced from `SETUP.md` or
-`TECHNICAL.md` instead.
+Project-specific secondary runbooks, such as environment or deployment setup files, should be referenced from `SETUP.md`
+or `TECHNICAL.md` instead.
 
 ## Dependency changes
 
@@ -32,10 +32,11 @@ Before adding a new package, library, image dependency, CLI tool, OS package, or
 
 Before creating or modifying style guides, read [.claude/styles/CLAUDE.md](.claude/styles/CLAUDE.md).
 
-Load a style guide when generating or reviewing files in that domain:
+Before generating or reviewing work in a domain covered by `.claude/styles/`, read the matching style guide:
 
-- [JAVA.md](.claude/styles/JAVA.md) — Optional chaining, service naming, DI patterns
-- [POSTMAN.md](.claude/styles/POSTMAN.md) — Collection structure, test scripts, environment variables
+- Java code: read [JAVA.md](.claude/styles/JAVA.md).
+- Postman collections, requests, environments, or scripts: read [POSTMAN.md](.claude/styles/POSTMAN.md).
+- Any other domain with a Markdown file in `.claude/styles/`: read that file before generating or reviewing the work.
 
 ## Commit conventions
 

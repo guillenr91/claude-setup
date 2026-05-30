@@ -6,6 +6,9 @@ This file is loaded into context. Keep it concise, explicit, and actionable.
 
 Use this file before creating or modifying any Markdown file in `.claude/styles/`.
 
+Every style guide in this directory is a required pre-read before generating or reviewing work in its domain. Name new
+style guides by domain so the matching file is obvious, such as `JAVA.md` for Java or `POSTMAN.md` for Postman.
+
 ## Required Header
 
 Every style guide in this directory must start with this header pattern:
