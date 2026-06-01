@@ -1,25 +1,11 @@
 ---
 name: ticket
 description: >-
-  Manage the ticket directory at .claude/context/tickets/<TICKET_ID>/ (analysis file plus PLAN.md)
-  across the lifecycle of a ticket — create on a new ticket, read on resumed work, update as
-  findings or phases change. TRIGGER when the user explicitly invokes /ticket, OR signals
-  starting a new ticket ("I have to work on a new ticket", "I was assigned a new ticket",
-  "we need to work on a ticket", "there is a ticket I need to work on", "starting a new ticket",
-  "picking up ticket <ID>", "new ticket assigned", "got a new ticket", "let's start a ticket",
-  "kicking off ticket <ID>"), OR signals resuming work on a ticket ("continue with ticket <ID>",
-  "back to <ID>", "let's keep working on <ID>", "resuming <ID>", "going back to ticket <ID>",
-  "next phase of <ID>", "more work on <ID>"), OR mentions a ticket-shaped ID (e.g. "ABC-123",
-  "PROJ-4567", "JIRA-42") in the context of doing, planning, or discussing work on it. Do NOT
-  trigger when the user asks a general code question that is not tied to ticket work; the ticket
-  is mentioned only as historical context ("ABC-123 was the one we punted last sprint"); the
-  user is asking a status or metadata question without intending to do work ("what's the state
-  of ABC-123?", "who owns PROJ-4567?"); the user is comparing or referencing tickets without
-  working on them ("similar to ABC-123", "like we did in PROJ-99"); the user explicitly says
-  they are not working on the ticket right now ("not yet", "later", "just curious"); or the
-  message is a one-line acknowledgement, thanks, or a non-actionable comment. When the message
-  is genuinely ambiguous between a positive and negative trigger, load the skill and ask the
-  user to confirm intent before taking any action — do not silently pick a side.
+  Create, resume, and maintain ticket context in .claude/context/tickets/<TICKET_ID>/ using
+  ANALYSIS.md and PLAN.md. Trigger when the user explicitly starts or resumes ticket work (for
+  example /ticket, "start a new ticket", "continue <ID>", "work on <ID>") or asks to plan/do work
+  for a ticket ID. Do not trigger for status-only, historical, or comparative mentions with no
+  intent to work. If intent is ambiguous, ask for confirmation before taking action.
 ---
 
 # Ticket Skill
