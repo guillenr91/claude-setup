@@ -70,6 +70,23 @@ not be pushed to the repository.
 
 For other ticket-specific commit conventions, see the ticket skill.
 
+## Pre-commit and pre-PR review
+
+This rule triggers immediately before running `git commit`, `git push`, or opening a PR (e.g. `gh pr create`). It does
+not trigger when only preparing artifacts for those actions, such as drafting a commit message or PR description
+without executing the command.
+
+When the rule triggers, run a comprehensive code review on the pending changes and resolve the findings. Do this every
+time, even when the change feels small.
+
+1. Run every code review capability available to you for the change. Use the highest effort level the task warrants.
+2. Triage every finding. For each one, either apply the fix, or record an explicit reason for skipping it (false
+   positive, out of scope, conflicts with a stated requirement). Do not silently ignore findings.
+3. Re-run the review after applying fixes when the changes are non-trivial, to confirm the finding is resolved and no
+   new issues were introduced.
+4. Summarize the review pass in the commit message, PR description, or final response: what was reviewed, how many
+   findings surfaced, what was fixed, and what was deferred with the reason.
+
 ## PR Review Feedback
 
 When reviewing a PR:
