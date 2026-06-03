@@ -4,16 +4,24 @@
 
 This file is loaded into context. Keep it concise, explicit, and actionable.
 
-Use this file as the entry point for every task in this repository.
-
 ## Context routing
 
 Before answering questions or performing tasks, read [.claude/context/CLAUDE.md](.claude/context/CLAUDE.md). Use it to
 choose which project context files to load before acting.
 
-Keep `.claude/context/CLAUDE.md` portable across projects: it should route only to `SETUP.md` and `TECHNICAL.md`.
+Keep this file portable across projects: it should route only to `SETUP.md` and `TECHNICAL.md`.
 Project-specific secondary runbooks, such as environment or deployment setup files, should be referenced from `SETUP.md`
 or `TECHNICAL.md` instead.
+
+## Style Guides
+
+Before creating or modifying style guides, read [.claude/styles/CLAUDE.md](.claude/styles/CLAUDE.md).
+
+Before generating or reviewing work in a domain covered by `.claude/styles/`, read the matching style guide first:
+
+- Java code: read [JAVA.md](.claude/styles/JAVA.md).
+- Postman collections, requests, environments, or scripts: read [POSTMAN.md](.claude/styles/POSTMAN.md).
+- Any other domain with a Markdown file in `.claude/styles/`: read that file before generating or reviewing the work.
 
 ## Dependency changes
 
@@ -28,22 +36,12 @@ Before adding a new package, library, image dependency, CLI tool, OS package, or
 5. Record the proof in the ticket notes, durable docs, commit message, or final response: command run, output observed,
    source inspected, or the explicit reason verification was not possible.
 
-## Style Guides
-
-Before creating or modifying style guides, read [.claude/styles/CLAUDE.md](.claude/styles/CLAUDE.md).
-
-Before generating or reviewing work in a domain covered by `.claude/styles/`, read the matching style guide:
-
-- Java code: read [JAVA.md](.claude/styles/JAVA.md).
-- Postman collections, requests, environments, or scripts: read [POSTMAN.md](.claude/styles/POSTMAN.md).
-- Any other domain with a Markdown file in `.claude/styles/`: read that file before generating or reviewing the work.
-
 ## Commit conventions
 
 Apply these rules to every commit, whether or not the work belongs to a ticket.
 
-**Never commit `CLAUDE.md` or any files in the `.claude/` directory.** These are local configuration files and should
-not be pushed to the repository.
+**Never commit repository-local agent instruction files unless the repository is specifically for maintaining those
+instructions.** In normal project repositories, these are local configuration files and should not be pushed.
 
 1. **Make each commit self-contained and testable.** Each commit must compile, pass its own verification step, and make
    sense without a later commit. Prefer small commits. Keep tightly coupled edits together, such as a rename and the
@@ -68,7 +66,7 @@ not be pushed to the repository.
    name encodes a ticket ID (e.g. `feature/ABC-123-short-slug`, `bugfix/PROJ-4567`, `ABC-123/...`). For commits that do
    not belong to a ticket, omit the prefix.
 
-For other ticket-specific commit conventions, see the ticket skill.
+For other ticket-specific commit conventions, see the ticket skill when it exists.
 
 ## Pre-commit and pre-PR review
 
