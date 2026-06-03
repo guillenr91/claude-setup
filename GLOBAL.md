@@ -56,6 +56,7 @@ When this file is installed as global instructions, keep global and repository-l
    - `.claude/context/CLAUDE.md`
    - `.claude/skills/**`
    - `.claude/styles/**`
+   - `scripts/sync-agent-context.sh`
 2. Identify the managed global target for the current agent:
    - Claude: `~/.claude/CLAUDE.md`.
    - Codex: `~/.codex/AGENTS.md`.
@@ -75,7 +76,12 @@ When this file is installed as global instructions, keep global and repository-l
    - A managed source-tree file has no corresponding migrated target file.
 5. If sync is required, ask the user for the canonical source path, repository, branch, tag, or archive before copying
    anything. Do not infer the source. If sync is not required, continue with the task.
-6. Copy and migrate only managed source files. Recursively enumerate managed source trees and preserve their relative
+6. Prefer the helper script when it exists in the canonical source:
+   ```bash
+   <source>/scripts/sync-agent-context.sh --source <source> --agent <claude|codex|copilot> --target <repo-root>
+   ```
+   Run the same command with `--dry-run` first when the target state is unclear.
+7. Copy and migrate only managed source files. Recursively enumerate managed source trees and preserve their relative
    subdirectories in the migrated target:
    - Global Claude: `GLOBAL.md` -> `~/.claude/CLAUDE.md`.
    - Global Codex: `GLOBAL.md` -> `~/.codex/AGENTS.md`.
@@ -85,15 +91,16 @@ When this file is installed as global instructions, keep global and repository-l
      `.claude/skills/` -> `.agents/skills/`; `.claude/styles/` -> `.agents/styles/`.
    - Copilot CLI repository: `CLAUDE.md` -> `AGENTS.md`; `.claude/context/` -> `.agents/context/`;
      `.claude/skills/` -> `.agents/skills/`; `.claude/styles/` -> `.agents/styles/`.
+   - Sync helper: `scripts/sync-agent-context.sh` -> `scripts/sync-agent-context.sh`.
 
    Some GitHub Copilot surfaces, especially GitHub.com and code review, also support `.github/copilot-instructions.md`
    and `.github/instructions/**/*.instructions.md` for repository-wide and path-specific custom instructions. Those
    files are not managed by this sync unless the user explicitly asks for GitHub.com or code-review compatibility.
-7. Create missing target directories only for managed files being copied.
-8. Do not delete, move, rename, or overwrite unrelated files. Leave extra files in target directories untouched.
-9. Update references when directory names, file names, or root instruction names change.
-10. Keep repository-local root instruction files focused on repository-local instructions: context routing, style guide
+8. Create missing target directories only for managed files being copied.
+9. Do not delete, move, rename, or overwrite unrelated files. Leave extra files in target directories untouched.
+10. Update references when directory names, file names, or root instruction names change.
+11. Keep repository-local root instruction files focused on repository-local instructions: context routing, style guide
    routing, dependency policy, commit conventions, and review guidance. Do not duplicate global behavior or tone
    sections in repository-local files.
-11. After sync, follow the repository-local root instruction file for context routing and style guide routing.
-12. Report which managed files were created, replaced, skipped as current, or migrated.
+12. After sync, follow the repository-local root instruction file for context routing and style guide routing.
+13. Report which managed files were created, replaced, skipped as current, or migrated.
