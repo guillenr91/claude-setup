@@ -1,17 +1,16 @@
 # Postman Style Guide
 
-## Context
+Loaded into context when read. Keep concise, explicit, and actionable for AI agents — preserve this standard in every
+future edit.
 
-This file is loaded into context. Keep it concise, explicit, and actionable.
-
-Use these rules when generating or reviewing Postman collections, requests, environments, and scripts. Apply a rule only
-when its trigger matches. Prefer existing collection conventions when they are more specific.
+Use these rules when generating or reviewing Postman collections, requests, environments, and scripts. Apply a rule
+only when its trigger matches. Prefer existing collection conventions when they are more specific.
 
 ## Collection structure
 
 ### Rule: group by purpose, not by URL path
 
-**Do:** organize folders by service or domain, then by interaction type: health, reads, writes, admin, or support.
+**Do:** organize folders by service or domain, then by interaction type (health, reads, writes, admin, support).
 
 **Do not:** create folders that mirror the URL path verbatim.
 
@@ -54,11 +53,11 @@ Collection
 - Mark credentials (`apiKey`, `accessToken`, anything bearer-shaped) as **secret** in Postman.
 - Commit `*.template.json` environment files with placeholder values only.
 
-**Do not:** commit environment files that contain real credentials.
+**Do not:** commit environment files containing real credentials.
 
 ### Rule: extract response values needed by later requests
 
-**Trigger:** a response contains a value that a subsequent request will need.
+**Trigger:** a response contains a value a subsequent request needs.
 
 **Do:** set the variable in the test script. Keep extraction small.
 
@@ -77,11 +76,11 @@ if (data?.id) {
 
 ### Rule: every request has a description with these sections in order
 
-1. **What it does**: one sentence.
-2. **Preconditions**: auth, prior requests, and required data.
-3. **Body fields**: for `POST`, `PUT`, and `PATCH`, list each field and whether it is required.
-4. **Successful response**: status code and key fields the caller can rely on.
-5. **Failure modes**: non-obvious error conditions.
+1. **What it does:** one sentence.
+2. **Preconditions:** auth, prior requests, required data.
+3. **Body fields:** for `POST` / `PUT` / `PATCH`, list each field and whether it's required.
+4. **Successful response:** status code and key fields the caller can rely on.
+5. **Failure modes:** non-obvious error conditions.
 
 **Do not:** write descriptions that just restate the URL or HTTP method.
 
@@ -193,7 +192,7 @@ toggled.
 
 **Trigger:** the API uses `ApiKey`, `X-Api-Key`, `X-Forwarded-User`, or any non-standard auth header.
 
-**Do:** document the scheme once on the collection, and reference an environment variable in each request.
+**Do:** document the scheme once on the collection; reference an environment variable in each request.
 
 **Do not:** embed credential values per request.
 
@@ -201,7 +200,7 @@ toggled.
 
 ### Rule: a request is not done until it has run and one assertion has failed once
 
-**Before adding a request to the collection:**
+**Before adding a request:**
 
 1. Run it against a real environment; confirm a successful response.
 2. Mutate one assertion temporarily to confirm it can fail.

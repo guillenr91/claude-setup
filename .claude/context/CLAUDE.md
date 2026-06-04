@@ -1,124 +1,89 @@
 # Context Guide
 
-## Context
+Loaded into context when read. Keep concise, explicit, and actionable for AI agents — preserve this standard in every
+future edit.
 
-This file is loaded into context. Keep it concise, explicit, and actionable.
+Use this file to decide which project context to load. All paths relative to `.claude/context/`. Keep this file
+portable: limit it to generic routing between `SETUP.md` and `TECHNICAL.md`. Project-specific routing belongs in
+`SETUP.md` or `TECHNICAL.md`, not here.
 
-Use this file to decide which project context to load. All paths here are relative to `.claude/context/`.
+## Routing
 
-This file is intentionally portable across projects. Keep it limited to generic routing between `SETUP.md` and
-`TECHNICAL.md`. Project-specific routing to additional context files belongs inside `SETUP.md` or `TECHNICAL.md`, not
-in this file.
+| Task involves                                  | Read                         |
+|------------------------------------------------|------------------------------|
+| Running, building, starting the app            | [SETUP.md](SETUP.md)         |
+| Credentials, env vars, external service access | [SETUP.md](SETUP.md)         |
+| Permissions, startup failures, IDE setup       | [SETUP.md](SETUP.md)         |
+| Debugging, code flow, architecture, integrations | [TECHNICAL.md](TECHNICAL.md) |
+| Where something is configured, how things connect | [TECHNICAL.md](TECHNICAL.md) |
+| Schemas, error patterns, environment differences | [TECHNICAL.md](TECHNICAL.md) |
+| First-time onboarding, unclear root cause       | Both                         |
 
-## Quick Reference
-
-| Task asks about          | Read                         |
-|--------------------------|------------------------------|
-| Running or configuring   | [SETUP.md](SETUP.md)         |
-| Architecture or behavior | [TECHNICAL.md](TECHNICAL.md) |
-| Unclear root cause       | Both                         |
-
-## Routing Rules
-
-Read `SETUP.md` when the task involves:
-
-- Running, building, or starting the application
-- Setting up credentials, environment variables, or external service access
-- Verifying permissions or troubleshooting startup failures
-- IDE configuration or local development setup
-
-Read `TECHNICAL.md` when the task involves:
-
-- Debugging issues or investigating bugs
-- Understanding code flow, architecture, or integrations
-- Finding where something is configured or how components connect
-- Data store schemas, error patterns, or environment differences
-
-Read both files when:
-
-- Onboarding to the project for the first time
-- The issue might be setup-related or code-related (unclear root cause)
-
----
-
-## Keep Documentation In Sync
+## Keep documentation in sync
 
 Update durable project context when you discover information a future assistant or developer will need:
 
-- New troubleshooting solution: add it to `SETUP.md`.
-- New component behavior: add it to `TECHNICAL.md`.
-- Verified command that was not documented: add the command and observed output.
-- New error and solution: document both the error and the fix.
-- Project-specific secondary context files may be referenced from `SETUP.md` or `TECHNICAL.md`; keep those routes out of
-  this portable context guide.
+- New troubleshooting solution → `SETUP.md`.
+- New component behavior → `TECHNICAL.md`.
+- Verified command not yet documented → add the command and observed output.
+- New error and solution → document both.
+- Project-specific secondary context files may be referenced from `SETUP.md` or `TECHNICAL.md`. Keep those routes out
+  of this portable guide.
 
-When you update `SETUP.md` or `TECHNICAL.md`, refresh its `last-verified` date only for content you re-verified.
+When you update `SETUP.md` or `TECHNICAL.md`, refresh `last-verified` only for content you re-verified. Before ending
+a session, check whether anything learned should be persisted.
 
-Before ending a session, check if anything learned should be persisted for future reference.
+## Required structure for SETUP.md and TECHNICAL.md
 
-## Table Of Contents Requirement
+Both files must:
 
-`SETUP.md` and `TECHNICAL.md` must each include a table of contents near the top of the file, after the `## Context`
-header and any introductory paragraph.
+1. Start with YAML front matter:
+   ```yaml
+   ---
+   last-verified: YYYY-MM-DD
+   ---
+   ```
+2. Open with this header pattern, followed by one short sentence stating the file's purpose:
+   ```markdown
+   # <Document Title>
 
-When generating either file, create the table of contents before the first main section. When updating either file,
-verify the table of contents still matches the headings you changed. If the file has no table of contents, add one as
-part of the same update before ending the task. Do not finish a documentation update that leaves `SETUP.md` or
-`TECHNICAL.md` without a current table of contents.
+   Loaded into context when read. Keep concise, explicit, and actionable for AI agents — preserve this standard in
+   every future edit.
+   ```
+   The one-sentence purpose statement is required, not optional.
+3. Include a table of contents after the `## Context` header and intro sentence, before the first main section. When
+   updating either file, verify the TOC still matches changed headings; if missing, add one as part of the same update.
+   Do not finish a documentation update that leaves either file without a current TOC.
 
----
+If `last-verified` is more than a few months old, treat the file as suspect and re-verify before relying on it.
 
-## Generating Missing Documentation
+## Generating SETUP.md or TECHNICAL.md when missing
 
-If `SETUP.md` or `TECHNICAL.md` does not exist, generate it from verified project evidence. Every command, path, and
-configuration must either be verified before being written or marked unverified per "Verification Standards".
-
-### Required Header
-
-Generated `SETUP.md` and `TECHNICAL.md` files must start with this header pattern:
-
-```markdown
-# <Document Title>
-
-## Context
-
-This file is loaded into context. Keep it concise, explicit, and actionable.
-```
-
-After the header, add one short sentence explaining the file's purpose.
+Generate from verified project evidence. Every command, path, and configuration must either be verified or marked
+unverified per "Verification Standards" below.
 
 ### SETUP.md
 
-Purpose: explain how to get from a fresh checkout to a running, verified application.
+Purpose: get from a fresh checkout to a running, verified application.
 
 Generate by:
 
-1. Identify the build system and required language runtime and version
-2. Identify external dependencies (cloud services, databases, caches, message queues, feature flags, secret stores)
-3. Discover required credentials and environment variables
-4. Test build and run commands until they succeed
-5. Identify common failure modes and their solutions
+1. Identify the build system and required language runtime + version.
+2. Identify external dependencies (cloud services, databases, caches, queues, feature flags, secret stores).
+3. Discover required credentials and environment variables.
+4. Test build and run commands until they succeed.
+5. Identify common failure modes and their solutions.
 
 Verify by:
 
-- Running each command and capturing actual output
-- Testing credential and permission commands with real access
-- Starting the application and confirming it responds correctly
-- Reproducing documented errors to capture exact messages
+- Running each command and capturing actual output.
+- Testing credential and permission commands with real access.
+- Starting the application and confirming it responds correctly.
+- Reproducing documented errors to capture exact messages.
 
-Required sections:
-
-0. Context header and table of contents.
-1. Prerequisites.
-2. Clone and build.
-3. Credentials configuration.
-4. Permission verification commands, including success and failure output.
-5. Environment variables.
-6. Run commands.
-7. Verification steps.
-8. IDE setup.
-9. Troubleshooting table.
-10. Quick reference table.
+Required sections (in order): Context header & TOC, Prerequisites, Clone and build, Credentials configuration,
+Permission verification commands (with success and failure output), Environment variables, Run commands, Verification
+steps, IDE setup, Troubleshooting table, Quick reference table.
 
 ### TECHNICAL.md
 
@@ -126,40 +91,30 @@ Purpose: explain how the system works well enough to debug or extend it.
 
 Generate by:
 
-1. Trace startup flow - what is loaded and from where
-2. Map external integrations and their configuration sources
-3. Identify persistent stores and their purposes (tables, collections, indexes, topics)
-4. Document authentication and authorization patterns
-5. Understand differences across environments (local, dev, staging, prod)
-6. Catalog error codes, exceptions, and known failure modes
+1. Trace startup flow — what is loaded and from where.
+2. Map external integrations and their configuration sources.
+3. Identify persistent stores and their purposes (tables, collections, indexes, topics).
+4. Document authentication and authorization patterns.
+5. Understand differences across environments (local, dev, staging, prod).
+6. Catalog error codes, exceptions, and known failure modes.
 
 Verify by:
 
-- Reading source code, not only configuration
-- Querying data stores to confirm structures
-- Tracing real API calls to understand auth flow
-- Testing in each environment when access permits
+- Reading source code, not only configuration.
+- Querying data stores to confirm structures.
+- Tracing real API calls to understand auth flow.
+- Testing in each environment when access permits.
 
-Required sections:
+Required sections (in order): Context header & TOC, Architecture overview, External integrations, Persistent stores
+(schemas + indexes), Authentication and authorization flow, Environment configurations, Error handling and
+exceptions, Debugging techniques, Permission barriers.
 
-0. Context header and table of contents.
-1. Architecture overview.
-2. External integrations.
-3. Persistent stores, including schemas and indexes.
-4. Authentication and authorization flow.
-5. Environment configurations.
-6. Error handling and exceptions.
-7. Debugging techniques.
-8. Permission barriers.
+## Verification standards
 
----
+Verify everything you write. When something cannot be verified (missing credentials, services, or env access), mark
+it unverified instead of guessing. **Unverified entries are acceptable. Unverified entries presented as fact are defects.**
 
-## Verification Standards
-
-Verify everything you write. When something cannot be verified because credentials, services, or environment access are
-missing, mark it unverified instead of guessing.
-
-| Item               | Verification Method                   | If Unverifiable                    |
+| Item               | Verification method                   | If unverifiable                    |
 |--------------------|---------------------------------------|------------------------------------|
 | Commands           | Run and confirm output                | Mark `Not verified - requires <X>` |
 | Paths              | Confirm file exists                   | Mark `Not verified - requires <X>` |
@@ -167,20 +122,3 @@ missing, mark it unverified instead of guessing.
 | External resources | Query with the appropriate CLI or SDK | Mark `Not verified - requires <X>` |
 | Data store schemas | Describe the structure directly       | Mark `Not verified - requires <X>` |
 | Error messages     | Reproduce to capture exact text       | Mark `Not verified - requires <X>` |
-
-Unverified entries are acceptable. Unverified entries presented as fact are defects.
-
----
-
-## Staleness
-
-`SETUP.md` and `TECHNICAL.md` should each begin with a YAML front matter block:
-
-```yaml
----
-last-verified: YYYY-MM-DD
----
-```
-
-Update this date when you re-verify the file end to end, or when every changed entry has been re-verified. If the date
-is more than a few months old, treat the file as suspect and re-verify before relying on it for a non-trivial action.

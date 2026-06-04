@@ -1,8 +1,7 @@
 # Java Style Guide
 
-## Context
-
-This file is loaded into context. Keep it concise, explicit, and actionable.
+Loaded into context when read. Keep concise, explicit, and actionable for AI agents — preserve this standard in every
+future edit.
 
 Use these rules when generating or reviewing Java code. Apply a rule only when its trigger matches. Prefer existing
 project patterns when they conflict with a rule here.
@@ -11,33 +10,32 @@ project patterns when they conflict with a rule here.
 
 ### Rule: choose the simplest readable shape
 
-**Trigger:** there are multiple valid ways to express the same Java behavior.
+**Trigger:** multiple valid ways to express the same Java behavior.
 
 **Do:** choose the version with the fewest moving parts that still names the project concept clearly.
 
 **Do not:** add helpers, constants, comments, records, abstractions, or extra line breaks unless they remove real
 complexity or protect a real invariant.
 
-**Exception:** accept a slightly longer shape when it makes failure behavior, resource ownership, or externally visible
-validation clearer.
+**Exception:** accept a slightly longer shape when it makes failure behavior, resource ownership, or externally
+visible validation clearer.
 
 ### Rule: avoid ceremony around one clear validation rule
 
-**Trigger:** validation reads as one rule, such as "required and non-empty" or "present and parseable".
+**Trigger:** validation reads as one rule (e.g. "required and non-empty", "present and parseable").
 
 **Do:** express it as one direct chain or expression when the error is the same for all invalid states.
 
-**Do not:** introduce temporary variables, separate null checks, or small helper methods that only restate the same
-validation rule.
+**Do not:** introduce temporary variables, separate null checks, or small helper methods that only restate the rule.
 
-Use the specific `Optional` pattern in "derive required values from optional helpers" when the validation starts from an
-existing optional helper.
+Use the `Optional` pattern in "derive required values from optional helpers" when starting from an existing optional
+helper.
 
 ### Rule: keep formatting compact when it stays readable
 
 **Trigger:** formatting method calls, lambdas, builders, or exceptions.
 
-**Do:** keep short related arguments together and wrap only at boundaries that improve scanning.
+**Do:** keep short related arguments together; wrap only at boundaries that improve scanning.
 
 **Do not:** add vertical space or line breaks just because an expression has multiple parts.
 
@@ -80,7 +78,6 @@ defines `null` semantics. Do not change those contracts without coordination.
 ### Rule: terminate the chain only at a non-`Optional` boundary
 
 **Do:**
-
 - Return `Optional<T>` from helpers so callers can keep chaining.
 - Use `.orElse(...)` / `.orElseThrow(...)` / `.orElseGet(...)` only in methods whose return type is fixed and
   non-`Optional`.
@@ -103,10 +100,10 @@ public UserDto getUser(Request request) {
 
 ### Rule: derive required values from optional helpers
 
-**Trigger:** a required value is the non-empty form of an existing `Optional<T>` helper, and absence should produce one
-clear validation error.
+**Trigger:** a required value is the non-empty form of an existing `Optional<T>` helper, and absence should produce
+one clear validation error.
 
-**Do:** use the optional helper, filter invalid values, and terminate with `.orElseThrow(...)`.
+**Do:** use the optional helper, filter invalid values, terminate with `.orElseThrow(...)`.
 
 **Do not:** repeat the raw lookup with separate null and empty checks.
 
@@ -126,65 +123,64 @@ private String required(String name) {
 
 **Trigger:** writing a Java helper, CLI, hook, Job runner, or other executable class.
 
-**Do:** let `main` translate failures into logs and exit codes. Let lower-level methods return values or throw focused
-exceptions.
+**Do:** let `main` translate failures into logs and exit codes. Let lower-level methods return values or throw
+focused exceptions.
 
-**Do not:** call `System.exit(...)` from parsing, retry, database, or business helpers. It makes the code harder to
-test and hides which layer owns failure handling.
+**Do not:** call `System.exit(...)` from parsing, retry, database, or business helpers. It makes code harder to test
+and hides which layer owns failure handling.
 
 ### Rule: parse runtime configuration once
 
-**Trigger:** code reads environment variables, system properties, command-line values, or external configuration in more
-than one method.
+**Trigger:** code reads environment variables, system properties, command-line values, or external configuration in
+more than one method.
 
-**Do:** validate configuration near the entrypoint and pass a small immutable object, such as a `record`, to the code
+**Do:** validate configuration near the entrypoint and pass a small immutable object (e.g. a `record`) to the code
 that needs it.
 
-**Do not:** read `System.getenv(...)`, parse numbers, or validate required settings inside every helper that happens to
-need a value.
+**Do not:** read `System.getenv(...)`, parse numbers, or validate required settings inside every helper that needs
+a value.
 
-**Exception:** read directly when the method is the only consumer and creating a config object would add no clarity.
+**Exception:** read directly when the method is the only consumer and creating a config object adds no clarity.
 
 ## Helpers and comments
 
-Use comments to explain project contracts and non-obvious intent in the fewest useful words. The fluent-pipeline rules
-apply to `Optional` and `Stream` chains, including `.filter`, `.map`, `.flatMap`, `.reduce`, `.collect`, `.sorted`, and
-`.takeWhile`.
+Use comments to explain project contracts and non-obvious intent in the fewest useful words. The fluent-pipeline
+rules apply to `Optional` and `Stream` chains, including `.filter`, `.map`, `.flatMap`, `.reduce`, `.collect`,
+`.sorted`, and `.takeWhile`.
 
 ### Rule: inline trivial single-use helpers
 
-**Trigger:** a private helper has one call site and only wraps a simple expression, pass-through constructor, or obvious
-library call.
+**Trigger:** a private helper has one call site and only wraps a simple expression, pass-through constructor, or
+obvious library call.
 
-**Do:** inline the expression at the call site and add a concise comment there when the reason is not obvious.
+**Do:** inline the expression at the call site; add a concise comment there when the reason isn't obvious.
 
-**Do not:** keep a helper only to name a one-line expression such as `Math.min(limit, value)`,
+**Do not:** keep a helper only to name a one-line expression like `Math.min(limit, value)`,
 `Optional.ofNullable(value)`, or `super(message, cause)`.
 
-**Exception:** keep the helper when it names a meaningful project concept, protects a non-obvious invariant, is likely
-to gain additional call sites, or keeps a fluent chain readable.
+**Exception:** keep the helper when it names a meaningful project concept, protects a non-obvious invariant, is
+likely to gain additional call sites, or keeps a fluent chain readable.
 
 ### Rule: use Javadoc for Java contracts that newcomers must understand
 
 **Trigger:** writing or modifying a class, constructor, method, record, interface method, or custom exception whose
-purpose, inputs, outputs, failure behavior, or project role is not obvious to someone new to Java or the project.
+purpose, inputs, outputs, failure behavior, or project role isn't obvious to someone new to Java or the project.
 
 **Do:** write a descriptive but concise standard Javadoc block with:
 
-- A short first sentence that explains what the code does in project terms.
-- An optional short `<p>` paragraph when runtime conditions, environment variables, or operational context are needed.
+- Short first sentence explaining what the code does in project terms.
+- Optional short `<p>` paragraph when runtime conditions, environment variables, or operational context are needed.
 - `@param` for every parameter when the method takes arguments.
 - `@return` when the method returns a value.
-- `@throws` for checked exceptions and for runtime exceptions that are part of the method contract.
-- `{@link TypeName}` for Java symbols and `{@code literal}` for environment variables, values, commands, and URL
-  fragments.
+- `@throws` for checked exceptions and for runtime exceptions that are part of the contract.
+- `{@link TypeName}` for Java symbols and `{@code literal}` for env vars, values, commands, URL fragments.
 - A `javadoc -Xdoclint` verification step when changing non-trivial Javadocs.
 
-**Do not:** use invalid Javadoc tags such as `{@Config}`; use `{@link Config}`. Do not explain Java syntax, restate the
-method name, or add a Javadoc block that says nothing beyond "gets X" or "sets Y". Do not add Javadoc to obvious
-one-line wrappers or pass-through constructors, such as a method that only returns `Optional.ofNullable(value)` or a
-constructor that only calls `super(message, cause)`. Do not turn Javadoc into a README; move long operational lists to
-durable docs unless the class cannot be understood without them.
+**Do not:** use invalid Javadoc tags like `{@Config}` (use `{@link Config}`). Don't explain Java syntax, restate the
+method name, or write Javadoc that says nothing beyond "gets X" / "sets Y". Don't add Javadoc to obvious one-line
+wrappers or pass-through constructors (e.g. a method that only returns `Optional.ofNullable(value)`, or a constructor
+that only calls `super(message, cause)`). Don't turn Javadoc into a README — move long operational lists to durable
+docs unless the class can't be understood without them.
 
 Keep `@param`, `@return`, and `@throws` text short. Explain the project contract, not the Java type or obvious
 mechanics.
@@ -213,19 +209,19 @@ private static URI serviceUri(Config config) {
 
 **Add a comment above the step when any of these are true:**
 
-- The predicate or transform encodes a business rule not visible in the expression, such as authorization, compliance,
-  soft-delete behavior, or an upstream contract.
+- The predicate or transform encodes a business rule not visible in the expression (authorization, compliance,
+  soft-delete behavior, an upstream contract).
 - The step works around a quirk of upstream data (legacy values, nulls that "shouldn't" exist, off-by-one units).
 - Ordering matters and reordering would break correctness.
-- A reducer's identity or combiner does more than it appears, such as `BigDecimal` scale, non-commutative combine logic,
-  or a mutating accumulator.
+- A reducer's identity or combiner does more than it appears (`BigDecimal` scale, non-commutative combine logic, a
+  mutating accumulator).
 
 **Do not add a comment when:**
 
 - It restates the predicate ("only active users", "map to DTO", "sum totals").
 - The step is a plain field access or a single-arg method reference whose name already explains it.
 
-**Comment placement:** one line above the step it describes. Explain *why*, not *what*.
+**Placement:** one line above the step it describes. Explain *why*, not *what*.
 
 ```java
 // Optional chain
@@ -260,15 +256,15 @@ return orders.stream()
 
 **Do:** pass usernames, passwords, tokens, and similar secrets through the API's supported credential mechanism.
 
-**Do not:** concatenate passwords or tokens into URLs, command text, logs, or other strings unless the API has no safer
-supported path.
+**Do not:** concatenate passwords or tokens into URLs, command text, logs, or other strings unless the API has no
+safer supported path.
 
 ### Rule: pass external values as data
 
 **Trigger:** generated text, requests, queries, or command invocations include values from users, configuration,
 environment variables, files, or external systems.
 
-**Do:** use structured APIs, typed builders, argument arrays, or parameter binding so unusual values remain data.
+**Do:** use structured APIs, typed builders, argument arrays, or parameter binding so unusual values stay data.
 
 **Do not:** concatenate external values into executable text or protocol strings when a structured API exists.
 
@@ -284,7 +280,7 @@ environment variables, files, or external systems.
 
 **Trigger:** code connects to a database, network service, subprocess, or filesystem resource that may hang.
 
-**Do:** set bounded timeouts at the call boundary and let the outer retry or orchestration layer control the total
+**Do:** set bounded timeouts at the call boundary; let the outer retry or orchestration layer control the total
 budget.
 
 **Do not:** allow one external call to consume the full job, request, or retry budget unless that is intentional and
@@ -294,9 +290,9 @@ documented.
 
 ### Rule: default terminal collector is `Stream.toList()` (Java 16+)
 
-**Do:** end pipelines with `.toList()` when the project runs on Java 16 or newer and callers do not mutate the result.
+**Do:** end pipelines with `.toList()` when the project runs on Java 16+ and callers do not mutate the result.
 
-**Why:** it is the modern idiom and returns an unmodifiable list.
+**Why:** modern idiom; returns an unmodifiable list.
 
 ```java
 List<UserDto> dtos = users.stream()

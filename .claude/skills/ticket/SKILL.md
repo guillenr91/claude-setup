@@ -10,121 +10,122 @@ description: >-
 
 # Ticket Skill
 
-Use this skill to create, resume, and maintain ticket context under `.claude/context/tickets/<TICKET_ID>/`.
+Loaded into context when invoked. Keep concise, explicit, and actionable for AI agents — preserve this standard in
+every future edit.
+
+Create, resume, and maintain ticket context under `.claude/context/tickets/<TICKET_ID>/`.
 
 ## Execution contract
 
-First decide whether ticket work is actually happening. If it is, identify the ticket ID, choose exactly one mode, then
-follow that mode's steps.
-
-- **Mode A — New ticket**: no analysis file exists yet. Create it.
-- **Mode B — Resuming work**: an analysis file exists. Load it for context before doing anything else.
-- **Mode C — Mid-work update**: a finding during work changes the analysis. Update the file.
+1. Decide whether ticket work is actually happening.
+2. Identify the ticket ID.
+3. Pick exactly one mode:
+   - **Mode A — New ticket**: no analysis file exists yet. Create it.
+   - **Mode B — Resuming work**: analysis file exists. Load it for context before anything else.
+   - **Mode C — Mid-work update**: a finding during work changes the analysis. Update the file.
+4. Follow that mode's steps.
 
 ## Writing principle
 
-Write ticket files for a newcomer. The reader may know nothing about the ticket, project, codebase, terminology, or
-prior conversation. Include enough verified context for that reader to understand:
+Write ticket files for a newcomer with no knowledge of the ticket, project, codebase, terminology, or prior
+conversation. Include enough verified context for that reader to understand:
 
-- The business context and why the work matters.
-- How the relevant system currently works, including concepts, terminology, and data flows.
+- Business context and why the work matters.
+- How the relevant system currently works (concepts, terminology, data flows).
 - What is broken or missing, and why.
 - Which data sources or code paths are involved.
-- Which solution was chosen, including the opposing case and the reason it still wins.
+- Which solution was chosen, including the opposing case and why it still wins.
 
 Do not assume prior knowledge. Explain the normal behavior before explaining the change or bug.
 
 ## Boundary with general context
 
-Ticket-specific facts belong in `.claude/context/tickets/<TICKET_ID>/`, not in shared project context. Keep
-`SETUP.md`, `TECHNICAL.md`, and any project-specific files they route to ticket-neutral because they are loaded for
-unrelated work.
+Ticket-specific facts → `.claude/context/tickets/<TICKET_ID>/`.
+Durable, reusable info (setup, technical, troubleshooting) → `SETUP.md` / `TECHNICAL.md`, routed per
+`.claude/context/CLAUDE.md`.
 
-When ticket work reveals a reusable setup step, technical behavior, or troubleshooting pattern, extract the general rule
-into the appropriate shared context file. Keep the ticket ID, temporary image tags, disposable resource names,
-validation logs, and command output in the ticket files.
+When ticket work reveals a reusable rule, extract it into the appropriate shared file. Keep ticket ID, temporary tags,
+disposable resource names, validation logs, and command output in the ticket files.
+
+Examples of durable findings that belong in project docs:
+
+- A new external integration, schema, or store.
+- A previously undocumented setup step, credential, or environment variable.
+- An architecture detail, error pattern, or debugging technique future work will need.
+- A verified command or troubleshooting fix not already documented.
+
+If a finding is both ticket-relevant *and* durable, update **both**: ticket-specific framing in the ticket file, a
+project-level entry in the appropriate doc.
+
+If `SETUP.md` or `TECHNICAL.md` does not yet exist, follow the generation guidance in `.claude/context/CLAUDE.md`
+rather than skipping the update or dumping the content into the ticket file. Verify before writing, per that file's
+verification standards.
 
 ## Step 0 — Confirm intent on ambiguous triggers
 
-If the skill loaded because the user mentioned a ticket ID or phrasing that could be either ticket work or a
-status/historical/comparative reference, ask the user to confirm before doing anything else. A single short question is
-enough: "Are you starting/resuming work on `<TICKET_ID>` now, or just referring to it?" Do not load files, investigate
-the codebase, or write anything until the user confirms they are doing work. If they say no, exit cleanly without side
-effects.
+If the trigger could be either ticket work or a status/historical/comparative reference, ask one short question:
+"Are you starting/resuming work on `<TICKET_ID>` now, or just referring to it?" Do not load files, investigate, or
+write anything until confirmed. If they say no, exit cleanly.
 
-Skip this step when intent is unambiguous — explicit `/ticket` invocation, "starting a new ticket", "continue with
-`<ID>`", and similar clear signals do not need confirmation.
+Skip this step on unambiguous triggers: explicit `/ticket`, "starting a new ticket", "continue with `<ID>`", etc.
 
 ## Step 1 — Establish the ticket ID
 
-If the user provided a ticket ID in their message or as an argument, use it. Otherwise, ask the user for the ticket ID
-and stop until they provide one. Do not invent or guess an ID.
+If the user provided one, use it. Otherwise, ask and stop until they answer. Do not invent or guess.
 
-Once you have the ID, refer to it as `<TICKET_ID>` for the rest of this skill. Each ticket has its own directory at
-`.claude/context/tickets/<TICKET_ID>/`, containing two files:
+For the rest of the skill, refer to it as `<TICKET_ID>`. Each ticket has its own directory at
+`.claude/context/tickets/<TICKET_ID>/` containing:
 
-- `ANALYSIS.md` — the analysis document (problem, options, recommendation, decisions).
-- `PLAN.md` — the implementation plan (phases, current phase, branch, status).
+- `ANALYSIS.md` — problem, options, recommendation, decisions.
+- `PLAN.md` — phases, current phase, branch, status.
 
 ## Step 2 — Pick the mode
 
-Check whether the directory `.claude/context/tickets/<TICKET_ID>/` exists and what is in it.
-
-- **Directory does not exist** → Mode A.
-- **Directory exists and the user is starting work or asking for context** → Mode B.
-- **Directory exists and a new finding has emerged during work** → Mode C.
+- Directory does not exist → **Mode A**.
+- Directory exists, user is starting work or asking for context → **Mode B**.
+- Directory exists, new finding has emerged during work → **Mode C**.
 
 ## Mode A — Create the analysis file
 
-Run these substeps before writing or editing application code.
+Run all substeps before writing or editing application code.
 
 ### A.1 — Get the ticket content
 
-The analysis file requires both:
+Required: **Description** (what the ticket is about) and **Acceptance criteria** (what must be true when done).
 
-- **Description**: what the ticket is about.
-- **Acceptance criteria**: what must be true when the ticket is done.
-
-If either item is missing, ask for the missing item and stop. Do not invent ticket content. Do not investigate or create
-files until both are available.
+If either is missing, ask and stop. Do not invent. Do not investigate or create files until both are available.
 
 ### A.2 — Investigate before writing
 
-Investigate the codebase before writing the analysis. Ground claims in real files, functions, and current behavior.
-Cite `file_path:line_number` for any code referenced.
+Ground claims in real files, functions, and current behavior. Cite `file_path:line_number` for any code referenced.
 
-For bug tickets, reproduce or directly observe the reported behavior when feasible. If you cannot reproduce it, write
-that explicitly under "Reproduction / evidence". For feature or refactor tickets, document the existing behavior being
-changed.
+- **Bugs:** reproduce or directly observe the reported behavior when feasible. If you cannot reproduce, say so
+  explicitly under "Reproduction / evidence".
+- **Features / refactors:** document the existing behavior being changed.
 
 #### A.2.1 — Investigation checklist
 
-Before concluding that you understand the problem space, verify you have covered these angles:
+Before concluding you understand the problem space, cover these angles:
 
-1. **Search by field or concept name, not only by table or class purpose.** If you need data X, search the entire
-   codebase for field names that could hold X. Data often lives in tables whose primary purpose differs from your use
-   case.
+1. **Search by field or concept name, not only by table or class purpose.** Data often lives in tables whose primary
+   purpose differs from your use case.
    ```bash
    rg -n "<fieldName>|<alternativeName>" -g "*.java"
    ```
-
-2. **Trace both creation and deletion paths.** If data disappears on event A, also trace what happens when that data was
-   created. The creation path may write to stores that survive the deletion.
-
-3. **Check existing dependencies in the target file.** Before proposing new data sources, look at what the file you plan
-   to modify already imports. The answer may be one existing injection away.
-
-4. **Check what related endpoints already return.** If a similar endpoint exists (e.g., v4 when building v5), examine
-   what data sources it uses and whether they contain what you need.
-
-5. **Ask what persists and what is transient.** For any data you assume is "deleted" or "cleared," verify there isn't a
+2. **Trace both creation and deletion paths.** If data disappears on event A, also trace what happens when it was
+   created — the creation path may write to stores that survive deletion.
+3. **Check existing dependencies in the target file.** Before proposing new data sources, look at what the file
+   already imports. The answer may be one existing injection away.
+4. **Check what related endpoints already return.** If a similar endpoint exists (v4 when building v5), examine its
+   data sources.
+5. **Ask what persists and what is transient.** For data you assume is "deleted" or "cleared," verify there isn't a
    secondary copy, audit log, or history table that retains it.
 
 ### A.3 — Write the analysis file
 
-Write `.claude/context/tickets/<TICKET_ID>/ANALYSIS.md` from the template below. Replace placeholders with real values.
-Write it so a newcomer with no project knowledge can understand the problem, current behavior, evidence, options, and
-recommendation without reading the prior conversation.
+Write `.claude/context/tickets/<TICKET_ID>/ANALYSIS.md` from this template, replacing placeholders. Write so a
+newcomer with no project knowledge can understand the problem, current behavior, evidence, options, and
+recommendation without reading prior conversation.
 
 ```markdown
 ---
@@ -147,27 +148,26 @@ referenced.>
 
 ## Acceptance criteria
 
-<The conditions that define "done" for this ticket, as provided by the user. List them verbatim or lightly edited for
-clarity. Do not invent criteria.>
+<The conditions that define "done", as provided by the user. List verbatim or lightly edited for clarity. Do not invent.>
 
 ## Reproduction / evidence
 
-<For bugs: reproduction steps or the observation that confirms the problem. If unverified, say so. For features or
-refactors: the existing behavior being changed.>
+<Bugs: reproduction steps or the observation that confirms the problem. If unverified, say so. Features / refactors:
+the existing behavior being changed.>
 
 ## Root cause hypothesis
 
-<Best current explanation. Mark it as a hypothesis until confirmed. Omit for pure feature work.>
+<Best current explanation. Mark as hypothesis until confirmed. Omit for pure feature work.>
 
 ## Data sources
 
-<Relevant tables, APIs, caches, queues, files, or other data stores. For each source, document the name, key fields,
-what it captures, and limitations.>
+<Relevant tables, APIs, caches, queues, files, or other data stores. For each: name, key fields, what it captures,
+limitations.>
 
 ## Constraints
 
-<Anything that narrows the solution space: API compatibility, performance budgets, deadlines, dependencies, permissions,
-or repository conventions.>
+<Anything that narrows the solution space: API compatibility, performance budgets, deadlines, dependencies,
+permissions, repository conventions.>
 
 ## Options
 
@@ -197,42 +197,39 @@ or repository conventions.>
 
 ## Recommendation
 
-<Which option should be chosen and why. First state the strongest opposing case, then explain why the recommendation
-still wins.>
+<Which option to choose and why. State the strongest opposing case first, then explain why the recommendation still
+wins.>
 
 ## Open questions
 
 <Questions that must be answered before implementation. If none, write "none". When answered, remove the question and
-incorporate the answer into the relevant section above.>
+fold the answer into the relevant section above.>
 ```
 
 ### A.4 — Wait for the user to choose
 
-After writing the file, summarize the recommended option in one or two sentences and ask the user which option to use.
-
-**Do not start implementation until the user explicitly chooses an option from the document.**
+After writing, summarize the recommended option in 1–2 sentences and ask which option to use. **Do not start
+implementation until the user explicitly chooses an option from the document.**
 
 ### A.5 — Create PLAN.md once an option is chosen
 
-After the user chooses an option, create `.claude/context/tickets/<TICKET_ID>/PLAN.md`. Write it so a newcomer can
-understand exactly where the work stands.
+After the user chooses, create `.claude/context/tickets/<TICKET_ID>/PLAN.md` so a newcomer can see exactly where the
+work stands.
 
-PLAN.md must contain at minimum:
+PLAN.md must contain:
 
-- **Branch** — the git branch where the work is happening. If the branch does not yet exist, propose a name and
-  confirm with the user before creating it. Update this field if the branch changes.
-- **Current phase** — the phase in progress. Keep this field accurate as work moves forward.
-- **Status summary** — one or two sentences a newcomer can read to know what is happening right now (e.g. "Phase 2 in
+- **Branch** — git branch where work is happening. If it doesn't exist yet, propose a name and confirm before
+  creating. Update if it changes.
+- **Current phase** — the phase in progress. Keep accurate as work moves.
+- **Status summary** — 1–2 sentences a newcomer can read to know what is happening right now (e.g. "Phase 2 in
   progress; data-access layer wired up, integration tests pending").
-- **Phases** — an ordered list of the smallest meaningfully testable changes. Each phase must produce an observable
-  result, such as a passing test, queryable database row, working endpoint, or successful build with new behavior. Do
-  not create phases for empty scaffolding with no verifiable behavior; fold scaffolding into the first phase that proves
-  it works. For each phase, include name, goal, affected files or areas, verification, and status (`pending`,
-  `in progress`, or `done`). If prerequisite bugs must be fixed before the main feature works, make them early phases.
-- **Decisions log** — material decisions made during implementation that a future reader needs to reconstruct context.
-  Append; do not overwrite.
-
-Use this template:
+- **Phases** — ordered list of the smallest meaningfully testable changes. Each phase must produce an observable
+  result (passing test, queryable row, working endpoint, successful build with new behavior). Do not create phases
+  for empty scaffolding with no verifiable behavior — fold scaffolding into the first phase that proves it works.
+  For each phase: name, goal, affected files / areas, verification, status (`pending` | `in progress` | `done`). If
+  prerequisite bugs must be fixed before the main feature works, make them early phases.
+- **Decisions log** — material decisions made during implementation that a future reader needs. Append; do not
+  overwrite.
 
 ```markdown
 ---
@@ -282,98 +279,71 @@ Keep PLAN.md current. `Current phase`, `Status summary`, branch, and phase statu
 
 ## Mode B — Resume work from existing analysis
 
-Use this mode when the user is continuing work on a ticket whose directory already exists.
+Use this when the user is continuing work on a ticket whose directory already exists.
 
 1. Read **both** files in full before answering, suggesting changes, or making edits:
-    - `.claude/context/tickets/<TICKET_ID>/ANALYSIS.md` for problem, options, and decisions.
-    - `.claude/context/tickets/<TICKET_ID>/PLAN.md` for current phase, branch, and status.
-2. Confirm the active git branch matches the branch named in PLAN.md. If it does not, surface the discrepancy and ask
-   before doing any work — do not silently switch or assume.
-3. Use these files as the source of truth for the problem, constraints, chosen option, current phase, and open
-   questions. Do not re-derive what is already documented.
-4. If the user's current request conflicts with what is documented (different option, different phase ordering, etc.),
-   surface the conflict and ask before proceeding. Do not silently override.
-5. If PLAN.md is missing but the analysis file exists, the ticket was created before the plan stage existed or the plan
-   was never created — offer to create PLAN.md now using A.5.
+   - `ANALYSIS.md` for problem, options, decisions.
+   - `PLAN.md` for current phase, branch, status.
+2. Confirm the active git branch matches the branch in PLAN.md. If not, surface the discrepancy and ask before doing
+   any work — do not silently switch or assume.
+3. Use these files as the source of truth for problem, constraints, chosen option, current phase, and open questions.
+   Do not re-derive what is already documented.
+4. If the user's request conflicts with what's documented (different option, different phase ordering, etc.), surface
+   the conflict and ask before proceeding. Do not silently override.
+5. If PLAN.md is missing but ANALYSIS.md exists, the ticket predates the plan stage or PLAN.md was never created —
+   offer to create it now using A.5.
 6. If either file is wrong or incomplete, switch to Mode C.
 
 ## Mode C — Update the analysis file with new findings
 
-During ticket work, update `.claude/context/tickets/<TICKET_ID>/ANALYSIS.md` only when a **material** finding emerges.
-A finding is material when it does at least one of these:
+During ticket work, update `ANALYSIS.md` only when a **material** finding emerges. A finding is material when it does
+at least one of:
 
-- Changes the **direction** of the work (different approach than what was chosen).
-- Changes the **scope** of the work (adds, removes, or reshapes what is being delivered).
+- Changes the **direction** of the work.
+- Changes the **scope** of the work (adds, removes, or reshapes what's being delivered).
 - Changes or invalidates a documented constraint.
 - Rules out an option, or surfaces a new option.
 - Changes the recommendation or the chosen option.
 - Reveals a root cause that contradicts the prior hypothesis.
 - Answers an item in "Open questions" or adds a new one.
 
-Do **not** update ANALYSIS.md for routine progress, minor observations, or anything already implied by existing content.
-ANALYSIS.md is a planning artifact, not a work log.
+Do **not** update ANALYSIS.md for routine progress, minor observations, or anything already implied. ANALYSIS.md is
+a planning artifact, not a work log.
 
 When you do update:
 
-1. Edit the relevant section in place. Preserve the existing structure.
-2. If a documented decision, direction, or scope changes, briefly note what changed and why in the "Recommendation" or
-   "Open questions" section. Include enough context for a future reader to reconstruct the reasoning.
-3. Re-read the changed section and make sure it still makes sense to a newcomer with no prior project knowledge.
-4. Tell the user what you changed in the file and why, in one or two sentences. Do not paste the full diff.
+1. Edit the relevant section in place. Preserve existing structure.
+2. If a documented decision, direction, or scope changes, briefly note what changed and why in "Recommendation" or
+   "Open questions". Include enough context for a future reader to reconstruct the reasoning.
+3. Re-read the changed section and confirm it still makes sense to a newcomer with no prior project knowledge.
+4. Tell the user what you changed and why, in 1–2 sentences. Do not paste the full diff.
 
 ### Keeping PLAN.md current
 
-PLAN.md must reflect reality. Update it whenever:
+Update PLAN.md whenever:
 
 - A phase changes status (`pending` → `in progress` → `done`).
 - The current phase or status summary changes.
 - The branch changes.
-- A material implementation decision is made — append to the decisions log with the date and one-line reason.
-- A direction or scope change in the analysis file invalidates the planned phases; revise the phases to match.
+- A material implementation decision is made — append to the decisions log with date and one-line reason.
+- A direction or scope change in ANALYSIS.md invalidates the planned phases — revise the phases to match.
 
 Each phase remains a smallest meaningfully testable change. If a phase grows during work, split it.
 
-### Scope boundary — what belongs in the ticket file vs. project docs
+## Hard rules
 
-The ticket files are only for ticket-specific analysis and plan state: problem, options, chosen direction, trade-offs,
-ticket-specific findings, phases, status, and decisions.
-
-Durable technical information discovered during ticket work belongs in project docs, not only in ticket files.
-Examples:
-
-- A new external integration, schema, or store.
-- A previously undocumented setup step, credential, or environment variable.
-- An architecture detail, error pattern, or debugging technique future work will need.
-- A verified command or troubleshooting fix not already documented.
-
-To decide whether durable information goes in `SETUP.md` or `TECHNICAL.md`, follow the routing rules in
-`.claude/context/CLAUDE.md`. If a finding is genuinely both ticket-relevant *and* durable (e.g. it shapes this ticket's
-solution and future work needs it), update **both** places: ticket-specific framing in the ticket file, and a
-project-level entry in the appropriate project doc.
-
-If `SETUP.md` or `TECHNICAL.md` does not yet exist, follow the generation guidance in `.claude/context/CLAUDE.md` rather
-than skipping the update or dumping the content into the ticket file. Verify before writing, per that file's
-verification standards.
-
-If you are uncertain where a finding belongs, ask before writing. Do not guess silently.
-
-## Rules
-
-- Do not skip the investigation step in Mode A. An analysis built only from the ticket text is not useful.
-- Every option must be a real option. Do not pad with strawmen.
-- If you genuinely see only one viable option, say so and explain why alternatives were rejected — do not invent fake
-  alternatives.
-- In Mode B, read both files in full before answering. Do not skim or guess.
-- In Mode C, update only for material findings. Do not turn ANALYSIS.md into a work log.
-- Keep PLAN.md current: `Current phase`, `Status summary`, branch, and phase statuses must reflect reality.
-- Keep ticket-specific analysis in the ticket file. Keep durable technical and setup information in the project docs (
-  `SETUP.md` / `TECHNICAL.md`), routed per `.claude/context/CLAUDE.md`.
-- General commit conventions live in the project root `CLAUDE.md` and still apply.
+- **Do not skip Mode A investigation.** An analysis built only from the ticket text is not useful.
+- **Every option is a real option.** Do not pad with strawmen. If you genuinely see only one viable option, say so
+  and explain why alternatives were rejected — do not invent fakes.
+- **Mode B reads both files in full.** Do not skim or guess.
+- **Mode C updates only for material findings.** Do not turn ANALYSIS.md into a work log.
+- **Don't guess where a finding belongs.** If uncertain whether something is ticket-specific or durable, ask before
+  writing.
 
 ## Ticket commit rules
 
 These apply on top of the general commit conventions in the project root `CLAUDE.md` (which already covers the
 `<TICKET_ID>: ...` subject-line prefix).
 
-1. **Keep PLAN.md current at commit time.** If a commit completes any phases, mark each completed phase as `done` and
-   refresh `Current phase` and `Status summary`. The PLAN.md update must land before or with the same commit.
+1. **Keep PLAN.md current at commit time.** If a commit completes any phases, mark each completed phase as `done`
+   and refresh `Current phase` and `Status summary`. The PLAN.md update must land before or with the same commit.

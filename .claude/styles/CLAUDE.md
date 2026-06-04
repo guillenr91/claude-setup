@@ -1,40 +1,37 @@
 # Style Guide Instructions
 
-## Context
+Loaded into context when read. Keep concise, explicit, and actionable for AI agents — preserve this standard in every
+future edit.
 
-This file is loaded into context. Keep it concise, explicit, and actionable.
+Read this before creating or modifying any Markdown file in `.claude/styles/`. Every guide in this directory is a
+required pre-read before generating or reviewing work in its domain. Name new guides by domain (`JAVA.md`,
+`POSTMAN.md`, etc.) so the matching file is obvious.
 
-Use this file before creating or modifying any Markdown file in `.claude/styles/`.
+## Required header
 
-Every style guide in this directory is a required pre-read before generating or reviewing work in its domain. Name new
-style guides by domain so the matching file is obvious, such as `JAVA.md` for Java or `POSTMAN.md` for Postman.
-
-## Required Header
-
-Every style guide in this directory must start with this header pattern:
+Every style guide must start with:
 
 ```markdown
 # <Domain> Style Guide
 
-## Context
-
-This file is loaded into context. Keep it concise, explicit, and actionable.
+Loaded into context when read. Keep concise, explicit, and actionable for AI agents — preserve this standard in every
+future edit.
 ```
 
 After the header, add one short sentence explaining when to use the guide.
 
-## Writing Rules
+## Writing rules
 
-- Write rules as `### Rule: <imperative rule name>`.
+- Format each rule as `### Rule: <imperative rule name>`.
 - State the trigger before the action.
-- Use `Do`, `Do not`, and `Exceptions` labels when they make the action clearer.
-- Include examples only when they disambiguate the rule.
-- Prefer existing project patterns when they conflict with a general style rule.
+- Use `Do`, `Do not`, and `Exceptions` labels when they sharpen the action.
+- Include examples only when they disambiguate.
+- Prefer existing project patterns when they conflict with a general rule.
 - Remove stale, duplicate, or conversational text.
 
-## Updating Rules
+## Updating rules
 
-- Update an existing rule in place when the behavior already belongs to that rule.
+- Update an existing rule in place when the behavior already belongs to it.
 - Add a new rule only when it changes a generation or review decision.
-- Keep examples short and specific to the rule they support.
-- Preserve the required header when editing existing style guides.
+- Keep examples short and specific to the rule.
+- Preserve the required header.
