@@ -1,7 +1,7 @@
 # Context Guide
 
-Loaded into context when read. Keep concise, explicit, and actionable for AI agents — preserve this standard in every
-future edit.
+Loaded into context when read. Keep concise, explicit, and actionable for AI agents. No decorative formatting around
+prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
 
 Use this file to decide which project context to load. All paths relative to `.claude/context/`. Keep this file
 portable: limit it to generic routing between `SETUP.md` and `TECHNICAL.md`. Project-specific routing belongs in
@@ -9,15 +9,15 @@ portable: limit it to generic routing between `SETUP.md` and `TECHNICAL.md`. Pro
 
 ## Routing
 
-| Task involves                                  | Read                         |
-|------------------------------------------------|------------------------------|
-| Running, building, starting the app            | [SETUP.md](SETUP.md)         |
-| Credentials, env vars, external service access | [SETUP.md](SETUP.md)         |
-| Permissions, startup failures, IDE setup       | [SETUP.md](SETUP.md)         |
-| Debugging, code flow, architecture, integrations | [TECHNICAL.md](TECHNICAL.md) |
+| Task involves                                     | Read                         |
+|---------------------------------------------------|------------------------------|
+| Running, building, starting the app               | [SETUP.md](SETUP.md)         |
+| Credentials, env vars, external service access    | [SETUP.md](SETUP.md)         |
+| Permissions, startup failures, IDE setup          | [SETUP.md](SETUP.md)         |
+| Debugging, code flow, architecture, integrations  | [TECHNICAL.md](TECHNICAL.md) |
 | Where something is configured, how things connect | [TECHNICAL.md](TECHNICAL.md) |
-| Schemas, error patterns, environment differences | [TECHNICAL.md](TECHNICAL.md) |
-| First-time onboarding, unclear root cause       | Both                         |
+| Schemas, error patterns, environment differences  | [TECHNICAL.md](TECHNICAL.md) |
+| First-time onboarding, unclear root cause         | Both                         |
 
 ## Keep documentation in sync
 
@@ -47,8 +47,9 @@ Both files must:
    ```markdown
    # <Document Title>
 
-   Loaded into context when read. Keep concise, explicit, and actionable for AI agents — preserve this standard in
-   every future edit.
+   Loaded into context when read. Keep concise, explicit, and actionable for AI agents. No decorative formatting
+   around prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future
+   edit.
    ```
    The one-sentence purpose statement is required, not optional.
 3. Include a table of contents after the `## Context` header and intro sentence, before the first main section. When
@@ -112,7 +113,7 @@ exceptions, Debugging techniques, Permission barriers.
 ## Verification standards
 
 Verify everything you write. When something cannot be verified (missing credentials, services, or env access), mark
-it unverified instead of guessing. **Unverified entries are acceptable. Unverified entries presented as fact are defects.**
+it unverified instead of guessing. Unverified entries are acceptable. Unverified entries presented as fact are defects.
 
 | Item               | Verification method                   | If unverifiable                    |
 |--------------------|---------------------------------------|------------------------------------|

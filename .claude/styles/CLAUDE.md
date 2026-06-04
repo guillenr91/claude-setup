@@ -1,7 +1,7 @@
 # Style Guide Instructions
 
-Loaded into context when read. Keep concise, explicit, and actionable for AI agents — preserve this standard in every
-future edit.
+Loaded into context when read. Keep concise, explicit, and actionable for AI agents. No decorative formatting around
+prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
 
 Read this before creating or modifying any Markdown file in `.claude/styles/`. Every guide in this directory is a
 required pre-read before generating or reviewing work in its domain. Name new guides by domain (`JAVA.md`,
@@ -14,8 +14,8 @@ Every style guide must start with:
 ```markdown
 # <Domain> Style Guide
 
-Loaded into context when read. Keep concise, explicit, and actionable for AI agents — preserve this standard in every
-future edit.
+Loaded into context when read. Keep concise, explicit, and actionable for AI agents. No decorative formatting around
+prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
 ```
 
 After the header, add one short sentence explaining when to use the guide.
@@ -24,7 +24,7 @@ After the header, add one short sentence explaining when to use the guide.
 
 - Format each rule as `### Rule: <imperative rule name>`.
 - State the trigger before the action.
-- Use `Do`, `Do not`, and `Exceptions` labels when they sharpen the action.
+- Use `Trigger:`, `Do:`, `Do not:`, and `Exception:` as plain colon-prefix labels at the start of a line.
 - Include examples only when they disambiguate.
 - Prefer existing project patterns when they conflict with a general rule.
 - Remove stale, duplicate, or conversational text.
