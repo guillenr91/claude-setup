@@ -77,22 +77,39 @@ the change feels small.
 
 ## PR review feedback
 
+The goal of every review comment is to help the developer improve their code or solve a detected issue. Comments that
+only point out problems without providing a path forward are not useful. Every comment should enable the developer to
+take immediate action.
+
 When reviewing a PR:
 
 - Calibrate state to impact. `REQUEST_CHANGES` only for clear breakage, security risk, data loss, or behavior
   likely to harm a workflow. Edge cases, hardening, polish, doc gaps, and low-risk maintainability are non-blocking
   unless evidence shows they break a supported workflow. For additive PRs that don't break existing behavior, state
   the risk plainly and say whether it should block.
-- Place feedback on the code. Use inline comments when supported; otherwise cite file and line.
 - Prefix every comment title with an uppercase category in brackets: `[BUG]`, `[SECURITY]`, `[TEST]`, `[DOCS]`,
   `[MAINTAINABILITY]`. Use `[LEGACY BUG]` for pre-existing issues — note them, but they don't block approval unless
   the PR makes them worse.
-- Each comment is measured and actionable: observed behavior, evidence, impact, smallest useful fix. Include a
-  concrete code suggestion or patch when possible.
-- General findings only for cross-cutting issues (multiple files, tests, architecture, release risk). Cite
-  concrete examples.
-- One general summary comment at the end, after the code-specific ones, explaining the feedback and why it
-  matters. Before posting it, confirm with the user whether the review should approve or request changes when not
-  already explicit.
+- Each comment must be actionable: state the issue, explain why it matters, and provide the solution. The developer
+  should be able to resolve the comment without further clarification.
 - Do not call a change unsafe, broken, or workflow-impacting unless the evidence supports that severity.
 - Prefer fewer, higher-signal comments. Combine findings that share a root cause or fix.
+
+Posting review comments:
+
+1. Post inline comments FIRST on specific code lines for each finding. Use the GitHub API to create review comments
+   with the exact diff position. To find the position, run `gh pr diff <PR> --patch | grep -n "<unique text>"` to
+   get the line number in the diff, then use that as the `position` parameter.
+2. Every inline comment MUST include a code suggestion when a fix is possible. Use GitHub's suggestion block format:
+   ```suggestion
+   // corrected code here
+   ```
+   This allows the author to apply the fix with one click. Only omit suggestions for observations that have no
+   concrete fix (e.g., questions, design discussions, or findings that require broader refactoring).
+3. Post ONE general summary comment LAST with the approval or request-changes verdict. This summary should:
+    - List what was verified (claims tested, tests run, code paths checked).
+    - Briefly reference the inline comments already posted (do not repeat full details).
+    - State the overall verdict and reasoning.
+4. Never post only a general comment without inline comments when there are specific code-level findings.
+5. Before posting, confirm with the user whether the review should approve or request changes when not already
+   explicit.
