@@ -98,8 +98,12 @@ When reviewing a PR:
 Posting review comments:
 
 1. Post inline comments FIRST on specific code lines for each finding. Use the GitHub API to create review comments
-   with the exact diff position. To find the position, run `gh pr diff <PR> --patch | grep -n "<unique text>"` to
-   get the line number in the diff, then use that as the `position` parameter.
+   with the exact diff position. To find the position, use this command template, replacing `<PR>` with the PR number
+   or URL and `<unique text>` with exact changed-line text:
+   ```bash
+   gh pr diff "<PR>" --patch | grep -n "<unique text>"
+   ```
+   Use the returned line number as the `position` parameter.
 2. Every inline comment MUST include a code suggestion when a fix is possible. Use GitHub's suggestion block format:
    ```suggestion
    // corrected code here

@@ -109,6 +109,7 @@ Before concluding you understand the problem space, cover these angles:
 
 1. Search by field or concept name, not only by table or class purpose. Data often lives in tables whose primary
    purpose differs from your use case.
+   Search template; replace `<fieldName>` and `<alternativeName>` with verified project terms before running.
    ```bash
    rg -n "<fieldName>|<alternativeName>" -g "*.java"
    ```
@@ -240,6 +241,10 @@ status: not-started  # one of: not-started, in-progress, blocked, done
 ---
 
 # <TICKET_ID> — Implementation plan
+
+## Context
+
+This file is loaded into context. Keep it concise, explicit, and actionable.
 
 ## Branch
 

@@ -58,6 +58,16 @@ Both files must:
 
 If `last-verified` is more than a few months old, treat the file as suspect and re-verify before relying on it.
 
+## Reusable setup commands and scripts
+
+Apply the global Markdown command efficiency rule. In `SETUP.md` and any setup-focused Markdown files, treat
+ready-to-run commands as operational instructions, not examples. A future agent should be able to replace documented
+values and run the command without guessing.
+
+For setup commands, also document dependencies that affect success: account, region, branch, service name, shell, OS,
+installed tool version, current directory, network access, credentials, and permissions. Keep prose short; let verified
+command blocks carry the setup procedure.
+
 ## Generating SETUP.md or TECHNICAL.md when missing
 
 Generate from verified project evidence. Every command, path, and configuration must either be verified or marked
@@ -74,17 +84,20 @@ Generate by:
 3. Discover required credentials and environment variables.
 4. Test build and run commands until they succeed.
 5. Identify common failure modes and their solutions.
+6. Convert repeatable setup steps into verified, parameterized commands or scripts.
 
 Verify by:
 
-- Running each command and capturing actual output.
+- Running each command and capturing a success signal (output, exit code, created file, HTTP status, test result, or
+  equivalent).
 - Testing credential and permission commands with real access.
 - Starting the application and confirming it responds correctly.
 - Reproducing documented errors to capture exact messages.
+- Confirming every command placeholder is explained and every command has verification evidence.
 
 Required sections (in order): Context header & TOC, Prerequisites, Clone and build, Credentials configuration,
 Permission verification commands (with success and failure output), Environment variables, Run commands, Verification
-steps, IDE setup, Troubleshooting table, Quick reference table.
+steps, Reusable commands and scripts, IDE setup, Troubleshooting table, Quick reference table.
 
 ### TECHNICAL.md
 
@@ -117,7 +130,7 @@ it unverified instead of guessing. Unverified entries are acceptable. Unverified
 
 | Item               | Verification method                   | If unverifiable                    |
 |--------------------|---------------------------------------|------------------------------------|
-| Commands           | Run and confirm output                | Mark `Not verified - requires <X>` |
+| Commands           | Run, confirm success signal, list replacements | Mark `Not verified - requires <X>` |
 | Paths              | Confirm file exists                   | Mark `Not verified - requires <X>` |
 | Configurations     | Read the actual config file           | Mark `Not verified - requires <X>` |
 | External resources | Query with the appropriate CLI or SDK | Mark `Not verified - requires <X>` |

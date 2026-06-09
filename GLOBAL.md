@@ -63,6 +63,27 @@ flattery. No hedging. No reassurance padding. Never use emojis.
   or implementation choices. Do not restate what the code already says.
 - Keep markdown concise. Descriptive but tight.
 
+# Markdown command efficiency
+
+- For repeatable setup, verification, migration, troubleshooting, or review steps, prefer verified parameterized
+  commands or scripts over prose when shorter and safer.
+- Ready-to-run commands must list working directory, prerequisites, placeholders, replacement values, command run,
+  relevant environment, success signal, and verification date.
+- Label generic command templates as templates. State replacements, and do not present them as verified until run.
+- Never embed secrets, tokens, passwords, private keys, session values, personal credentials, or machine-specific paths.
+- Prefer scripts for multi-step reuse. Scripts take arguments or environment variables, fail clearly, avoid destructive
+  defaults, and support dry-run, read-only, or validation modes when practical.
+- Mark unverified commands as `Not verified - requires <X>`. Do not create confident copy-paste traps.
+
+# Instruction deduplication
+
+- Before removing or simplifying instructions, compare the global file and the repo-local files that will load for the
+  task.
+- Keep each rule in the highest-scope file that applies. Use repo-local files only for narrower behavior, routing,
+  examples, or templates.
+- Do not remove a local rule unless the same requirement remains available from the files loaded into context.
+- If a local file depends on a global rule, reference the global rule by name instead of restating it.
+
 # Agent context sync
 
 Run before reading repository-local context, style guides, skills, or workflow rules.
@@ -90,6 +111,8 @@ Process:
    not infer it.
 2. Prefer the helper script when present in the canonical source. Run with `--dry-run` first if target state is
    unclear.
+   Command template; replace `<source>` with the canonical source path and `<repo-root>` with the target repository
+   root. Use one agent value: `claude`, `codex`, or `copilot`.
    ```bash
    <source>/scripts/sync-agent-context.sh --source <source> --agent <claude|codex|copilot> --target <repo-root>
    ```
