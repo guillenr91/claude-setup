@@ -7,6 +7,28 @@ Read this before creating or modifying any Markdown file in `.claude/styles/`. E
 required pre-read before generating or reviewing work in its domain. Name new guides by domain (`JAVA.md`,
 `POSTMAN.md`, etc.) so the matching file is obvious.
 
+Scope rule for this directory: PROJECT-AGNOSTIC style and convention rules only. This is a hard boundary, not a
+preference. Project-specific facts go in `.claude/context/` instead — see
+[.claude/context/CLAUDE.md](../context/CLAUDE.md).
+
+Forbidden in any file under `.claude/styles/`:
+
+- Real module names, class names, helper names, function names from this repo.
+- Real file paths or directory names from this repo.
+- Real table schemas, column names, field names.
+- Real environment URLs, host names, API keys (even placeholder values).
+- Real tag values, branch names, ticket IDs, PR numbers.
+- Code examples that reference any of the above.
+
+Allowed in style guides:
+
+- Generic placeholders (`<TICKET_ID>`, `<aggregator>`, `<area>`, `<service>`, `<env-or-suite-tags>`).
+- Domain-standard concepts (Robot Framework `Suite Setup`, Java `Optional`, HTTP verbs, etc.).
+- Code shapes built from placeholders.
+
+Test before committing: clone a different repo using the same domain (a different Java service, a different Robot
+suite). Would this rule still apply unchanged? If no → it does not belong here, move it to `.claude/context/`.
+
 ## Required header
 
 Every style guide must start with:

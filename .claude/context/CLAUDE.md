@@ -7,6 +7,22 @@ Use this file to decide which project context to load. All paths relative to `.c
 portable: limit it to generic routing between `SETUP.md` and `TECHNICAL.md`. Project-specific routing belongs in
 `SETUP.md` or `TECHNICAL.md`, not here.
 
+## Where information goes inside `.claude/context/`
+
+This directory owns project-specific facts. Two sub-buckets, hard boundary:
+
+1. `SETUP.md` and `TECHNICAL.md` — PROJECT-WIDE reference reused across tickets: module names, helper names, table
+   schemas, env URLs, credentials guidance, debugging recipes, reusable building blocks, mappings from generic
+   `styles/` placeholders to this project's actual identifiers.
+2. `tickets/<TICKET_ID>/` — TICKET-SCOPED only: analysis, plan, decisions, reproduction evidence for one piece of
+   work. When a ticket finding turns out to be reusable, extract it into `TECHNICAL.md` (or `SETUP.md`) and leave
+   only the ticket framing in the ticket file.
+
+Project-agnostic style and convention rules do NOT belong here — they go in `.claude/styles/`. See
+[.claude/styles/CLAUDE.md](../styles/CLAUDE.md).
+
+Do not duplicate across files; cross-link instead.
+
 ## Routing
 
 | Task involves                                     | Read                         |

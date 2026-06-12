@@ -11,6 +11,18 @@ project context files to load.
 Keep this file portable: route only to `SETUP.md` and `TECHNICAL.md`. Project-specific runbooks (env, deployment, etc.)
 should be referenced from `SETUP.md` or `TECHNICAL.md` instead.
 
+### Where information goes
+
+Each directory under `.claude/` owns its own rules in its own `CLAUDE.md`. Before writing anything durable, read
+the `CLAUDE.md` of the directory you are targeting:
+
+- Project-agnostic style and convention rules → [.claude/styles/CLAUDE.md](.claude/styles/CLAUDE.md).
+- Project-wide reference (`SETUP.md`, `TECHNICAL.md`) and ticket-scoped files (`tickets/<TICKET_ID>/`) →
+  [.claude/context/CLAUDE.md](.claude/context/CLAUDE.md).
+
+Do not duplicate facts across directories; cross-link instead. When unsure where something belongs, ask before
+writing.
+
 ## Style guides
 
 Before creating or modifying style guides, read [.claude/styles/CLAUDE.md](.claude/styles/CLAUDE.md).
