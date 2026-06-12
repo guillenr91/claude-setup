@@ -102,10 +102,27 @@ When reviewing a PR:
 - Prefix every comment title with an uppercase category in brackets: `[BUG]`, `[SECURITY]`, `[TEST]`, `[DOCS]`,
   `[MAINTAINABILITY]`. Use `[LEGACY BUG]` for pre-existing issues — note them, but they don't block approval unless
   the PR makes them worse.
-- Each comment must be actionable: state the issue, explain why it matters, and provide the solution. The developer
-  should be able to resolve the comment without further clarification.
+- Each comment must be actionable: state what you observed, explain why it matters, and offer a path forward. The
+  developer should be able to resolve the comment without further clarification.
 - Do not call a change unsafe, broken, or workflow-impacting unless the evidence supports that severity.
 - Prefer fewer, higher-signal comments. Combine findings that share a root cause or fix.
+
+Tone for review comments:
+
+- Frame findings as observations to verify, not asserted facts. The reviewer's context is incomplete; the author
+  has context the reviewer doesn't. Write comments that invite verification rather than declare verdicts.
+- Use phrasing like "I want to flag a scenario I couldn't verify on my side", "could you verify whether…",
+  "from my read it looks like…", "I noticed X — was that intentional?". Avoid "this is broken", "this will
+  fail", "this introduces a bug" unless you have reproduced the failure in this session.
+- When you cannot reproduce a concern in-session, say so explicitly and ask the author to confirm or refute.
+  State what you'd need to verify it yourself if relevant.
+- Suggestions are offers, not orders. "Would you consider…", "up to you — happy to keep it inline if you prefer
+  minimal churn" is fine for non-blocking polish. Reserve direct imperative phrasing for issues you have evidence
+  for.
+- Keep the category prefix (`[BUG]`, `[TEST]`, etc.) — the prefix signals severity; the body should still
+  invite verification rather than declare it.
+- The category does not have to match certainty. A `[BUG]` comment can still open with "possible issue —
+  could you verify?". Severity describes potential impact; tone describes confidence.
 
 Posting review comments:
 
