@@ -72,26 +72,39 @@ In normal project repos, treat them as local config.
 
 For ticket-specific conventions beyond these, see the ticket skill when it exists.
 
+## Code review effort
+
+Applies to every code review — pre-commit, pre-PR, reviewing someone else's PR, or ad-hoc analysis of pending
+changes. The two subsections below specialise this rule to specific triggers; the rule itself lives here.
+
+1. Run every code review capability available. Use every coding tool at your disposal — built-in tools, subagents,
+   any code-review skills present in the session, language-specific linters and type checkers, and any
+   project-specific verification scripts.
+2. Use the highest effort level the task warrants. Default to higher effort when the change touches security,
+   data, auth, public APIs, or shared infrastructure.
+3. Triage every finding: apply the fix, or record an explicit skip reason (false positive, out of scope, conflicts
+   with stated requirement). No silent ignores.
+4. Re-run the review after fixes when changes are non-trivial, to confirm resolution and no new issues.
+5. Summarize the review pass in the commit message, PR description, or final response: what was reviewed, how many
+   findings surfaced, what was fixed, what was deferred and why.
+
 ## Pre-commit / pre-PR review
 
 Triggers immediately before running `git commit`, `git push`, or opening a PR (`gh pr create`). Does not trigger
 when only drafting a commit message or PR description without executing the command.
 
-When triggered, run a comprehensive code review on the pending changes and resolve findings — every time, even when
+When triggered, apply the rules in `## Code review effort` above to the pending changes — every time, even when
 the change feels small.
-
-1. Run every code review capability available. Use the highest effort level the task warrants.
-2. Triage every finding: apply the fix, or record an explicit skip reason (false positive, out of scope, conflicts
-   with stated requirement). No silent ignores.
-3. Re-run the review after fixes when changes are non-trivial, to confirm resolution and no new issues.
-4. Summarize the review pass in the commit message, PR description, or final response: what was reviewed, how many
-   findings surfaced, what was fixed, what was deferred and why.
 
 ## PR review feedback
 
 The goal of every review comment is to help the developer improve their code or solve a detected issue. Comments that
 only point out problems without providing a path forward are not useful. Every comment should enable the developer to
 take immediate action.
+
+Apply `## Code review effort` above before posting any feedback: run every code review capability available, use
+every coding tool at your disposal, and use the highest effort level the task warrants. Findings posted as PR
+comments must come from that pass, not from a glance at the diff.
 
 When reviewing a PR:
 
@@ -126,6 +139,24 @@ Tone for review comments:
 
 Posting review comments:
 
+Draft-first gate. Never call the GitHub API to create inline comments, summary comments, or submit a review until
+the operator has seen every drafted comment and explicitly approved posting. Approval of the drafts also covers
+the verdict if it is unambiguous in the drafts; if the verdict (approve vs. request changes) is not explicit,
+confirm it separately before posting. Approval of one batch does not extend to later edits — re-confirm after any
+non-trivial change. "Looks good", "go ahead", "post it", or equivalent counts as approval; do not infer approval
+from silence or from earlier turns.
+
+Drafting workflow:
+
+1. Collect every inline finding (code, file, line, suggested fix) and the summary comment in the chat as plain
+   text or a structured list before any API call.
+2. Show the operator the exact body of each comment, the file and line it will attach to, the suggestion block if
+   any, and the proposed verdict.
+3. Apply edits the operator requests. If they reject a finding, drop it; do not post it anyway.
+4. Only after explicit approval, run the steps below to post.
+
+After approval:
+
 1. Post inline comments FIRST on specific code lines for each finding. Use the GitHub API to create review comments
    with the exact diff position. To find the position, use this command template, replacing `<PR>` with the PR number
    or URL and `<unique text>` with exact changed-line text:
@@ -144,5 +175,3 @@ Posting review comments:
     - Briefly reference the inline comments already posted (do not repeat full details).
     - State the overall verdict and reasoning.
 4. Never post only a general comment without inline comments when there are specific code-level findings.
-5. Before posting, confirm with the user whether the review should approve or request changes when not already
-   explicit.
