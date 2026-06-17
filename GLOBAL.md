@@ -82,12 +82,12 @@ Managed targets per agent — each line lists: global instructions | repo root |
 repo skills | repo styles.
 
 - Claude: `~/.claude/CLAUDE.md` | `CLAUDE.md` | `.claude/context/CLAUDE.md` | `.claude/settings.json` and
-  `.claude/hooks/stop-fact-check-gate.sh` | `.claude/skills/**` | `.claude/styles/**`
+  `.claude/scripts/hooks/stop-fact-check-gate.sh` | `.claude/skills/**` | `.claude/styles/**`
 - Codex: `~/.codex/AGENTS.md` | `AGENTS.md` | `.codex/context/AGENTS.md` | `.codex/hooks.json` and
-  `.codex/hooks/stop-fact-check-gate.sh` | `.codex/skills/**` | `.codex/styles/**`
+  `.codex/scripts/hooks/stop-fact-check-gate.sh` | `.codex/skills/**` | `.codex/styles/**`
 - Copilot CLI: `$HOME/.copilot/copilot-instructions.md` | `AGENTS.md` | `.agents/context/AGENTS.md` |
-  `.github/hooks/stop-fact-check-gate.json` and `.github/hooks/stop-fact-check-gate.sh` | `.agents/skills/**` |
-  `.agents/styles/**`
+  `.github/hooks/stop-fact-check-gate.json` and `.github/scripts/hooks/stop-fact-check-gate.sh` |
+  `.agents/skills/**` | `.agents/styles/**`
 
 For Codex, `.codex/context/`, `.codex/skills/`, and `.codex/styles/` are managed project-local support docs. Codex
 hook discovery uses `.codex/hooks.json` or inline `[hooks]` in `.codex/config.toml`. For Copilot CLI,
@@ -114,20 +114,26 @@ Process:
     - `CLAUDE.md` → the agent's repo root (see list above).
     - `.claude/context/`, `.claude/skills/`, `.claude/styles/` → keep as-is for Claude; rename `.claude/` →
       `.codex/` for Codex and `.claude/` → `.agents/` for Copilot CLI.
-    - `.claude/settings.json` → `.claude/settings.json` for Claude as a `command` Stop hook.
-    - Hook policy must stay agent-agnostic. Convert only the runtime adapter: file path, schema, handler type, and
-      response format.
-    - `.claude/scripts/hooks/stop-fact-check-gate.sh` → `.claude/hooks/stop-fact-check-gate.sh` for Claude.
-    - `.claude/settings.json` → `.codex/hooks.json` for Codex by generating an agent-native `command` Stop hook.
-      Do not copy Claude `prompt` or `agent` hook handlers directly because Codex parses but skips those handler
-      types.
-    - `.claude/scripts/hooks/stop-fact-check-gate.sh` → `.codex/hooks/stop-fact-check-gate.sh` for Codex. Keep the policy
-      agent-neutral inside the script. Keep the Codex allow path silent unless a Codex-specific block/continue
-      output contract has been verified.
+    - Hook layout convention: every agent ships the shared hook script under its own
+      `<agent-dir>/scripts/hooks/stop-fact-check-gate.sh` — `.claude/scripts/hooks/...` for Claude,
+      `.codex/scripts/hooks/...` for Codex, `.github/scripts/hooks/...` for Copilot CLI. Each agent's runtime hook
+      config invokes that path. Hook policy must stay agent-agnostic; convert only the runtime adapter — schema,
+      handler type, and response format.
+    - `.claude/settings.json` → `.claude/settings.json` for Claude as a `command` Stop hook that invokes
+      `.claude/scripts/hooks/stop-fact-check-gate.sh`.
+    - `.claude/scripts/hooks/stop-fact-check-gate.sh` → `.codex/scripts/hooks/stop-fact-check-gate.sh` for Codex.
+      Keep the policy agent-neutral inside the script. Keep the Codex allow path silent unless a Codex-specific
+      block/continue output contract has been verified.
+    - `.claude/settings.json` → `.codex/hooks.json` for Codex by generating an agent-native `command` Stop hook
+      that invokes `.codex/scripts/hooks/stop-fact-check-gate.sh`. Do not copy Claude `prompt` or `agent` hook
+      handlers directly because Codex parses but skips those handler types.
+    - `.claude/scripts/hooks/stop-fact-check-gate.sh` → `.github/scripts/hooks/stop-fact-check-gate.sh` for
+      Copilot CLI. Keep the policy agent-neutral inside the script.
     - `.claude/settings.json` → `.github/hooks/stop-fact-check-gate.json` for Copilot CLI by generating an
-      agent-native `command` `agentStop` hook.
-    - `.claude/scripts/hooks/stop-fact-check-gate.sh` → `.github/hooks/stop-fact-check-gate.sh` for Copilot CLI.
-      Keep the policy agent-neutral inside the script.
+      agent-native `command` `agentStop` hook that invokes `.github/scripts/hooks/stop-fact-check-gate.sh`.
+      The Copilot config JSON stays in `.github/hooks/` because Copilot CLI's cloud agent only loads
+      `.github/hooks/*.json`; the script itself lives under `.github/scripts/hooks/` for layout symmetry with
+      the other agents.
     - `scripts/sync-agent-context.sh` → `scripts/sync-agent-context.sh`.
 4. Create directories only for managed copies. Do not delete, move, rename, or overwrite unrelated files.
 5. Update references when names change.

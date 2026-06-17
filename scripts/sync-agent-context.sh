@@ -141,7 +141,7 @@ write_codex_hooks_json() {
         "hooks": [
           {
             "type": "command",
-            "command": "HOOK_AGENT=codex /bin/bash \"$(git rev-parse --show-toplevel)/.codex/hooks/stop-fact-check-gate.sh\"",
+            "command": "HOOK_AGENT=codex /bin/bash \"$(git rev-parse --show-toplevel)/.codex/scripts/hooks/stop-fact-check-gate.sh\"",
             "timeout": 30,
             "statusMessage": "Checking final-answer facts"
           }
@@ -167,7 +167,7 @@ write_copilot_hooks_json() {
     "agentStop": [
       {
         "type": "command",
-        "bash": "HOOK_AGENT=copilot .github/hooks/stop-fact-check-gate.sh",
+        "bash": "HOOK_AGENT=copilot .github/scripts/hooks/stop-fact-check-gate.sh",
         "timeoutSec": 30
       }
     ]
@@ -185,19 +185,19 @@ copy_settings_for_agent() {
 
   if [ "$agent" = "claude" ]; then
     copy_file "$source_file" "$target_file"
-    copy_file "$SOURCE/.claude/scripts/hooks/stop-fact-check-gate.sh" "$TARGET/.claude/hooks/stop-fact-check-gate.sh"
+    copy_file "$SOURCE/.claude/scripts/hooks/stop-fact-check-gate.sh" "$TARGET/.claude/scripts/hooks/stop-fact-check-gate.sh"
     return
   fi
 
   if [ "$agent" = "codex" ]; then
     write_codex_hooks_json "$target_file"
-    copy_file "$SOURCE/.claude/scripts/hooks/stop-fact-check-gate.sh" "$TARGET/.codex/hooks/stop-fact-check-gate.sh"
+    copy_file "$SOURCE/.claude/scripts/hooks/stop-fact-check-gate.sh" "$TARGET/.codex/scripts/hooks/stop-fact-check-gate.sh"
     return
   fi
 
   if [ "$agent" = "copilot" ]; then
     write_copilot_hooks_json "$target_file"
-    copy_file "$SOURCE/.claude/scripts/hooks/stop-fact-check-gate.sh" "$TARGET/.github/hooks/stop-fact-check-gate.sh"
+    copy_file "$SOURCE/.claude/scripts/hooks/stop-fact-check-gate.sh" "$TARGET/.github/scripts/hooks/stop-fact-check-gate.sh"
     return
   fi
 }
@@ -323,14 +323,14 @@ if [ "$SKIP_REPOSITORY" -eq 0 ]; then
 
   if [ "$DRY_RUN" -eq 0 ]; then
     chmod +x "$TARGET/scripts/sync-agent-context.sh"
-    if [ "$AGENT" = "claude" ] && [ -f "$TARGET/.claude/hooks/stop-fact-check-gate.sh" ]; then
-      chmod +x "$TARGET/.claude/hooks/stop-fact-check-gate.sh"
+    if [ "$AGENT" = "claude" ] && [ -f "$TARGET/.claude/scripts/hooks/stop-fact-check-gate.sh" ]; then
+      chmod +x "$TARGET/.claude/scripts/hooks/stop-fact-check-gate.sh"
     fi
-    if [ "$AGENT" = "codex" ] && [ -f "$TARGET/.codex/hooks/stop-fact-check-gate.sh" ]; then
-      chmod +x "$TARGET/.codex/hooks/stop-fact-check-gate.sh"
+    if [ "$AGENT" = "codex" ] && [ -f "$TARGET/.codex/scripts/hooks/stop-fact-check-gate.sh" ]; then
+      chmod +x "$TARGET/.codex/scripts/hooks/stop-fact-check-gate.sh"
     fi
-    if [ "$AGENT" = "copilot" ] && [ -f "$TARGET/.github/hooks/stop-fact-check-gate.sh" ]; then
-      chmod +x "$TARGET/.github/hooks/stop-fact-check-gate.sh"
+    if [ "$AGENT" = "copilot" ] && [ -f "$TARGET/.github/scripts/hooks/stop-fact-check-gate.sh" ]; then
+      chmod +x "$TARGET/.github/scripts/hooks/stop-fact-check-gate.sh"
     fi
   fi
 fi

@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "HOOK_AGENT=claude \"${CLAUDE_PROJECT_DIR}/.claude/hooks/stop-fact-check-gate.sh\"",
+            "command": "HOOK_AGENT=claude \"${CLAUDE_PROJECT_DIR}/.claude/scripts/hooks/stop-fact-check-gate.sh\"",
             "timeout": 30
           }
         ]
