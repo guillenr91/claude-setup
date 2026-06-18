@@ -31,6 +31,8 @@ Before generating or reviewing work in a domain covered by `.claude/styles/`, re
 
 - Java code → [JAVA.md](.claude/styles/JAVA.md)
 - Postman collections, requests, environments, scripts → [POSTMAN.md](.claude/styles/POSTMAN.md)
+- Workflow diagrams, architecture diagrams, any visual documentation →
+  [DIAGRAMS.md](.claude/styles/DIAGRAMS.md)
 - Any other domain with a Markdown file in `.claude/styles/` → that file.
 
 ## Dependency changes
