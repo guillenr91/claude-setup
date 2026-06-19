@@ -128,80 +128,6 @@ copy_tree() {
   done
 }
 
-write_codex_hooks_json() {
-  local target_file="$1"
-  local tmp_file
-
-  tmp_file="$(mktemp)"
-  cat > "$tmp_file" <<'JSON'
-{
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "HOOK_AGENT=codex /bin/bash \"$(git rev-parse --show-toplevel)/.codex/scripts/hooks/stop-fact-check-gate.sh\"",
-            "timeout": 30,
-            "statusMessage": "Checking final-answer facts"
-          }
-        ]
-      }
-    ]
-  }
-}
-JSON
-  copy_file "$tmp_file" "$target_file" "generated Codex hooks.json"
-  rm -f "$tmp_file"
-}
-
-write_copilot_hooks_json() {
-  local target_file="$1"
-  local tmp_file
-
-  tmp_file="$(mktemp)"
-  cat > "$tmp_file" <<'JSON'
-{
-  "version": 1,
-  "hooks": {
-    "agentStop": [
-      {
-        "type": "command",
-        "bash": "HOOK_AGENT=copilot .github/scripts/hooks/stop-fact-check-gate.sh",
-        "timeoutSec": 30
-      }
-    ]
-  }
-}
-JSON
-  copy_file "$tmp_file" "$target_file" "generated Copilot hooks json"
-  rm -f "$tmp_file"
-}
-
-copy_settings_for_agent() {
-  local source_file="$1"
-  local target_file="$2"
-  local agent="$3"
-
-  if [ "$agent" = "claude" ]; then
-    copy_file "$source_file" "$target_file"
-    copy_file "$SOURCE/.claude/scripts/hooks/stop-fact-check-gate.sh" "$TARGET/.claude/scripts/hooks/stop-fact-check-gate.sh"
-    return
-  fi
-
-  if [ "$agent" = "codex" ]; then
-    write_codex_hooks_json "$target_file"
-    copy_file "$SOURCE/.claude/scripts/hooks/stop-fact-check-gate.sh" "$TARGET/.codex/scripts/hooks/stop-fact-check-gate.sh"
-    return
-  fi
-
-  if [ "$agent" = "copilot" ]; then
-    write_copilot_hooks_json "$target_file"
-    copy_file "$SOURCE/.claude/scripts/hooks/stop-fact-check-gate.sh" "$TARGET/.github/scripts/hooks/stop-fact-check-gate.sh"
-    return
-  fi
-}
-
 SOURCE=""
 AGENT=""
 TARGET="$PWD"
@@ -279,7 +205,6 @@ case "$AGENT" in
     GLOBAL_TARGET="$HOME/.claude/CLAUDE.md"
     ROOT_TARGET="$TARGET/CLAUDE.md"
     CONTEXT_TARGET="$TARGET/.claude/context"
-    SETTINGS_TARGET="$TARGET/.claude/settings.json"
     SKILLS_TARGET="$TARGET/.claude/skills"
     STYLES_TARGET="$TARGET/.claude/styles"
     TARGET_DOC_DIR=".claude"
@@ -289,7 +214,6 @@ case "$AGENT" in
     GLOBAL_TARGET="$HOME/.codex/AGENTS.md"
     ROOT_TARGET="$TARGET/AGENTS.md"
     CONTEXT_TARGET="$TARGET/.codex/context"
-    SETTINGS_TARGET="$TARGET/.codex/hooks.json"
     SKILLS_TARGET="$TARGET/.codex/skills"
     STYLES_TARGET="$TARGET/.codex/styles"
     TARGET_DOC_DIR=".codex"
@@ -299,7 +223,6 @@ case "$AGENT" in
     GLOBAL_TARGET="$HOME/.copilot/copilot-instructions.md"
     ROOT_TARGET="$TARGET/AGENTS.md"
     CONTEXT_TARGET="$TARGET/.agents/context"
-    SETTINGS_TARGET="$TARGET/.github/hooks/stop-fact-check-gate.json"
     SKILLS_TARGET="$TARGET/.agents/skills"
     STYLES_TARGET="$TARGET/.agents/styles"
     TARGET_DOC_DIR=".agents"
@@ -314,23 +237,11 @@ fi
 if [ "$SKIP_REPOSITORY" -eq 0 ]; then
   copy_agent_file "$SOURCE/CLAUDE.md" "$ROOT_TARGET" "$RENAME_CLAUDE_FILES" "$TARGET_DOC_DIR"
   copy_tree "$SOURCE/.claude/context" "$CONTEXT_TARGET" "$RENAME_CLAUDE_FILES" "$RENAME_CLAUDE_FILES" "$TARGET_DOC_DIR"
-  if [ -f "$SOURCE/.claude/settings.json" ]; then
-    copy_settings_for_agent "$SOURCE/.claude/settings.json" "$SETTINGS_TARGET" "$AGENT"
-  fi
   copy_tree "$SOURCE/.claude/skills" "$SKILLS_TARGET" "$RENAME_CLAUDE_FILES" "$RENAME_CLAUDE_FILES" "$TARGET_DOC_DIR"
   copy_tree "$SOURCE/.claude/styles" "$STYLES_TARGET" "$RENAME_CLAUDE_FILES" "$RENAME_CLAUDE_FILES" "$TARGET_DOC_DIR"
   copy_file "$SOURCE/scripts/sync-agent-context.sh" "$TARGET/scripts/sync-agent-context.sh"
 
   if [ "$DRY_RUN" -eq 0 ]; then
     chmod +x "$TARGET/scripts/sync-agent-context.sh"
-    if [ "$AGENT" = "claude" ] && [ -f "$TARGET/.claude/scripts/hooks/stop-fact-check-gate.sh" ]; then
-      chmod +x "$TARGET/.claude/scripts/hooks/stop-fact-check-gate.sh"
-    fi
-    if [ "$AGENT" = "codex" ] && [ -f "$TARGET/.codex/scripts/hooks/stop-fact-check-gate.sh" ]; then
-      chmod +x "$TARGET/.codex/scripts/hooks/stop-fact-check-gate.sh"
-    fi
-    if [ "$AGENT" = "copilot" ] && [ -f "$TARGET/.github/scripts/hooks/stop-fact-check-gate.sh" ]; then
-      chmod +x "$TARGET/.github/scripts/hooks/stop-fact-check-gate.sh"
-    fi
   fi
 fi

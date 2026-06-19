@@ -75,24 +75,21 @@ flattery. No hedging. No reassurance padding. Never use emojis.
 Run before reading repository-local context, style guides, skills, or workflow rules.
 
 Managed source files (canonical source only): `GLOBAL.md`, `CLAUDE.md`, `.claude/context/CLAUDE.md`,
-`.claude/settings.json`, `.claude/scripts/hooks/**`, `.claude/skills/**`, `.claude/styles/**`,
-`scripts/sync-agent-context.sh`.
+`.claude/skills/**`, `.claude/styles/**`, `scripts/sync-agent-context.sh`.
 
-Managed targets per agent — each line lists: global instructions | repo root | repo context | repo hooks |
-repo skills | repo styles.
+Managed targets per agent — each line lists: global instructions | repo root | repo context | repo skills |
+repo styles.
 
-- Claude: `~/.claude/CLAUDE.md` | `CLAUDE.md` | `.claude/context/CLAUDE.md` | `.claude/settings.json` and
-  `.claude/scripts/hooks/stop-fact-check-gate.sh` | `.claude/skills/**` | `.claude/styles/**`
-- Codex: `~/.codex/AGENTS.md` | `AGENTS.md` | `.codex/context/AGENTS.md` | `.codex/hooks.json` and
-  `.codex/scripts/hooks/stop-fact-check-gate.sh` | `.codex/skills/**` | `.codex/styles/**`
+- Claude: `~/.claude/CLAUDE.md` | `CLAUDE.md` | `.claude/context/CLAUDE.md` | `.claude/skills/**` |
+  `.claude/styles/**`
+- Codex: `~/.codex/AGENTS.md` | `AGENTS.md` | `.codex/context/AGENTS.md` | `.codex/skills/**` |
+  `.codex/styles/**`
 - Copilot CLI: `$HOME/.copilot/copilot-instructions.md` | `AGENTS.md` | `.agents/context/AGENTS.md` |
-  `.github/hooks/stop-fact-check-gate.json` and `.github/scripts/hooks/stop-fact-check-gate.sh` |
   `.agents/skills/**` | `.agents/styles/**`
 
-For Codex, `.codex/context/`, `.codex/skills/`, and `.codex/styles/` are managed project-local support docs. Codex
-hook discovery uses `.codex/hooks.json` or inline `[hooks]` in `.codex/config.toml`. For Copilot CLI,
-`.agents/context/`, `.agents/skills/`, and `.agents/styles/` are support docs. Copilot hook discovery uses
-`.github/hooks/*.json`. The root `AGENTS.md` must route agents to these support docs.
+For Codex, `.codex/context/`, `.codex/skills/`, and `.codex/styles/` are managed project-local support docs. For
+Copilot CLI, `.agents/context/`, `.agents/skills/`, and `.agents/styles/` are support docs. The root `AGENTS.md`
+must route agents to these support docs.
 
 Sync is required when: the managed global target is missing, empty, or older than one week; the repo root file is
 missing, empty, or older than one week; a managed repo target directory is missing or empty; a managed source file has
@@ -114,36 +111,13 @@ Process:
     - `CLAUDE.md` → the agent's repo root (see list above).
     - `.claude/context/`, `.claude/skills/`, `.claude/styles/` → keep as-is for Claude; rename `.claude/` →
       `.codex/` for Codex and `.claude/` → `.agents/` for Copilot CLI.
-    - Hook layout convention: every agent ships the shared hook script under its own
-      `<agent-dir>/scripts/hooks/stop-fact-check-gate.sh` — `.claude/scripts/hooks/...` for Claude,
-      `.codex/scripts/hooks/...` for Codex, `.github/scripts/hooks/...` for Copilot CLI. Each agent's runtime hook
-      config invokes that path. Hook policy must stay agent-agnostic; convert only the runtime adapter — schema,
-      handler type, and response format.
-    - `.claude/settings.json` → `.claude/settings.json` for Claude as a `command` Stop hook that invokes
-      `.claude/scripts/hooks/stop-fact-check-gate.sh`.
-    - `.claude/scripts/hooks/stop-fact-check-gate.sh` → `.codex/scripts/hooks/stop-fact-check-gate.sh` for Codex.
-      Keep the policy agent-neutral inside the script. Keep the Codex allow path silent unless a Codex-specific
-      block/continue output contract has been verified.
-    - `.claude/settings.json` → `.codex/hooks.json` for Codex by generating an agent-native `command` Stop hook
-      that invokes `.codex/scripts/hooks/stop-fact-check-gate.sh`. Do not copy Claude `prompt` or `agent` hook
-      handlers directly because Codex parses but skips those handler types.
-    - `.claude/scripts/hooks/stop-fact-check-gate.sh` → `.github/scripts/hooks/stop-fact-check-gate.sh` for
-      Copilot CLI. Keep the policy agent-neutral inside the script.
-    - `.claude/settings.json` → `.github/hooks/stop-fact-check-gate.json` for Copilot CLI by generating an
-      agent-native `command` `agentStop` hook that invokes `.github/scripts/hooks/stop-fact-check-gate.sh`.
-      The Copilot config JSON stays in `.github/hooks/` because Copilot CLI's cloud agent only loads
-      `.github/hooks/*.json`; the script itself lives under `.github/scripts/hooks/` for layout symmetry with
-      the other agents.
     - `scripts/sync-agent-context.sh` → `scripts/sync-agent-context.sh`.
 4. Create directories only for managed copies. Do not delete, move, rename, or overwrite unrelated files.
 5. Update references when names change.
 6. Keep repo-local root instruction files focused on repo-local concerns (context routing, style routing, dependency
    policy, commit conventions, review). Do not duplicate global behavior or tone sections.
 7. After sync, follow the repo-local root file for context and style routing.
-8. Verify migrated hook files when possible: parse generated JSON, confirm hook scripts are executable, and run the
-   shared hook script with sample Stop input. Actual Codex hook execution also requires a trusted project `.codex`
-   layer. Actual Copilot hook execution also requires valid Copilot or GitHub authentication.
-9. Report which managed files were created, replaced, skipped as current, or migrated.
+8. Report which managed files were created, replaced, skipped as current, or migrated.
 
 GitHub Copilot also supports `.github/copilot-instructions.md` and `.github/instructions/**/*.instructions.md` for
 GitHub.com and code-review surfaces. Those are not managed by this sync unless the user explicitly asks for that
