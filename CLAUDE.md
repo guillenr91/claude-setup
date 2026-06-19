@@ -5,8 +5,11 @@ Loaded into context. Keep concise, explicit, and actionable for AI agents. No de
 
 ## Context routing
 
-Before answering or acting, read [.claude/context/CLAUDE.md](.claude/context/CLAUDE.md) and use it to choose which
-project context files to load.
+When the task could touch project-specific context — building, running, debugging, editing repo code, env vars,
+deployment, integrations, schemas, or any answer that depends on what is in this repo — read
+[.claude/context/CLAUDE.md](.claude/context/CLAUDE.md) before acting and use it to choose which project context
+files to load. For purely conversational, meta, or instruction-file turns that do not touch project code, you may
+skip it.
 
 Keep this file portable: route only to `SETUP.md` and `TECHNICAL.md`. Project-specific runbooks (env, deployment, etc.)
 should be referenced from `SETUP.md` or `TECHNICAL.md` instead.
@@ -79,9 +82,13 @@ For ticket-specific conventions beyond these, see the ticket skill when it exist
 Applies to every code review — pre-commit, pre-PR, reviewing someone else's PR, or ad-hoc analysis of pending
 changes. The two subsections below specialise this rule to specific triggers; the rule itself lives here.
 
-1. Run every code review capability available. Use every coding tool at your disposal — built-in tools, subagents,
-   any code-review skills present in the session, language-specific linters and type checkers, and any
-   project-specific verification scripts.
+1. Match review breadth to change scope. For non-trivial changes — anything that touches code that runs at
+   runtime, tests, build, infra, public APIs, security, data, or auth — run every code review capability
+   available. Use every coding tool at your disposal: built-in tools, subagents, any code-review skills present
+   in the session, language-specific linters and type checkers, and any project-specific verification scripts.
+   For trivial changes (typo fixes in comments or docs, formatting-only edits, comment-only edits, dead-link
+   updates, version bumps in non-runtime config) run a proportional subset and state in the review summary
+   what was skipped and why. When in doubt, treat the change as non-trivial.
 2. Use the highest effort level the task warrants. Default to higher effort when the change touches security,
    data, auth, public APIs, or shared infrastructure.
 3. Triage every finding: apply the fix, or record an explicit skip reason (false positive, out of scope, conflicts
@@ -97,6 +104,39 @@ when only drafting a commit message or PR description without executing the comm
 
 When triggered, apply the rules in `## Code review effort` above to the pending changes — every time, even when
 the change feels small.
+
+## GitHub write actions: draft-first gate
+
+Applies to every action that creates or modifies content visible on GitHub: opening a PR (`gh pr create`), editing
+a PR title or description (`gh pr edit`), submitting a PR review or any inline review comment (`gh api` POSTs to
+`pulls/.../reviews` or `pulls/.../comments`), replying to existing PR review comments (top-level or threaded), and
+creating or commenting on issues. Local commits are not covered by this gate; existing commit conventions apply
+there.
+
+Never call the relevant API or `gh` write command until the operator has seen the exact draft and explicitly
+approved posting. Cover all of:
+
+1. PR creation: draft the title and full body (Summary, Test plan, any other sections) in chat first. Show the
+   target base branch and head branch. Wait for explicit approval before running `gh pr create`. Same rule for
+   `gh pr edit` against an existing PR title or description.
+2. PR review comments: handled by the drafting workflow under `## PR review feedback`. The gate here applies in
+   addition to that workflow.
+3. PR review replies: when replying to an inline comment thread or a top-level review comment, draft the reply in
+   chat first, show which comment it replies to (file, line, original comment text or ID), and wait for explicit
+   approval before posting. Same rule for replying to issue comments.
+
+Approval rules:
+
+- Approval must be explicit. "Looks good", "go ahead", "post it", "ship it", or equivalent counts. Do not infer
+  approval from silence, from earlier turns, or from prior approvals on different content.
+- Approval of one draft does not extend to later edits. After any non-trivial change to the draft, re-confirm.
+- For PRs, approval of the draft body covers `gh pr create` only if the title, body, base, and head are all
+  unambiguous in the draft. If any of those is missing or ambiguous, confirm separately before posting.
+- For PR reviews, approval of the drafted comments covers the verdict (approve vs. request changes) only if the
+  verdict is unambiguous in the drafts. Otherwise confirm separately.
+
+If the operator rejects a draft or any part of it, drop the rejected piece. Do not post it anyway, and do not
+re-draft a near-duplicate to argue the point.
 
 ## PR review feedback
 
@@ -141,14 +181,9 @@ Tone for review comments:
 
 Posting review comments:
 
-Draft-first gate. Never call the GitHub API to create inline comments, summary comments, or submit a review until
-the operator has seen every drafted comment and explicitly approved posting. Approval of the drafts also covers
-the verdict if it is unambiguous in the drafts; if the verdict (approve vs. request changes) is not explicit,
-confirm it separately before posting. Approval of one batch does not extend to later edits — re-confirm after any
-non-trivial change. "Looks good", "go ahead", "post it", or equivalent counts as approval; do not infer approval
-from silence or from earlier turns.
+Apply the `## GitHub write actions: draft-first gate` section above before any API call.
 
-Drafting workflow:
+Drafting workflow for review comments:
 
 1. Collect every inline finding (code, file, line, suggested fix) and the summary comment in the chat as plain
    text or a structured list before any API call.
