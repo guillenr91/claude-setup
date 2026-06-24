@@ -111,7 +111,7 @@ verify. Those are not hedges; they are accurate labels.
 Run when a sync trigger below fires. Do not run on every turn.
 
 Managed source files (canonical source only): `GLOBAL.md`, `CLAUDE.md`, `.claude/context/CLAUDE.md`,
-`.claude/skills/**`, `.claude/styles/**`, `scripts/sync-agent-context.sh`.
+`.claude/skills/**`, `.claude/styles/**`.
 
 Managed targets per agent — each line lists: global instructions | repo root | repo context | repo skills |
 repo styles.
@@ -149,7 +149,6 @@ Process:
     - `CLAUDE.md` → the agent's repo root (see list above).
     - `.claude/context/`, `.claude/skills/`, `.claude/styles/` → keep as-is for Claude; rename `.claude/` →
       `.codex/` for Codex and `.claude/` → `.agents/` for Copilot CLI.
-    - `scripts/sync-agent-context.sh` → `scripts/sync-agent-context.sh`.
 4. Create directories only for managed copies. Do not delete, move, rename, or overwrite unrelated files.
 5. Update references when names change.
 6. Keep repo-local root instruction files focused on repo-local concerns (context routing, style routing, dependency

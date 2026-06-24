@@ -239,9 +239,4 @@ if [ "$SKIP_REPOSITORY" -eq 0 ]; then
   copy_tree "$SOURCE/.claude/context" "$CONTEXT_TARGET" "$RENAME_CLAUDE_FILES" "$RENAME_CLAUDE_FILES" "$TARGET_DOC_DIR"
   copy_tree "$SOURCE/.claude/skills" "$SKILLS_TARGET" "$RENAME_CLAUDE_FILES" "$RENAME_CLAUDE_FILES" "$TARGET_DOC_DIR"
   copy_tree "$SOURCE/.claude/styles" "$STYLES_TARGET" "$RENAME_CLAUDE_FILES" "$RENAME_CLAUDE_FILES" "$TARGET_DOC_DIR"
-  copy_file "$SOURCE/scripts/sync-agent-context.sh" "$TARGET/scripts/sync-agent-context.sh"
-
-  if [ "$DRY_RUN" -eq 0 ]; then
-    chmod +x "$TARGET/scripts/sync-agent-context.sh"
-  fi
 fi
