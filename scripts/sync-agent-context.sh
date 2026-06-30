@@ -213,10 +213,10 @@ case "$AGENT" in
   codex)
     GLOBAL_TARGET="$HOME/.codex/AGENTS.md"
     ROOT_TARGET="$TARGET/AGENTS.md"
-    CONTEXT_TARGET="$TARGET/.codex/context"
-    SKILLS_TARGET="$TARGET/.codex/skills"
-    STYLES_TARGET="$TARGET/.codex/styles"
-    TARGET_DOC_DIR=".codex"
+    CONTEXT_TARGET="$TARGET/.agents/context"
+    SKILLS_TARGET="$TARGET/.agents/skills"
+    STYLES_TARGET="$TARGET/.agents/styles"
+    TARGET_DOC_DIR=".agents"
     RENAME_CLAUDE_FILES=1
     ;;
   copilot)

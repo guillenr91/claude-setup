@@ -118,14 +118,13 @@ repo styles.
 
 - Claude: `~/.claude/CLAUDE.md` | `CLAUDE.md` | `.claude/context/CLAUDE.md` | `.claude/skills/**` |
   `.claude/styles/**`
-- Codex: `~/.codex/AGENTS.md` | `AGENTS.md` | `.codex/context/AGENTS.md` | `.codex/skills/**` |
-  `.codex/styles/**`
+- Codex: `~/.codex/AGENTS.md` | `AGENTS.md` | `.agents/context/AGENTS.md` | `.agents/skills/**` |
+  `.agents/styles/**`
 - Copilot CLI: `$HOME/.copilot/copilot-instructions.md` | `AGENTS.md` | `.agents/context/AGENTS.md` |
   `.agents/skills/**` | `.agents/styles/**`
 
-For Codex, `.codex/context/`, `.codex/skills/`, and `.codex/styles/` are managed project-local support docs. For
-Copilot CLI, `.agents/context/`, `.agents/skills/`, and `.agents/styles/` are support docs. The root `AGENTS.md`
-must route agents to these support docs.
+For Codex and Copilot CLI, `.agents/context/`, `.agents/skills/`, and `.agents/styles/` are managed project-local
+support docs. The root `AGENTS.md` must route agents to these support docs.
 
 Sync is required when any of these is true and you observe it in the current session: the managed global target
 is missing or empty; the repo root file is missing or empty; a managed repo target directory is missing or empty;
@@ -148,7 +147,7 @@ Process:
     - `GLOBAL.md` → the agent's global target (see list above).
     - `CLAUDE.md` → the agent's repo root (see list above).
     - `.claude/context/`, `.claude/skills/`, `.claude/styles/` → keep as-is for Claude; rename `.claude/` →
-      `.codex/` for Codex and `.claude/` → `.agents/` for Copilot CLI.
+      `.agents/` for Codex and Copilot CLI.
 4. Create directories only for managed copies. Do not delete, move, rename, or overwrite unrelated files.
 5. Update references when names change.
 6. Keep repo-local root instruction files focused on repo-local concerns (context routing, style routing, dependency
