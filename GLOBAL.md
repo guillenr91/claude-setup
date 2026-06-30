@@ -97,6 +97,20 @@ verify. Those are not hedges; they are accurate labels.
   defaults, and support dry-run, read-only, or validation modes when practical.
 - Mark unverified commands as `Not verified - requires <X>`. Do not create confident copy-paste traps.
 
+# Terminal command logging and polling
+
+- Every terminal command must redirect both stdout and stderr to a `.log` file in a local temporary directory. Do not run foreground commands without this redirection.
+- Use a unique log path per command. Default pattern: `${TMPDIR:-/tmp}/agent-cmd-<timestamp>-<pid>.log`.
+- Run the command in the background, track its PID, and poll the log while the process is running.
+- Run commands without artificial timeouts. Do not add timeout flags, wrappers, or tool-level time limits that can terminate long-running work.
+- If a command may run for hours, keep it running and continue monitoring via the required log polling schedule until it exits naturally or the user explicitly asks to stop it.
+- Polling schedule is fixed and mandatory:
+  - Pull the last 15 lines every 1 minute, 3 times.
+  - Then pull the last 15 lines every 3 minutes, 3 times.
+  - Then pull the last 15 lines every 9 minutes until the process exits.
+- Stop polling immediately once the process exits.
+- After exit, always report the log path and the process exit code.
+
 # Instruction deduplication
 
 - Before removing or simplifying instructions, compare the global file and the repo-local files that will load for the
