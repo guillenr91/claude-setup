@@ -164,6 +164,11 @@ When reviewing a PR:
 
 Tone for review comments:
 
+- Voice: write every comment in first person as the operator (the repository owner). Use "I" to refer to the
+  operator, not to yourself. The reviewer agent must be invisible — never say "I (Claude)", "the agent",
+  "from my read as an assistant", or anything that breaks the operator-as-reviewer voice. Example:
+  "I checked the auth middleware and noticed X — could you verify whether…". The drafts shown to the operator
+  for approval use this same voice so the operator can edit before posting.
 - Frame findings as observations to verify, not asserted facts. The reviewer's context is incomplete; the author
   has context the reviewer doesn't. Write comments that invite verification rather than declare verdicts.
 - Use phrasing like "I want to flag a scenario I couldn't verify on my side", "could you verify whether…",
@@ -194,21 +199,69 @@ Drafting workflow for review comments:
 
 After approval:
 
-1. Post inline comments FIRST on specific code lines for each finding. Use the GitHub API to create review comments
-   with the exact diff position. To find the position, use this command template, replacing `<PR>` with the PR number
+All inline comments and the summary MUST be posted as a single grouped GitHub review — one `POST` to
+`/repos/{owner}/{repo}/pulls/{pull_number}/reviews` that embeds every inline comment in the `comments` array
+and includes the summary in `body` and the verdict in `event`. Do not call
+`/repos/{owner}/{repo}/pulls/{pull_number}/comments` per finding; that creates ungrouped top-level review
+comments instead of a single review.
+
+Endpoint and payload schema, verified against the GitHub REST docs for "Create a review for a pull request":
+
+- Method and path: `POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews`.
+- Top-level fields: `body` (string), `event` (string), `comments` (array of objects), `commit_id` (string,
+  optional — pins the review to a specific commit SHA; omit to use the latest commit on the PR head).
+- `event` accepts one of: `APPROVE`, `REQUEST_CHANGES`, `COMMENT`. Omitting `event` creates a `PENDING` review
+  that must be submitted later; do not omit it for a normal review submission.
+- `body` (top level) is required when `event` is `REQUEST_CHANGES` or `COMMENT`. It may be omitted for `APPROVE`,
+  but include it anyway so the verdict carries the summary.
+- Each entry in `comments[]` requires `path` and `body`. Positioning fields:
+    - `line` (integer) — the file line in the diff to attach the comment to. For multi-line comments, this is
+      the last line of the range.
+    - `side` (string) — `RIGHT` for additions or unchanged context lines (green or white in the diff), `LEFT`
+      for deletions (red in the diff).
+    - `start_line` and `start_side` — required together for multi-line comments (unless using `in_reply_to`).
+      `start_line` is the first line of the range; `start_side` is `LEFT` or `RIGHT`.
+    - `position` (integer) — diff-hunk position, not the file line. GitHub docs mark `position` as closing down
+      and direct callers to use `line` instead. Treat `position` as a fallback only; do not use it for new code.
+
+Drafting and submission steps:
+
+1. Build one review payload with every finding embedded in the `comments` array.
+2. Position each `comments[]` entry with `line` + `side`. Use `RIGHT` for findings on additions or unchanged
+   context lines and `LEFT` for findings on deletions. For multi-line comments, set `start_line` + `start_side`
+   together in addition to `line` + `side`. Reach for `position` only as a fallback when `line` cannot target
+   the intended location; to compute `position`, use this command template — replace `<PR>` with the PR number
    or URL and `<unique text>` with exact changed-line text:
    ```bash
    gh pr diff "<PR>" --patch | grep -n "<unique text>"
    ```
    Use the returned line number as the `position` parameter.
-2. Every inline comment MUST include a code suggestion when a fix is possible. Use GitHub's suggestion block format:
+3. Every inline comment in the `comments` array MUST include a code suggestion when a fix is possible. Use
+   GitHub's suggestion block format inside the comment `body`:
    ```suggestion
    // corrected code here
    ```
    This allows the author to apply the fix with one click. Only omit suggestions for observations that have no
    concrete fix (e.g., questions, design discussions, or findings that require broader refactoring).
-3. Post ONE general summary comment LAST with the approval or request-changes verdict. This summary should:
+4. Set `body` on the review object to the summary, which must:
     - List what was verified (claims tested, tests run, code paths checked).
-    - Briefly reference the inline comments already posted (do not repeat full details).
+    - Briefly reference the inline findings included in this review (do not repeat full details).
     - State the overall verdict and reasoning.
-4. Never post only a general comment without inline comments when there are specific code-level findings.
+5. Set `event` to `APPROVE`, `REQUEST_CHANGES`, or `COMMENT` based on the approved verdict.
+6. Submit the review with one API call. Example template; replace `<owner>`, `<repo>`, `<pull_number>`, and the
+   payload contents:
+   ```bash
+   gh api -X POST "/repos/<owner>/<repo>/pulls/<pull_number>/reviews" \
+     --input - <<'JSON'
+   {
+     "body": "<summary>",
+     "event": "<APPROVE|REQUEST_CHANGES|COMMENT>",
+     "comments": [
+       { "path": "<file>", "line": <n>, "side": "RIGHT", "body": "<inline body with optional suggestion block>" }
+     ]
+   }
+   JSON
+   ```
+7. Never post only a summary review without inline comments when there are specific code-level findings.
+8. If the review requires a reply to an existing comment thread rather than a new top-level finding, that reply
+   is governed by the `## GitHub write actions: draft-first gate` section above and is a separate posting step.
