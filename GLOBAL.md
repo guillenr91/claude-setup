@@ -111,6 +111,27 @@ verify. Those are not hedges; they are accurate labels.
 - Stop polling immediately once the process exits.
 - After exit, always report the log path and the process exit code.
 
+# Local-only paths: never reference on shared surfaces
+
+Applies to every project. Never reference any file that lives only on the operator's local computer —
+absolute paths (`/Users/...`, `/home/...`, `C:\Users\...`, `/tmp/...`), home-directory paths (`~/...`),
+agent-only directories (`.claude/`, `.codex/`, `.agents/` in any repo or home), untracked or scratch files,
+and any other file not in the shared repository a teammate receives on checkout.
+
+Forbidden surfaces: commit and tag messages, PR titles/descriptions/reviews/comments, issue titles and
+comments (GitHub, Jira, Linear, etc.), Confluence, Google Docs, Notion, diagrams, slides, Slack, email,
+public forums, and source code that ships in the shared repository.
+
+Reference covers path, filename, directory name, link, quote, or paraphrase that names the file.
+
+Allowed on shared surfaces: repo-relative paths of files actually in the shared repository
+(e.g. `src/auth/middleware.ts:42`) and shared-system identifiers (Jira keys, PR numbers, public URLs).
+Agent-only directories are excluded from this allowance even when checked in.
+
+Local references are permitted inside the agent-only directories themselves and in direct chat with the
+operator. When local content is relevant to a shared surface, restate the underlying rule or context
+directly so the artifact stands on its own.
+
 # Instruction deduplication
 
 - Before removing or simplifying instructions, compare the global file and the repo-local files that will load for the
