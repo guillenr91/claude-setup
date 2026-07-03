@@ -123,6 +123,11 @@ When reviewing a PR:
 - Prefix every comment title with an uppercase category in brackets: `[BUG]`, `[SECURITY]`, `[TEST]`, `[DOCS]`,
   `[MAINTAINABILITY]`. Use `[LEGACY BUG]` for pre-existing issues — note them, but they don't block approval unless
   the PR makes them worse.
+- Start every inline comment with a brief title line, then a blank line, then the body. The title must include the
+  category prefix and summarize the issue in one short sentence.
+- Start every summary review body with a brief title line, then a blank line, then the body. The summary title must
+  not include a category prefix. It should state the review verdict, such as `Approved`, `Approved with comments`,
+  `Requesting changes`, or `Commenting for visibility`.
 - Each comment must be actionable: state what you observed, explain why it matters, and offer a path forward. The
   developer should be able to resolve the comment without further clarification.
 - Do not call a change unsafe, broken, or workflow-impacting unless the evidence supports that severity.
@@ -145,8 +150,8 @@ Tone for review comments:
 - Suggestions are offers, not orders. "Would you consider…", "up to you — happy to keep it inline if you prefer
   minimal churn" is fine for non-blocking polish. Reserve direct imperative phrasing for issues you have evidence
   for.
-- Keep the category prefix (`[BUG]`, `[TEST]`, etc.) — the prefix signals severity; the body should still
-  invite verification rather than declare it.
+- Keep the category prefix (`[BUG]`, `[TEST]`, etc.) on inline comments — the prefix signals severity; the body should
+  still invite verification rather than declare it.
 - The category does not have to match certainty. A `[BUG]` comment can still open with "possible issue —
   could you verify?". Severity describes potential impact; tone describes confidence.
 
@@ -209,12 +214,15 @@ Drafting and submission steps:
    ```
    This allows the author to apply the fix with one click. Only omit suggestions for observations that have no
    concrete fix (e.g., questions, design discussions, or findings that require broader refactoring).
-4. Set `body` on the review object to the summary, which must:
+4. Preserve Markdown newlines exactly when constructing the API payload. Do not encode newlines manually as literal
+   `\n` text inside shell strings. Build the body from a real multiline source, such as a temporary Markdown file read
+   with `jq --rawfile`, or another method that proves the JSON string contains actual newline characters.
+5. Set `body` on the review object to the summary, which must:
     - List what was verified (claims tested, tests run, code paths checked).
     - Briefly reference the inline findings included in this review (do not repeat full details).
     - State the overall verdict and reasoning.
-5. Set `event` to `APPROVE`, `REQUEST_CHANGES`, or `COMMENT` based on the approved verdict.
-6. Submit the review with one API call. Example template; replace `<owner>`, `<repo>`, `<pull_number>`, and the
+6. Set `event` to `APPROVE`, `REQUEST_CHANGES`, or `COMMENT` based on the approved verdict.
+7. Submit the review with one API call. Example template; replace `<owner>`, `<repo>`, `<pull_number>`, and the
    payload contents:
    ```bash
    gh api -X POST "/repos/<owner>/<repo>/pulls/<pull_number>/reviews" \
@@ -228,6 +236,10 @@ Drafting and submission steps:
    }
    JSON
    ```
-7. Never post only a summary review without inline comments when there are specific code-level findings.
-8. If the review requires a reply to an existing comment thread rather than a new top-level finding, that reply
+8. After posting or editing GitHub-visible Markdown, fetch the created or edited review/comment body and verify it
+   renders from real Markdown line breaks. Check that the stored body does not contain literal `\n` sequences unless
+   they are intentionally part of code text. If formatting is wrong, draft the exact correction, get approval for the
+   edit, and patch the comment.
+9. Never post only a summary review without inline comments when there are specific code-level findings.
+10. If the review requires a reply to an existing comment thread rather than a new top-level finding, that reply
    is governed by the `## GitHub write actions: draft-first gate` section above and is a separate posting step.
