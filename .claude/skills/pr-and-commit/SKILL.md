@@ -120,9 +120,13 @@ When reviewing a PR:
   likely to harm a workflow. Edge cases, hardening, polish, doc gaps, and low-risk maintainability are non-blocking
   unless evidence shows they break a supported workflow. For additive PRs that don't break existing behavior, state
   the risk plainly and say whether it should block.
-- Prefix every comment title with an uppercase category in brackets: `[BUG]`, `[SECURITY]`, `[TEST]`, `[DOCS]`,
-  `[MAINTAINABILITY]`. Use `[LEGACY BUG]` for pre-existing issues — note them, but they don't block approval unless
-  the PR makes them worse.
+- Prefix every comment title with an uppercase category in brackets: `[BUG]`, `[POSSIBLE ISSUE]`, `[SECURITY]`,
+  `[TEST]`, `[DOCS]`, `[MAINTAINABILITY]`. Use `[LEGACY BUG]` for pre-existing issues — note them, but they don't
+  block approval unless the PR makes them worse.
+- Use `[BUG]` only when the issue has been VERIFIED in-session to block existing or new code (reproduced, traced
+  through the code path, or confirmed by test output). If the issue is a plausible defect you have not verified
+  blocks a workflow, use `[POSSIBLE ISSUE]` instead — it reflects that the concern is unverified. Do not upgrade
+  `[POSSIBLE ISSUE]` to `[BUG]` on suspicion alone.
 - Start every inline comment with a brief title line, then a blank line, then the body. The title must include the
   category prefix and summarize the issue in one short sentence.
 - Start every summary review body with a brief title line, then a blank line, then the body. The summary title must
@@ -150,10 +154,11 @@ Tone for review comments:
 - Suggestions are offers, not orders. "Would you consider…", "up to you — happy to keep it inline if you prefer
   minimal churn" is fine for non-blocking polish. Reserve direct imperative phrasing for issues you have evidence
   for.
-- Keep the category prefix (`[BUG]`, `[TEST]`, etc.) on inline comments — the prefix signals severity; the body should
-  still invite verification rather than declare it.
-- The category does not have to match certainty. A `[BUG]` comment can still open with "possible issue —
-  could you verify?". Severity describes potential impact; tone describes confidence.
+- Keep the category prefix (`[BUG]`, `[POSSIBLE ISSUE]`, `[TEST]`, etc.) on inline comments — the prefix signals
+  severity AND verification state; the body should still invite verification rather than declare it.
+- The category encodes verification. `[BUG]` means verified-blocking; `[POSSIBLE ISSUE]` means unverified. If you
+  cannot reproduce or trace the failure in-session, the correct prefix is `[POSSIBLE ISSUE]`, not `[BUG]` softened
+  with hedging language.
 
 Posting review comments:
 
