@@ -260,3 +260,88 @@ Do: Use this structure:
 </mxfile>
 ```
 Do: Set `pages="N"` in the `<mxfile>` tag to match the number of diagram pages.
+
+### Rule: Always declare `whiteSpace=wrap;html=1` on text-carrying cells
+
+Trigger: Any `mxCell` whose `value` contains prose or inline `<font>` spans.
+Do: Include `whiteSpace=wrap;html=1;` in the `style` attribute.
+Do not: Rely on drawio's implicit wrapping. Without an explicit `whiteSpace=wrap`, long lines render
+as a single line and overflow the shape border.
+
+### Rule: Edit `.drawio` files as raw XML text, not through an XML DOM writer
+
+Trigger: Programmatically updating an existing `.drawio` file's cell values or attributes.
+Do: Use text substitution (regex or string replace) on the raw file bytes, and write cell values with
+single-level XML escaping — `&lt;`, `&gt;`, `&amp;`, `&apos;`, `&quot;`, `&#xa;`.
+Do not: Use a DOM library's `element.set('value', '<font ...>text</font>')` — most DOM writers will
+re-escape special characters and produce `&amp;lt;font&amp;gt;`, which drawio then renders as literal
+`<font>` text visible on the diagram.
+
+Verification: after any programmatic edit, `grep 'value="[^"]*&amp;lt;'` in the file — that pattern
+should have zero hits.
+
+### Rule: Size containers from their children, not from their own value
+
+Trigger: Sizing a group wrapper, a legend box, or any cell whose content is other cells rather than
+its own `value` text.
+Do: Compute the container's height as `sum(child heights) + spacing + padding`.
+Do not: Apply a "tight-fit to text" heuristic to a container whose `value` is just its label
+(e.g. `"Legend"`, `""`) — that will collapse the container and hide its children.
+
+Marker: cells with `style="group"` or with children referencing them as `parent="..."` are containers.
+
+### Rule: Compute available height from the cell's declared spacing, not a fixed budget
+
+Trigger: Writing an overflow-detection script or auto-sizing loop.
+Do: Parse `spacingLeft`, `spacingRight`, `spacingTop`, `spacingBottom` (falling back to `spacing`) from
+the cell's `style` attribute, and subtract those exact values from `width` and `height`.
+Do not: Subtract a flat "20px for spacing" — cells without any `spacing*=` declaration have zero
+spacing budget, and a flat deduction produces false-positive overflow reports.
+
+### Rule: Add a small cushion above the computed tight-fit height
+
+Trigger: Auto-sizing a text cell to fit its content.
+Do: Compute `rendered_line_count * font_size * 1.35 + spacing_top + spacing_bottom`, then add ~6 px.
+Do not: Set the height to the exact computed value — drawio's real renderer varies slightly by
+platform and font-metric availability, and an exact-fit height clips descenders in some environments.
+
+### Rule: Give minimum-height rows to single-line labels
+
+Trigger: A legend row, section header, or small workflow shape carrying one line of text.
+Do: Use ≥ 40px height for a plain-text row at `fontSize=12`, ≥ 44px if the label contains inline
+`Courier New` at `font-size:14`. Vertically center any adjacent color swatch or icon.
+Do not: Rely on the shape height matching the font metric exactly — 24-30px rows fail strict
+line-height estimators and can render with the label kissing the border.
+
+### Rule: When removing a workflow node, remove or re-target its connectors
+
+Trigger: Deleting an `mxCell` that participates in edges.
+Do: Iterate every `mxCell` with `edge="1"` and check its `source` and `target` attributes. Delete
+edges whose endpoints reference the removed cell, or re-target them to a valid replacement.
+Do not: Delete only the node — dangling edges remain in the file and render as arrows to nothing.
+
+### Rule: Every non-edge cell needs both `width` and `height`
+
+Trigger: Creating a group wrapper, container, or any `vertex="1"` cell.
+Do: Set `<mxGeometry width="..." height="..." as="geometry" />` explicitly.
+Do not: Omit either dimension. A cell with missing width or height silently renders at zero size
+and vanishes.
+
+### Rule: Preserve user edits during programmatic rewrites
+
+Trigger: Editing a `.drawio` file the user has previously opened and saved in the diagrams.net app.
+Do: Target only the specific cell values or attributes you need to change (regex on the raw file, or
+`.attrib['x'] = str(new_x)` on the specific cell). Preserve viewport values (`dx`, `dy` on
+`mxGraphModel`), user-added group wrappers with random hex IDs, connector waypoints
+(`entryX/entryY/exitX/exitY`, `<Array as="points">`), and any style overrides that weren't in your
+original file.
+Do not: Regenerate the file from a template. If you must, first diff your generated file against the
+user-edited file and surface the removed elements for confirmation before overwriting.
+
+### Rule: Re-run the tight-fit pass after every content edit
+
+Trigger: Changing any `value` attribute of a text cell.
+Do: Immediately recompute that cell's tight-fit height using the spacing-aware formula above, and
+update the `height` attribute in the same edit.
+Do not: Assume a previous height still fits. Prose edits change wrap count, and a shape that fit its
+old value can trivially overflow its new value.
