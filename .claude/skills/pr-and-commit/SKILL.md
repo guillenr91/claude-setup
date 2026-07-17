@@ -49,12 +49,12 @@ Applies to every code review — pre-commit, pre-PR, reviewing someone else's PR
 changes. The two subsections below specialise this rule to specific triggers; the rule itself lives here.
 
 1. Match review breadth to change scope. For non-trivial changes — anything that touches code that runs at
-   runtime, tests, build, infra, public APIs, security, data, or auth — run every code review capability
-   available. Use every coding tool at your disposal: built-in tools, subagents, any code-review skills present
-   in the session, language-specific linters and type checkers, and any project-specific verification scripts.
-   For trivial changes (typo fixes in comments or docs, formatting-only edits, comment-only edits, dead-link
-   updates, version bumps in non-runtime config) run a proportional subset and state in the review summary
-   what was skipped and why. When in doubt, treat the change as non-trivial.
+   runtime, tests, build, infra, public APIs, security, data, or auth — first discover the review capabilities
+   available in the current environment, then use every applicable capability. Include available tools, skills,
+   subagents, project scripts, language checks, and local verification commands when they apply. For trivial changes
+   (typo fixes in comments or docs, formatting-only edits, comment-only edits, dead-link updates, version bumps in
+   non-runtime config) run a proportional subset and state in the review summary what was skipped and why. When in
+   doubt, treat the change as non-trivial.
 2. Use the highest effort level the task warrants. Default to higher effort when the change touches security,
    data, auth, public APIs, or shared infrastructure.
 3. Triage every finding: apply the fix, or record an explicit skip reason (false positive, out of scope, conflicts
@@ -110,9 +110,9 @@ The goal of every review comment is to help the developer improve their code or 
 only point out problems without providing a path forward are not useful. Every comment should enable the developer to
 take immediate action.
 
-Apply `## Code review effort` above before posting any feedback: run every code review capability available, use
-every coding tool at your disposal, and use the highest effort level the task warrants. Findings posted as PR
-comments must come from that pass, not from a glance at the diff.
+Apply `## Code review effort` above before posting any feedback: discover the review capabilities available in the
+current environment, use every applicable capability, and use the highest effort level the task warrants. Findings
+posted as PR comments must come from that pass, not from a glance at the diff.
 
 When reviewing a PR:
 
