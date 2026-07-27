@@ -66,6 +66,40 @@ return findUserId(request)
         .orElse(null);
 ```
 
+### Rule: use `Optional.orElseThrow` when a single null check must throw
+
+Trigger: a call may return `null` and the reaction is to log-and-throw a runtime exception.
+
+Do: write it as `Optional.ofNullable(call(...)).orElseThrow(() -> ...)`. Use a block-body lambda so the exception
+factory can log context before returning the exception.
+
+Do not: introduce a local variable followed by `if (value == null) { log(...); throw new ...; }`. That splits one
+guard across three statements and separates the log message from the throw.
+
+Exception: keep the imperative form when several distinct null/state checks apply to the same value and lifting
+one into `Optional` would leave the others behind in imperative form.
+
+```java
+private Response fetchThing(final String id) {
+    try {
+        return Optional.ofNullable(client.get(id))
+                .orElseThrow(() -> {
+                    log.error("Client returned null for id: {} - treating as service failure", id);
+                    return new IllegalStateException("Client returned null for id: " + id);
+                });
+    } catch (RuntimeException e) {
+        log.error("Client call failed for id: {} - downstream service error", id, e);
+        throw e;
+    }
+}
+```
+
+The surrounding `try/catch (RuntimeException e)` still handles thrown exceptions; the `Optional` chain handles
+the `null` return.
+
+Related: "Rule: prefer `Optional` chaining over cascading null checks" — the exception there for "Single null
+check with an immediate return" applies only when the reaction is to *return* a value, not to throw.
+
 ### Rule: helpers return `Optional<T>`, not `null`
 
 Trigger: writing or modifying a helper that performs extraction or lookup and may have no result.
@@ -147,6 +181,44 @@ Exception: read directly when the method is the only consumer and creating a con
 Use comments to explain project contracts and non-obvious intent in the fewest useful words. The fluent-pipeline
 rules apply to `Optional` and `Stream` chains, including `.filter`, `.map`, `.flatMap`, `.reduce`, `.collect`,
 `.sorted`, and `.takeWhile`.
+
+### Rule: a helper's name and return type must match a single responsibility
+
+Trigger: writing or refactoring a private helper that fetches / loads / builds a value.
+
+Do: stop the helper at the raw returned type. If callers need a projection (flattening, defaulting, filtering,
+unwrapping), let each caller do it at the call site.
+
+Do not: bake a caller-specific reshape (e.g. flattening a response to one of its inner lists, or defaulting a
+nested field) into the helper. It hides the raw value from other callers, forces a second helper when a caller
+needs it, and produces a name that describes only the last transformation.
+
+Exception: keep the reshape inside the helper when every call site needs the same one AND the raw form has no
+other useful reader. In that case, name the helper after the reshape (`loadEnabledUserIds`, not `loadUsers`).
+
+```java
+// Do
+private LookupResponse loadLookup(final String key) {
+    return Optional.ofNullable(client.fetch(key))
+            .orElseThrow(() -> {
+                log.error("Client returned null for key: {}", key);
+                return new IllegalStateException("Client returned null for key: " + key);
+            });
+}
+
+// Caller: reshape at the call site.
+List<Item> items = Optional.ofNullable(loadLookup(key).getItems())
+        .orElse(Collections.emptyList());
+
+// Do not: bake the projection into the helper, forcing every caller into that shape.
+private List<Item> loadItems(final String key) {
+    LookupResponse response = loadLookup(key);
+    return Optional.ofNullable(response.getItems()).orElse(Collections.emptyList());
+}
+```
+
+The compact `Optional.ofNullable(...).orElse(...)` at the call site is the "Rule: avoid ceremony around one clear
+validation rule" shape applied to a defaulting projection.
 
 ### Rule: inline trivial single-use helpers
 
