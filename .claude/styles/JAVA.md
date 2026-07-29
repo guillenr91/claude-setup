@@ -42,6 +42,42 @@ Do not: add vertical space or line breaks just because an expression has multipl
 Exception: wrap aggressively when the line hides a condition, repeats long expressions, or exceeds the project's
 formatter conventions.
 
+## Reuse existing helpers first
+
+### Rule: scan for existing utilities before writing new logic
+
+Trigger: about to write null-safety plumbing, iteration+filter boilerplate, a projection, a small validation, or
+any short piece of logic that "feels generic enough that someone probably wrote it already."
+
+Do: before writing it, scan the project's shared utility packages (`.../utils/`, `.../common/`, `.../helper/`,
+and analogous libjava modules the project depends on). Grep for the noun or verb at the center of what you're
+about to write — collection, stream, non-null, non-empty, optional, retry, parse, validate. If a helper already
+exists, use it directly and take the null-safety, empty-safety, and formatting choices it encodes.
+
+Do not: reimplement the same shape inline. Repeated ad-hoc `Optional.ofNullable(list).orElse(emptyList()).stream()`,
+`if (x == null) continue`, or `list.stream().filter(Objects::nonNull)` around every call are signs a shared helper
+was skipped.
+
+Exception: build a new helper only when the existing one does not fit the exact shape you need. When you introduce
+a new helper, put it in the shared utility package so the next scan finds it.
+
+```java
+// Do
+Utils.nonNullNonEmptyStream(locations).forEach(location -> ...);
+Utils.nonNullNonEmptyStream(location.getPlans()).map(PlanModel::getPlanCode)...
+
+// Do not
+for (Location location : locations) {
+    if (location == null || CollectionUtils.isEmpty(location.getPlans())) {
+        continue;
+    }
+    location.getPlans().stream().filter(Objects::nonNull)...
+}
+```
+
+This is a "before you write" habit, not a post-hoc cleanup. A quick grep in the shared utility package is cheaper
+than a code review round.
+
 ## Null handling
 
 ### Rule: prefer `Optional` chaining over cascading null checks
@@ -99,6 +135,68 @@ the `null` return.
 
 Related: "Rule: prefer `Optional` chaining over cascading null checks" — the exception there for "Single null
 check with an immediate return" applies only when the reaction is to *return* a value, not to throw.
+
+### Rule: collapse a nullable fetch and its empty-default into a fetch helper
+
+Trigger: a caller pattern that (1) invokes a nullable fetch, (2) short-circuits when the result is `null` or
+empty, and (3) then streams / transforms the value. Especially common when the empty short-circuit returns a
+default like `Collections.emptyList()`.
+
+Do: extract the fetch into a helper whose entire body is
+`Optional.ofNullable(nullableCall(...)).orElse(<empty default>)`. Let the calling method be a single fluent
+expression that starts from that helper.
+
+Do not: keep a local variable, a separate `CollectionUtils.isEmpty(...) return Collections.emptyList()` guard,
+and then a stream in the same method. It splits a single "load-or-empty" concept across four statements when a
+one-liner helper expresses it directly.
+
+Exception: when the caller needs to distinguish "null response" from "empty result" (different logs, different
+metrics, different downstream behavior), keep the guards imperative in the caller so each case can act
+distinctly.
+
+```java
+// Do
+private List<Item> getItems(final String key) {
+    try {
+        return Optional.ofNullable(client.fetch(key))
+                .orElse(Collections.emptyList());
+    } catch (RuntimeException e) {
+        log.error("Failed to fetch items for key: {} - downstream error", key, e);
+        throw e;
+    }
+}
+
+private List<Item> getActiveItems(final String key) {
+    return getItems(key)
+            .stream()
+            .filter(Objects::nonNull)
+            .filter(Item::isActive)
+            .collect(Collectors.toList());
+}
+
+// Do not
+private List<Item> getActiveItems(final String key) {
+    List<Item> items;
+    try {
+        items = client.fetch(key);
+    } catch (RuntimeException e) {
+        log.error("Failed to fetch items for key: {} - downstream error", key, e);
+        throw e;
+    }
+    if (CollectionUtils.isEmpty(items)) {
+        return Collections.emptyList();
+    }
+    return items.stream()
+            .filter(Objects::nonNull)
+            .filter(Item::isActive)
+            .collect(Collectors.toList());
+}
+```
+
+This is the sibling of the "`Optional.orElseThrow` when a single null check must throw" rule: same
+`Optional.ofNullable(nullableCall()).<terminal>(...)` shape, but the terminal is a default value instead of an
+exception. Use `orElse` for a cheap literal like `Collections.emptyList()` or `""`; use `orElseGet` when the
+default construction is not free.
 
 ### Rule: helpers return `Optional<T>`, not `null`
 
@@ -195,6 +293,95 @@ needs it, and produces a name that describes only the last transformation.
 
 Exception: keep the reshape inside the helper when every call site needs the same one AND the raw form has no
 other useful reader. In that case, name the helper after the reshape (`loadEnabledUserIds`, not `loadUsers`).
+
+### Rule: name a method for the check it actually performs
+
+Trigger: naming or renaming a method that returns a filtered / validated / selected value.
+
+Do: pick a name that matches exactly the filter(s) the method applies. If it selects by one attribute, name it
+after that attribute. If a qualifier in the name implies a check the method does not perform, remove the
+qualifier or add the check.
+
+Do not: use qualifiers like `Active`, `Valid`, `Enabled`, `Live`, `Current` when the method does not enforce
+that state. A future reader will assume the guarantee holds and skip re-adding it upstream, silently reintroducing
+a bug.
+
+```java
+// Do — name matches behavior
+private List<Subscription> getPlanSubscriptions(final String userId) {
+    return getUserSubscriptions(userId)
+            .stream()
+            .filter(sub -> PlanCatalog.isPlan(sub.getPlanCode()))
+            .collect(Collectors.toList());
+}
+
+// Do not — name promises "active" but method only filters by plan code
+private List<Subscription> getActivePlanSubscriptions(final String userId) {
+    return getUserSubscriptions(userId)
+            .stream()
+            .filter(sub -> PlanCatalog.isPlan(sub.getPlanCode()))
+            .collect(Collectors.toList());
+}
+```
+
+If the qualifier is load-bearing (a caller genuinely depends on it), add the check the name promises; do not
+remove the qualifier and leave the semantic gap.
+
+### Rule: split orchestration from per-item transformation
+
+Trigger: a method (a) fetches / precomputes shared state, (b) iterates a collection, and (c) does non-trivial
+work per item (nested loops, multi-step filtering, per-item state). It reads like two responsibilities layered
+together — one method's worth of orchestration, one method's worth of per-item logic.
+
+Do: keep the orchestrator short — fetch inputs, precompute lookups, then loop and delegate each item to a
+per-item helper whose signature makes the inputs it needs explicit. The orchestrator's for-loop should be one
+or two lines.
+
+Do not: keep 30+ lines of nested per-item work inline in the orchestrator. It hides which state is shared
+across items vs. scoped to one item, and it makes each responsibility harder to test in isolation.
+
+```java
+// Do
+private List<Entry> buildEntries(final String key, final List<Item> items) {
+    Map<String, Set<String>> indexByGroup = buildIndex(loadGroups(key));
+    Set<String> supersededGroups = findSupersededGroups(loadGroups(key), key);
+
+    List<Entry> result = new ArrayList<>();
+    for (Item item : items) {
+        result.addAll(buildEntriesForItem(key, item, indexByGroup, supersededGroups));
+    }
+    return result;
+}
+
+private List<Entry> buildEntriesForItem(final String key,
+                                        final Item item,
+                                        final Map<String, Set<String>> indexByGroup,
+                                        final Set<String> supersededGroups) {
+    // Per-item logic — filter groups, apply validators, emit entries.
+    ...
+}
+
+// Do not
+private List<Entry> buildEntries(final String key, final List<Item> items) {
+    Map<String, Set<String>> indexByGroup = buildIndex(loadGroups(key));
+    Set<String> supersededGroups = findSupersededGroups(loadGroups(key), key);
+
+    List<Entry> result = new ArrayList<>();
+    for (Item item : items) {
+        // 30+ lines of nested filter/emit logic here.
+        ...
+    }
+    return result;
+}
+```
+
+Exception: keep the work inline when the per-item block is genuinely a handful of lines with no nested loops
+and no independent responsibility — a for-loop that only appends one derived value per item is not two
+responsibilities.
+
+Prefer a per-item helper that returns a `List<Entry>` (or `Collection<Entry>`) and let the orchestrator use
+`result.addAll(...)`. A helper that mutates a shared accumulator passed by reference is harder to test and
+reads as a side-effecting procedure.
 
 ```java
 // Do
@@ -319,6 +506,30 @@ return orders.stream()
         // Identity uses scale=2 so the running total never silently loses cents from a higher-scale addend.
         .reduce(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP), BigDecimal::add);
 ```
+
+### Rule: never attribute code to a ticket, reviewer, or review pass
+
+Trigger: writing or editing a comment (line comment or Javadoc) that describes why a piece of code exists.
+
+Do: describe the invariant, business rule, upstream contract, or data quirk the code protects against. Present tense,
+no author. Make the comment understandable to a reader who has never seen the ticket or the review.
+
+Do not: name a ticket ID, a reviewer, a review tool, a review pass, or a review round in the comment. Do not preface
+a comment with `// <TICKET-ID>:`, `// <TICKET-ID> pre-commit review:`, `// (<Reviewer name>):`,
+`// (<Reviewer name> review):`, `// per <Reviewer name>'s review`, `// <Bot> PR#<N>:`, or any similar attribution. That
+context belongs in the PR description, the commit message, and the code-review thread — it rots as the codebase
+evolves and misleads a future reader who wasn't part of that review.
+
+```java
+// Do
+// Legacy trials keep locationAccountEligibility unset when userLocationId is blank; fall back to accountEligibility.
+
+// Do not
+// BE-1234: Legacy trials keep locationAccountEligibility unset (per Mayank's review, PR #827).
+```
+
+Exception: this rule is about comments in the code. Ticket IDs and reviewer references remain welcome in commit
+messages, PR descriptions, review threads, and any other artifact that lives outside the source tree.
 
 ## External calls and resources
 
