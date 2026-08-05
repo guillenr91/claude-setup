@@ -61,6 +61,16 @@ you'd consider" when you mean "do this"). Use the opinion-marker phrases from `#
 "I'd recommend", "opinion:") for genuine judgment, and the required uncertainty phrasing for claims you cannot
 verify. Those are not hedges; they are accurate labels.
 
+Never insert forced line breaks in prose. Write each bullet or paragraph as one continuous line and let the
+consuming surface soft-wrap. Applies to commit subjects and bodies, PR titles/descriptions/reviews/inline
+comments, Jira/Slack/Confluence/email drafts, issue titles and comments, and any file written on the user's
+behalf — including `git commit -m` HEREDOCs, `gh pr create --body`, MCP tool bodies, and any HEREDOC-fed text.
+Only insert a newline when the semantic structure requires one (between bullets, between paragraphs, before/after
+a code fence, between YAML frontmatter and body). Exception: match the surrounding style when editing a file
+that already uses wrapped prose, or wrap when the user explicitly asks. Before finalizing prose longer than one
+line for a shared surface, check: does any sentence end at an arbitrary column and continue on the next line?
+If yes, join them.
+
 # Engineering standards
 
 - Simple over clever. No over-engineering, no extra features, no unnecessary defensive programming.
