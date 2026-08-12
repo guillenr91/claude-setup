@@ -420,6 +420,33 @@ Do not: keep a helper only to name a one-line expression like `Math.min(limit, v
 Exception: keep the helper when it names a meaningful project concept, protects a non-obvious invariant, is
 likely to gain additional call sites, or keeps a fluent chain readable.
 
+### Rule: prefer Javadoc blocks over line comments for anything a reader might inspect
+
+Trigger: about to attach an explanatory comment to a declaration — class, interface, enum, record, method,
+constructor, field, constant, inner type, annotation type, or interface method.
+
+Do: put the explanation in a Javadoc `/** ... */` block placed directly above the declaration. Javadoc renders
+in IDE hover tooltips, generated docs, and code-review UIs, and signals the text is part of the contract.
+
+Do not: use `//` line comments above a declaration to carry that explanation, even for one-liners. Line comments
+above declarations read as scratch notes and don't surface in tooling.
+
+Reserve `//` line comments for scratch or step-level explanations INSIDE method bodies (a single expression in a
+chain, a non-obvious branch, a workaround for upstream data). See "Rule: comment non-obvious steps; do not
+comment obvious ones" for what belongs there and what doesn't.
+
+Exception: skip the Javadoc block entirely when the identifier plus type already tell the whole story (e.g.
+`MILLIS_PER_SECOND`, `MAX_RETRIES`, a private setter that mirrors its field). In those cases add no comment at
+all — an empty Javadoc block is worse than none.
+
+```java
+/**
+ * Values below 10^<N> are <unit-A> (<M> digits today); values at or above are <unit-B> (<K> digits). Threshold
+ * stays unambiguous through ~year <Y>.
+ */
+private static final long UNIT_BOUNDARY = 1_000_000_000_000L;
+```
+
 ### Rule: use Javadoc for Java contracts that newcomers must understand
 
 Trigger: writing or modifying a class, constructor, method, record, interface method, or custom exception whose
