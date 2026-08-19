@@ -29,7 +29,8 @@ repo styles.
   `.agents/styles/**`
 - Copilot CLI: `$HOME/.copilot/copilot-instructions.md` | `AGENTS.md` | `.agents/context/AGENTS.md` |
   `.agents/skills/**` | `.agents/styles/**`
-- Cursor: (no filesystem target — manual step, see below) | `AGENTS.md` | `.agents/context/AGENTS.md` |
+- Cursor: `.cursor/rules/global/*.mdc` (per-repo, one file per `GLOBAL.md` section, alwaysApply — see
+  "Cursor global rule as project rule" below) | `AGENTS.md` | `.agents/context/AGENTS.md` |
   `.agents/skills/**` | `.agents/styles/**`
 
 For Codex, Copilot CLI, and Cursor, `.agents/context/`, `.agents/skills/`, and `.agents/styles/` are managed
@@ -50,10 +51,15 @@ Cursor rules and skills docs).
    <source>/scripts/sync-agent-context.sh --source <source> --agent <claude|codex|copilot|cursor> --target <repo-root>
    ```
 3. Copy and migrate only managed files. Preserve relative subdirectories. Migration map:
-    - `GLOBAL.md` → the agent's global target (see list above). Cursor has no filesystem target for user-level
-      rules; the script prints a `MANUAL` message telling the user to paste `GLOBAL.md` into
-      Cursor Settings > Customize > Rules > User Rules. Pass `--skip-global` to suppress that message on
-      repeat runs.
+    - `GLOBAL.md` → the agent's global target (see list above). Cursor has no supported way to create a
+      global (User Rule) programmatically or from a file — Cursor's official rule-creation docs at
+      <https://cursor.com/docs/rules#creating-a-rule> list exactly two methods (`/create-rule` in chat
+      and Customize > Rules > Add Rule), both of which produce Project Rules. For `--agent cursor`,
+      after the script finishes, invoke the `create-rule` skill (Cursor's built-in skill for creating
+      Project Rules) to split `GLOBAL.md` into one Project Rule per top-level `#` section under
+      `<repo>/.cursor/rules/global/`, each with `alwaysApply: true`. See "Cursor global rule as project
+      rule" below. Do not create User Rules via MCP tools or scripts — those do not surface in
+      Customize > Rules and are not the documented method.
     - `CLAUDE.md` → the agent's repo root (see list above). The root file is written INSIDE a fenced region
       so team-owned content in the same file is preserved. See "Fenced root file" below.
     - `.claude/context/`, `.claude/skills/`, `.claude/styles/` → keep as-is for Claude; rename `.claude/` →
@@ -90,6 +96,71 @@ Behavior by target state:
 
 Never edit content between the fence markers by hand. Anything that must survive the sync goes below (or
 above) the fence.
+
+## Cursor global rule as project rule
+
+Cursor documents exactly two rule-creation methods
+(<https://cursor.com/docs/rules#creating-a-rule>): `/create-rule` in chat and Customize > Rules > Add
+Rule. Both create Project Rules under `.cursor/rules/*.mdc`. There is no documented programmatic way
+to create a User Rule (Customize > Rules > User Rules). Attempting to create one via MCP tools like
+`cursor-app-control.cursor_dialog` produces a "rule" that does not appear in the Settings UI and cannot
+be trusted to load into Agent context — verified in-session by adding, listing (visible only to the
+same MCP tool), and observing absence from Customize > Rules. Do not use that path.
+
+Trade-off accepted: `GLOBAL.md` is applied per repo via Project Rules, not globally. Every repo needs
+its own copy, and every edit to `GLOBAL.md` requires re-syncing into every repo. Cursor precedence per
+docs: Team Rules > Project Rules > User Rules; the per-repo Project Rules created below win over a
+conflicting User Rule.
+
+Why split by section: Cursor's `create-rule` skill (installed at
+`~/.cursor/skills-cursor/create-rule/SKILL.md` on each operator's machine) recommends keeping rules
+"under 50 lines" and "one concern per rule". `GLOBAL.md` today spans multiple concerns (core behavior,
+tone, engineering standards, terminal logging, local-only paths, instruction dedup). Copying it as one
+file violates that guidance. The split-by-section procedure below matches the skill and keeps each
+Project Rule focused.
+
+Procedure for `--agent cursor` (run this as an explicit follow-up after
+`sync-agent-context.sh --agent cursor` finishes):
+
+1. Invoke the `create-rule` skill's intent by running the helper script
+   `scripts/split_global_to_rules.py` from the canonical source:
+
+   ```bash
+   python3 <source>/scripts/split_global_to_rules.py \
+       --source <source>/GLOBAL.md --target <repo-root>
+   ```
+
+   The script parses `GLOBAL.md` into sections at each top-level `#` heading, slugs each heading, and
+   writes `<repo>/.cursor/rules/global/<slug>.mdc` with `alwaysApply: true`. By default it skips the
+   `# Context` section (skill-preamble, not runtime guidance); override with `--skip-heading <name>`
+   (repeatable) or pass a single dummy value to disable the default skip.
+2. Confirm the output. Expected messages: `CREATE` / `REPLACE` / `SKIP  current` / `SKIP  heading`,
+   and `DELETE` for any `.mdc` under `global/` whose owning section no longer exists in `GLOBAL.md`.
+3. Do not edit the bodies by hand. Anything the repo needs to override or extend belongs in a
+   separate `.cursor/rules/*.mdc` file outside `global/` — the `global/` files are regenerated from
+   `GLOBAL.md`.
+4. Commit `.cursor/rules/global/` per Cursor docs guidance ("Check your rules into git so your whole
+   team benefits").
+5. Report each CREATE/REPLACE/SKIP/DELETE path alongside the other sync results.
+
+Idempotence is enforced by the script: identical files are skipped; changed files are replaced;
+orphan files (whose owning section was removed from `GLOBAL.md`) are deleted. Do not touch any other
+file under `.cursor/rules/`.
+
+Alternative if you prefer the fully interactive path:
+
+- Open the target repo in Cursor, run `/create-rule` in chat once per section, and paste the section
+  contents. This is one of the two official methods and produces the same files. It is slower but
+  keeps the agent inside the documented UI flow.
+
+Notes:
+
+- User Rules (Customize > Rules > User Rules) remain useful if the user wants to paste `GLOBAL.md` in
+  manually through the UI. That path is officially supported for existing rules but not documented as
+  a creation entry point. This skill does not automate it and does not require it.
+- The helper script `scripts/sync-agent-context.sh` does not write `.cursor/rules/global/*.mdc` today.
+  The companion script `scripts/split_global_to_rules.py` handles that step; run it as an explicit
+  follow-up after `sync-agent-context.sh --agent cursor` as shown in the procedure above.
 
 ## GitHub Copilot code review
 
