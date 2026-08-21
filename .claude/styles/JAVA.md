@@ -82,16 +82,32 @@ than a code review round.
 
 ### Rule: prefer `Optional` chaining over cascading null checks
 
-Trigger: a method threads a value through two or more sequential nullable lookups, transformations, or filters.
+Trigger: a method threads a value through one or more nullable lookups, transformations, or filters, or returns a
+value derived from a nullable source.
 
-Do: express the flow as one `Optional` chain when it stays readable.
+Do: express the flow as one `Optional` chain when it stays readable. This covers the single-transform-and-return
+case (e.g. look up a value from a map, transform it if present, return `null` when absent) — prefer
+`Optional.ofNullable(source).map(...).orElse(null)` over an imperative `T x = source; if (x == null) return null;
+return f(x);` and over a ternary `source == null ? null : f(source)`.
 
-Do not: write `if (x == null) return ...;` guards in series.
+Do not: write `if (x == null) return ...;` guards in series. Do not introduce a temporary variable and a separate
+null check just to transform-and-return a nullable value.
 
 Exceptions (write the imperative form instead):
-- Single null check with an immediate return.
+- Trivial identity return: `return x;` after a `null` check where no transformation happens.
 - Tight loop where allocation pressure has been measured and matters.
 - Steps that must throw distinct exceptions on absence — the chain hides which step produced the absence.
+- Multiple independent guards on different sources that don't compose into one chain (e.g. two unrelated
+  null checks on inputs before the transform).
+
+```java
+return Optional.ofNullable(index.get(key))
+        .map(Entry::createdAt)
+        .map(this::toMillis)
+        .orElse(null);
+```
+
+The extended chaining example (multiple nullable lookups and filters) still applies:
 
 ```java
 return findUserId(request)
