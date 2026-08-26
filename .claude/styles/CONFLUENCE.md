@@ -5,6 +5,63 @@ prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these st
 
 Use this guide when converting Markdown documentation into Confluence pages or reviewing Confluence-targeted content.
 
+### Rule: Use the Atlassian MCP plugin for every Confluence read and write
+
+Trigger: any Confluence page read, create, or update.
+Do: use the Atlassian MCP plugin. It is the only supported path, because it accepts a body in a declared content
+format and stores it without reserializing the rest of the page.
+Do: when the plugin is not installed, stop and ask the user to install it. Do not fall back to another tool.
+Do: when the plugin is installed but not authenticated, stop and ask the user to authenticate, then retry.
+Do not: use a general-purpose assistant or other MCP server that exposes Confluence write helpers as a convenience.
+Those tools reserialize the whole stored body on every call and silently degrade it, and they append an attribution
+footer per call, so repeated use leaves a stack of duplicate footers.
+Do not: treat a partial-edit or find-and-replace page helper as safer than a full-body update just because it touches
+fewer characters. The damage is proportional to the stored body, not to the edit.
+Exception: read-only page fetches through another tool are acceptable when the Atlassian plugin is unavailable and the
+content is only being summarized, never written back.
+
+### Rule: Know the degradations a reserializing write tool causes
+
+Trigger: deciding whether a non-Atlassian tool is good enough for a small Confluence fix.
+Do: assume every one of these will happen to the entire page, not just the edited region.
+Do: check for all of them when a page was written by any tool other than the Atlassian plugin.
+
+| Element | Degradation |
+| --- | --- |
+| Fenced or `pre` code block | Collapsed to inline monospace inside a paragraph, with padding blank lines |
+| Nested list | Flattened, so child items become siblings of their parent |
+| Ordered list | Renumbered from one per item, or converted to bullets |
+| Attribution footer | A new footer appended per call, accumulating on every edit |
+
+Do not: publish and hope. A degraded page needs a human to repair it in the editor, which is the cost this rule exists
+to avoid.
+
+### Rule: Round-trip through the structured format, not Markdown
+
+Trigger: editing part of an existing Confluence page rather than authoring a page from scratch.
+Do: fetch the page in the plugin's structured content format, edit that body, and send it back in the same format.
+The structured format is round-trip safe: it preserves inline comments, existing local element IDs, and native
+elements the Markdown representation cannot express.
+Do: use the structured format when the body contains code blocks, nested lists, tables, panels, statuses, expands,
+layouts, task or decision lists, smart cards, media, or macros.
+Do: keep whatever opaque IDs the fetched body carries. Copy them through unchanged, and do not invent new ones.
+Do: reserve the Markdown content format for short, structurally flat bodies with no native elements.
+Do not: fetch as Markdown and write back as Markdown when the page has native elements. The conversion loses them
+silently, and the loss shows up as a formatting regression rather than an error.
+
+### Rule: Size the page so one full-body update fits in a single response
+
+Trigger: creating a page, or planning an update to a page whose stored body is already long.
+Do: estimate the full body against the response budget before starting, because the Atlassian plugin update takes the
+whole body, so a page that cannot be emitted in one response cannot be safely updated at all.
+Do: split the content across a parent page and child pages when the body will not fit. Each page then stays
+independently updatable.
+Do: prefer a table or a short reference list over a long run of per-row prose and links when a section is what pushes
+the page over the limit.
+Do not: start a multi-call sequence that leaves the page truncated between calls. Readers see the intermediate state.
+Do not: patch the remainder with a different tool to finish the job. That reintroduces the degradations above.
+Exception: a first-time page create can be built up across calls, because there is no prior good version to damage.
+
 ### Rule: Treat the Confluence title as the document H1
 
 Trigger: publishing a Markdown document to a Confluence page.
@@ -117,15 +174,20 @@ Do: prefer `shell` or `bash` for terminal commands, and use the actual data form
 Do: keep copy-paste blocks free of prompts, output, secrets, and machine-specific paths.
 Do not: combine command output with commands unless the output is the actual thing the reader must copy.
 
-### Rule: Prefer ADF for pages with Confluence-only elements
+### Rule: Prefer ADF only when the structured HTML format cannot express the content
 
 Trigger: updating a page that contains native Confluence elements such as a TOC macro, inline smart cards, layouts,
 panels, statuses, expand blocks, or other editor-created elements.
-Do: fetch the existing page in Atlassian Document Format before updating.
+Do: reach for the structured HTML format first. It expresses native elements through data-type attributes and is
+round-trip safe, so it handles most of these pages with less machinery than ADF.
+Do: use ADF when a node genuinely has no HTML representation, or when the node's parameters must be set
+programmatically.
+Do: fetch the existing page in Atlassian Document Format before updating, when working in ADF.
 Do: preserve native extension nodes from the fetched ADF when replacing or regenerating the rest of the body.
 Do: validate generated ADF as JSON before publishing.
 Do: inspect key generated nodes before publishing, especially the first few nodes, code blocks, tables, and smart links.
 Do: fetch the page after publishing in ADF and confirm the native elements still exist.
+Do not: use storage-format XML macro markup. Use the content format the tool declares.
 Do not: assume Markdown round-tripping preserves Confluence-only elements.
 Do not: pass very large generated ADF bodies through a tool or prompt boundary that may truncate the content.
 
@@ -205,4 +267,8 @@ Do not: copy an overly long Markdown title into Confluence when a shorter title 
 Trigger: creating or updating a Confluence page through tooling.
 Do: fetch the page after publishing.
 Do: confirm the title, parent, and key content changed as intended.
+Do: verify formatting, not only content. Confirm code blocks are still block-level, nested lists still nest, ordered
+lists still count, and there is exactly one attribution footer.
+Do: fix a formatting regression in the same turn it was introduced, while the intended body is still reconstructable.
 Do not: assume the Markdown converted correctly without reading the stored page back.
+Do not: report the page as updated based on content alone.
