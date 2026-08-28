@@ -47,9 +47,15 @@ skill.
 
 ## Commits, PRs, and reviews
 
-Before running `git commit`, `git push`, `gh pr create`, `gh pr edit`, submitting a PR review, posting inline
-review comments or replies, or drafting a commit message / PR description / PR review, invoke the
-`pr-and-commit` skill.
+Before running `git commit` or `git push`, or drafting a commit message, invoke the `commit-review` skill.
+
+Before running `gh pr create`, `gh pr edit`, submitting a PR review, posting inline review comments or replies,
+creating or commenting on issues, or drafting a PR description / PR review / PR reply, invoke the
+`manage-pull-request` skill.
+
+Any code review — pre-commit, pre-PR, reviewing someone else's PR, or ad-hoc analysis — invokes the
+`code-review-effort` skill. `commit-review` and `manage-pull-request` invoke it as part of their pre-commit and
+pre-PR review steps; invoke it directly when the user asks for a code review outside those triggers.
 
 ## Agent context sync
 

@@ -1,83 +1,38 @@
 ---
-name: pr-and-commit
+name: manage-pull-request
 description: >-
-  Commit conventions, code review effort, pre-commit/pre-PR review, GitHub
-  draft-first gate, and PR review feedback rules. Invoke before running
-  `git commit`, `git push`, `gh pr create`, `gh pr edit`, submitting a PR
-  review, posting inline review comments or replies, and creating or
-  commenting on issues. Also invoke when the user asks to draft a commit
-  message, PR description, or PR review. Do not invoke for read-only git
-  operations (`git status`, `git log`, `git diff`).
+  Pull request creation, editing, review submission, inline comments and
+  replies, addressing incoming PR feedback, and issue creation/comments on
+  GitHub. Invoke before running `gh pr create`, `gh pr edit`, submitting a PR
+  review, posting inline review comments or replies, or creating or commenting
+  on issues. Also invoke when the user asks to draft a PR description, PR
+  review, PR reply, or to address feedback on a PR. Do not invoke for local
+  commits or `git push` — those are covered by commit-review.
 ---
 
-# PR and Commit Skill
+# Manage Pull Request Skill
 
 Loaded into context when invoked. Keep concise, explicit, and actionable for AI agents. No decorative formatting
 around prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
 
-Applies commit conventions, review effort, GitHub write-action gate, and PR review feedback rules.
+Applies pre-PR review, GitHub write-action draft-first gate, addressing incoming PR feedback, and PR review
+authoring rules.
 
-## Commit conventions
+## Pre-PR review
 
-Apply to every commit, ticket or not.
+Triggers immediately before running `gh pr create`. Also triggers before `gh pr edit` when the edit changes the PR's
+scope or claims (title, description body, base branch). Skip for pure typo fixes to an existing description.
 
-Never commit repository-local agent instruction files unless the repository exists specifically to maintain them.
-In normal project repos, treat them as local config.
+Invoke the `code-review-effort` skill and apply its rules to the changes in the PR — every time, even when the
+change feels small. Use the review output to write the PR description's summary of what was verified.
 
-1. Self-contained and testable. Each commit must compile, pass its own verification, and make sense without a later
-   commit. Prefer small commits. Keep tightly coupled edits together (rename + reference updates = one commit). Put
-   unrelated fixes in separate commits. A class plus its tests = one change. Feature-flag plumbing + the gated feature
-   = two changes when the plumbing is testable on its own.
-2. Concise imperative subject. State what changed.
-3. Bulleted body only when there are multiple changes. One present-participle bullet per change:
-   ```
-   - Adding AuthMiddleware to centralize token validation
-   - Removing unused legacy session cookie helpers
-   - Updating LoginController to call AuthMiddleware before dispatch
-   ```
-   Single-change commit → subject only, no one-bullet body restating the subject. If the reason is not obvious from the
-   diff, add one short paragraph after the subject or bullets.
-4. Ticket prefix when applicable. Format: `<TICKET_ID>: <description>` (e.g. `ABC-123: extract auth middleware`).
-   A commit is a ticket commit if the ticket skill is active for a known `<TICKET_ID>` OR the branch encodes one
-   (`feature/ABC-123-...`, `bugfix/PROJ-4567`, `ABC-123/...`). Otherwise omit the prefix.
-
-For ticket-specific conventions beyond these, see the ticket skill when it exists.
-
-## Code review effort
-
-Applies to every code review — pre-commit, pre-PR, reviewing someone else's PR, or ad-hoc analysis of pending
-changes. The two subsections below specialise this rule to specific triggers; the rule itself lives here.
-
-1. Match review breadth to change scope. For non-trivial changes — anything that touches code that runs at
-   runtime, tests, build, infra, public APIs, security, data, or auth — first discover the review capabilities
-   available in the current environment, then use every applicable capability. Include available tools, skills,
-   subagents, project scripts, language checks, and local verification commands when they apply. For trivial changes
-   (typo fixes in comments or docs, formatting-only edits, comment-only edits, dead-link updates, version bumps in
-   non-runtime config) run a proportional subset and state in the review summary what was skipped and why. When in
-   doubt, treat the change as non-trivial.
-2. Use the highest effort level the task warrants. Default to higher effort when the change touches security,
-   data, auth, public APIs, or shared infrastructure.
-3. Triage every finding: apply the fix, or record an explicit skip reason (false positive, out of scope, conflicts
-   with stated requirement). No silent ignores.
-4. Re-run the review after fixes when changes are non-trivial, to confirm resolution and no new issues.
-5. Summarize the review pass in the commit message, PR description, or final response: what was reviewed, how many
-   findings surfaced, what was fixed, what was deferred and why.
-
-## Pre-commit / pre-PR review
-
-Triggers immediately before running `git commit`, `git push`, or opening a PR (`gh pr create`). Does not trigger
-when only drafting a commit message or PR description without executing the command.
-
-When triggered, apply the rules in `## Code review effort` above to the pending changes — every time, even when
-the change feels small.
-
-## GitHub write actions: draft-first gate
+## Draft-first gate for GitHub write actions
 
 Applies to every action that creates or modifies content visible on GitHub: opening a PR (`gh pr create`), editing
 a PR title or description (`gh pr edit`), submitting a PR review or any inline review comment (`gh api` POSTs to
 `pulls/.../reviews` or `pulls/.../comments`), replying to existing PR review comments (top-level or threaded), and
-creating or commenting on issues. Local commits are not covered by this gate; existing commit conventions apply
-there.
+creating or commenting on issues. Local commits and `git push` are governed by the commit-review skill, not this
+gate.
 
 Never call the relevant API or `gh` write command until the operator has seen the exact draft and explicitly
 approved posting. Cover all of:
@@ -104,13 +59,43 @@ Approval rules:
 If the operator rejects a draft or any part of it, drop the rejected piece. Do not post it anyway, and do not
 re-draft a near-duplicate to argue the point.
 
+## Addressing incoming PR feedback
+
+Triggers when someone leaves a comment, review, or requested change on a PR the operator owns and the operator asks
+to address it. This is distinct from `## PR review feedback` below, which covers reviews the operator is authoring.
+
+Follow this sequence in order. Do not merge or reorder steps. Do not skip because a step looks small.
+
+1. Analyze the incoming comment against the affected code. State plainly whether the comment is right, partially
+   right, or wrong, and what the resulting change (if any) is.
+2. Apply the change locally. Do not commit yet.
+3. Run the fully impacted test suite for the changed file(s) end-to-end (not `--dryrun` alone) and confirm it
+   passes. If local live runs are not available for the project, run the closest verification the project supports
+   and say so. Do not skip verification just because the diff looks small.
+4. Show the operator the diff and the test result. Wait for the operator to approve committing.
+5. Commit locally by invoking the `commit-review` skill (it enforces commit conventions, pre-commit review, and the
+   commit-message approval gate). Do not push. Do not mention reviewers, authors, or any human names in the commit
+   message.
+6. Wait for the operator to review the local commit and push it themselves. Do not push on their behalf unless
+   they explicitly ask you to.
+7. Verify the push landed before drafting any reply. Confirm the commit SHA exists on the remote branch
+   (`git ls-remote origin <branch>` or `gh pr view <n> --json headRefOid`) and matches the local commit. Do not
+   draft or post a reply that cites a SHA that is not yet on the remote.
+8. Only after the push is verified, draft each PR reply in chat. Keep replies brief and concise: acknowledge the
+   point, state the fix in one or two sentences, cite the pushed SHA. Do not restate the full analysis.
+9. Get explicit operator approval for each reply. Approval of one reply does not extend to others.
+10. Only after approval, post the replies using the draft-first gate above.
+
+Never post a reply, comment, or review to GitHub until steps 1–9 are complete and the operator has approved the
+exact text of each reply.
+
 ## PR review feedback
 
 The goal of every review comment is to help the developer improve their code or solve a detected issue. Comments that
 only point out problems without providing a path forward are not useful. Every comment should enable the developer to
 take immediate action.
 
-Apply `## Code review effort` above before posting any feedback: discover the review capabilities available in the
+Invoke the `code-review-effort` skill before posting any feedback: discover the review capabilities available in the
 current environment, use every applicable capability, and use the highest effort level the task warrants. Findings
 posted as PR comments must come from that pass, not from a glance at the diff.
 
@@ -140,10 +125,11 @@ When reviewing a PR:
 Tone for review comments:
 
 - Voice: write every comment in first person as the operator (the repository owner). Use "I" to refer to the
-  operator, not to yourself. The reviewer agent must be invisible — never say "I (Claude)", "the agent",
-  "from my read as an assistant", or anything that breaks the operator-as-reviewer voice. Example:
-  "I checked the auth middleware and noticed X — could you verify whether…". The drafts shown to the operator
-  for approval use this same voice so the operator can edit before posting.
+  operator, not to yourself. The reviewer agent must be invisible — never let the agent's identity leak (e.g.
+  "I (Claude)", "I (Codex)", "I (Cursor)", "the agent", "from my read as an assistant") or anything that breaks
+  the operator-as-reviewer voice. Example: "I checked the auth middleware and noticed X — could you verify
+  whether…". The drafts shown to the operator for approval use this same voice so the operator can edit before
+  posting.
 - Frame findings as observations to verify, not asserted facts. The reviewer's context is incomplete; the author
   has context the reviewer doesn't. Write comments that invite verification rather than declare verdicts.
 - Use phrasing like "I want to flag a scenario I couldn't verify on my side", "could you verify whether…",
@@ -162,7 +148,7 @@ Tone for review comments:
 
 Posting review comments:
 
-Apply the `## GitHub write actions: draft-first gate` section above before any API call.
+Apply the `## Draft-first gate for GitHub write actions` section above before any API call.
 
 Drafting workflow for review comments:
 
@@ -247,4 +233,4 @@ Drafting and submission steps:
    edit, and patch the comment.
 9. Never post only a summary review without inline comments when there are specific code-level findings.
 10. If the review requires a reply to an existing comment thread rather than a new top-level finding, that reply
-   is governed by the `## GitHub write actions: draft-first gate` section above and is a separate posting step.
+   is governed by the `## Draft-first gate for GitHub write actions` section above and is a separate posting step.
