@@ -64,7 +64,12 @@ Any code review — pre-commit, pre-PR, reviewing someone else's PR, or ad-hoc a
 `code-review-effort` skill. `commit-review` and `manage-pull-request` invoke it as part of their pre-commit and
 pre-PR review steps; invoke it directly when the user asks for a code review outside those triggers.
 
-## Agent context sync
+## Agent context
 
-Invoke the `install-agent-context` skill when the user runs `/install-agent-context` or explicitly asks to sync agent
-instruction files across agents (Claude, Codex, Copilot CLI). Do not sync automatically.
+Invoke the `install-agent-context` skill when the user runs `/install-agent-context` or explicitly asks to install
+agent instruction files across agents (Claude, Codex, Copilot CLI, Cursor). Do not run automatically.
+
+Invoke the `reload-agent-context` skill immediately after any agent context file is modified — by you, by another
+tool, by a script, or by a sub-agent — after commands that can rewrite context files (git checkout / pull / rebase
+/ merge / stash pop, patch apply, install-agent-context runs), when the user asks to reload context, and before
+applying rules from a context file that has been changed in-session but not re-read since the change.
