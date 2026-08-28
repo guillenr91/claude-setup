@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Split a GLOBAL.md-style file into per-section Cursor Project Rules.
 
-Follows the procedure in `.claude/skills/sync-agent-context/SKILL.md` under
+Follows the procedure in `.claude/skills/install-agent-context/SKILL.md` under
 "Cursor global rule as project rule":
 
 - Parse sections at each single-`#` heading (not `##`).

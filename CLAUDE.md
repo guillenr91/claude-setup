@@ -66,5 +66,5 @@ pre-PR review steps; invoke it directly when the user asks for a code review out
 
 ## Agent context sync
 
-Invoke the `sync-agent-context` skill when the user runs `/sync-agent-context` or explicitly asks to sync agent
+Invoke the `install-agent-context` skill when the user runs `/install-agent-context` or explicitly asks to sync agent
 instruction files across agents (Claude, Codex, Copilot CLI). Do not sync automatically.
