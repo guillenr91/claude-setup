@@ -40,6 +40,13 @@ Before generating or reviewing work in a domain covered by `.claude/styles/`, re
   [MARKDOWN.md](.claude/styles/MARKDOWN.md)
 - Any other domain with a Markdown file in `.claude/styles/` → that file.
 
+## Answering with evidence
+
+Before sending any reply that makes a factual claim — about code, tools, docs, external systems, or prior
+conversation state — invoke the `evidence-first` skill. It applies to every reply, including short and
+conversational ones. Skip only for pure meta replies with no factual content, pure opinion clearly labeled as
+such, recaps of what the operator just said, and read-only lookups whose output is shown in the same turn.
+
 ## Dependency changes
 
 Before editing dependency manifests, installing CLI tools, or adding OS packages, invoke the `add-dependency`
