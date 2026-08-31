@@ -139,7 +139,7 @@ copy_tree() {
     return 1
   fi
 
-  find "$source_dir" -type f | while IFS= read -r source_file; do
+  find "$source_dir" -type f ! -name '.DS_Store' | while IFS= read -r source_file; do
     rel="${source_file#"$source_dir"/}"
     target_rel="$rel"
     if [ "$rename_claude_files" -eq 1 ]; then
