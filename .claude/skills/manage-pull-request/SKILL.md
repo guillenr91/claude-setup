@@ -101,17 +101,50 @@ posted as PR comments must come from that pass, not from a glance at the diff.
 
 When reviewing a PR:
 
+- Verdict selection is mechanical, not stylistic. After the `code-review-effort` pass, classify every surviving
+  (evidence-first-verified) finding as blocking or non-blocking, then apply the table below. Do not default to
+  `COMMENT` to hedge — an unverified concern is not a blocker, and a non-blocking observation does not downgrade
+  approval.
+
+  | Verified blockers? | Non-blocking findings? | Verdict         |
+  |--------------------|------------------------|-----------------|
+  | Yes (≥1)           | any                    | REQUEST_CHANGES |
+  | No                 | Yes                    | APPROVE         |
+  | No                 | No                     | APPROVE         |
+
+  A blocker is a VERIFIED (evidence-first-passed) finding that causes clear breakage, security risk, data loss, or
+  behavior likely to harm a supported workflow — see the `[BUG]` vs `[POSSIBLE ISSUE]` rules below. Edge cases,
+  hardening, polish, doc gaps, and low-risk maintainability are non-blocking unless evidence shows they break a
+  supported workflow. Reserve `COMMENT` for genuinely-ambiguous cases where the operator explicitly declined to
+  pick a side; state that reason in the summary if you use it.
+
 - Calibrate state to impact. `REQUEST_CHANGES` only for clear breakage, security risk, data loss, or behavior
   likely to harm a workflow. Edge cases, hardening, polish, doc gaps, and low-risk maintainability are non-blocking
   unless evidence shows they break a supported workflow. For additive PRs that don't break existing behavior, state
   the risk plainly and say whether it should block.
 - Prefix every comment title with an uppercase category in brackets: `[BUG]`, `[POSSIBLE ISSUE]`, `[SECURITY]`,
-  `[TEST]`, `[DOCS]`, `[MAINTAINABILITY]`. Use `[LEGACY BUG]` for pre-existing issues — note them, but they don't
-  block approval unless the PR makes them worse.
+  `[PERFORMANCE]`, `[TEST]`, `[DOCS]`, `[MAINTAINABILITY]`. Use `[LEGACY BUG]` for pre-existing issues — note
+  them, but they don't block approval unless the PR makes them worse.
+
+  Category selection — pick by the primary axis of concern, not the reviewer's convenience:
+
+  - `[BUG]` / `[POSSIBLE ISSUE]` — correctness. `[BUG]` = verified in-session to break; `[POSSIBLE ISSUE]` =
+    plausible defect, unverified.
+  - `[SECURITY]` — exploitable weakness (auth, injection, secret exposure, sandbox escape, etc.).
+  - `[PERFORMANCE]` — extra CPU, memory, I/O, latency, or cost with no correctness impact. Use for redundant
+    reads, duplicate work, missing caches, hot-path allocations. Do NOT use `[MAINTAINABILITY]` for these —
+    "duplicate DB read" is a performance concern even when the fix looks like a refactor.
+  - `[TEST]` — missing, wrong, or misleading test coverage.
+  - `[DOCS]` — javadoc / README / comment inaccuracy or gap.
+  - `[MAINTAINABILITY]` — future readability, name/structure clarity, dead code, non-obvious invariants that
+    should be commented. Reserve for concerns that only affect readers, not runtime behavior or cost.
+
 - Use `[BUG]` only when the issue has been VERIFIED in-session to block existing or new code (reproduced, traced
   through the code path, or confirmed by test output). If the issue is a plausible defect you have not verified
   blocks a workflow, use `[POSSIBLE ISSUE]` instead — it reflects that the concern is unverified. Do not upgrade
-  `[POSSIBLE ISSUE]` to `[BUG]` on suspicion alone.
+  `[POSSIBLE ISSUE]` to `[BUG]` on suspicion alone. The same verification rule applies to `[PERFORMANCE]`: if the
+  regression is measured or traced in-session, state that; if it is a plausible-cost concern without a
+  measurement, keep the `[PERFORMANCE]` prefix but frame the body as an unverified concern to be confirmed.
 - Start every inline comment with a brief title line, then a blank line, then the body. The title must include the
   category prefix and summarize the issue in one short sentence.
 - Start every summary review body with a brief title line, then a blank line, then the body. The summary title must
@@ -152,12 +185,68 @@ Apply the `## Draft-first gate for GitHub write actions` section above before an
 
 Drafting workflow for review comments:
 
-1. Collect every inline finding (code, file, line, suggested fix) and the summary comment in the chat as plain
-   text or a structured list before any API call.
-2. Show the operator the exact body of each comment, the file and line it will attach to, the suggestion block if
-   any, and the proposed verdict.
-3. Apply edits the operator requests. If they reject a finding, drop it; do not post it anyway.
-4. Only after explicit approval, run the steps below to post.
+Hard sequence — do not merge, skip, or reorder these steps. Each is a stop-and-wait gate.
+
+1. GATHER + FALSIFY — collect every candidate finding surfaced by the `code-review-effort` pass, then run its
+   Popperian falsification step (skill's Rule 3) on each one BEFORE the triage table exists. For each candidate,
+   name the evidence that would prove it wrong, go get that evidence in-session, and drop the finding if the
+   evidence falsifies it — or if you cannot obtain the evidence at all. The operator's triage input in step 2 is
+   the surviving-after-falsification list only. Do NOT include "I could not verify but wanted to flag" findings —
+   go verify first, or drop.
+
+2. TRIAGE TABLE (mandatory, FIRST operator interaction) — the very next thing you show the operator after the
+   review pass is the triage table below. It must be the first thing in your message. Do NOT precede it with a
+   summary paragraph, capabilities recap, verdict prose, or any other framing content. Skill/tool status
+   updates go AFTER the table, not before. If you have nothing else to say, say nothing — the table is
+   sufficient by itself.
+
+   Table shape — exactly this Markdown, one row per surviving finding, `#` starts at 1:
+
+   ```markdown
+   | # | Comment | Trigger | Impact | Blocking? |
+   |---|---------|---------|--------|-----------|
+   | 1 | <2–4 word slug> | <concrete condition to hit it> | <what breaks / degrades / mis-attributes> | <Yes/No — one-line reason> |
+   ```
+
+   Column discipline (enforce every row):
+
+   - `#` — 1-indexed integer so the operator can say "keep 1 and 3, drop 2".
+   - `Comment` — 2–4 words TOTAL, no backticks, no code identifiers. This is a slug the operator scans, not a
+     description. If you cannot fit the finding in 4 words, the slug is wrong — pick a different noun phrase.
+     Examples of correct slugs: "duplicate subscription read", "wire schema coupling", "dedup key null
+     formatting". Examples of WRONG slugs (too long / code-heavy): "Duplicate getUserSubscriptions read on
+     post-expiry send path", "`locationId` camelCase vs `plan_code` snake_case".
+   - `Trigger` — the concrete condition that produces the issue: specific inputs, state, config, or code path.
+     One sentence. No file paths or line numbers in this column (they belong in the inline body later).
+   - `Impact` — what actually goes wrong when the trigger fires. Behavior change, wrong data, extra cost,
+     silent drop, mis-attributed metric. One sentence, concrete outcome.
+   - `Blocking?` — `Yes — <reason>` for verified blockers (per the verdict-selection table above), `No —
+     <reason>` for non-blocking. Reason must explain WHY it does or does not block; do not just repeat "No".
+
+   Table rules:
+
+   - Include EVERY finding that survived `evidence-first`, blocking or not. Do not pre-filter to "the ones I
+     think you'd keep" — the operator makes that call.
+   - Do NOT include the inline-comment body, file paths, line numbers, code suggestions, or verdict rationale
+     inside the table. Those come in step 4.
+   - Immediately AFTER the table (still in the same message), on one line, state the verdict that follows
+     from the `Blocking?` column via the verdict-selection table above (`APPROVE` / `REQUEST_CHANGES`), so the
+     operator can override before drafting. One line, no rationale prose.
+   - If additional context is required for the operator to decide (e.g. a review capability failed to run),
+     add ONE short line after the verdict line naming what was skipped and why. Do not expand into a status
+     narrative.
+
+3. WAIT — stop and wait for the operator to select rows. "Keep 1 and 3" / "all of them" / "drop 2 and 5" all
+   count. Silence does not. Do not draft bodies preemptively.
+
+4. DRAFT BODIES — for each kept row, and only for those rows, draft the full inline-comment body (title line
+   + blank + body, with a `suggestion` block when a concrete fix exists). Show the operator the exact body,
+   the file and line it will attach to, and the proposed verdict.
+
+5. EDIT — apply changes the operator requests. If they reject a body after seeing it, drop it; do not post it
+   anyway or re-draft a near-duplicate to argue.
+
+6. POST — only after explicit approval on the final drafts AND the verdict, run the posting steps below.
 
 After approval:
 
