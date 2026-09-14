@@ -154,6 +154,12 @@ When reviewing a PR:
   developer should be able to resolve the comment without further clarification.
 - Do not call a change unsafe, broken, or workflow-impacting unless the evidence supports that severity.
 - Prefer fewer, higher-signal comments. Combine findings that share a root cause or fix.
+- Keep every inline comment and the summary review brief and concise. State the finding in one or two sentences,
+  do not restate context the diff already shows, and do not lecture. Long comments dilute signal.
+- Do not include GitHub `suggestion` blocks or any other prescriptive code fix in inline comment bodies. Surface
+  the concern in prose and let the author choose the fix — the review's job is to raise the concern, not to
+  write the patch. This applies even when a concrete fix is obvious; describe the intent in one sentence
+  instead.
 
 Tone for review comments:
 
@@ -187,12 +193,15 @@ Drafting workflow for review comments:
 
 Hard sequence — do not merge, skip, or reorder these steps. Each is a stop-and-wait gate.
 
-1. GATHER + FALSIFY — collect every candidate finding surfaced by the `code-review-effort` pass, then run its
-   Popperian falsification step (skill's Rule 3) on each one BEFORE the triage table exists. For each candidate,
-   name the evidence that would prove it wrong, go get that evidence in-session, and drop the finding if the
-   evidence falsifies it — or if you cannot obtain the evidence at all. The operator's triage input in step 2 is
-   the surviving-after-falsification list only. Do NOT include "I could not verify but wanted to flag" findings —
-   go verify first, or drop.
+1. GATHER + VALIDATE — collect every candidate finding surfaced by the `code-review-effort` pass, then validate
+   each one against the actual code on the PR (the diff plus any file, caller, contract, or config the finding
+   depends on) BEFORE the triage table exists. A finding reaches the triage table only when in-session evidence
+   from the PR code confirms it is a real, valid concern. Also run the falsification step (`code-review-effort`
+   Rule 3): name the evidence that would prove the finding WRONG and go collect it. Drop any finding that fails
+   validation against the PR code, that the falsification pass actually falsified, or whose falsifying evidence
+   you cannot obtain in-session. Do NOT include "I could not verify but wanted to flag" findings — go verify
+   against the PR code first, or drop. The operator's triage input in step 2 is the validated-and-survived list
+   only.
 
 2. TRIAGE TABLE (mandatory, FIRST operator interaction) — the very next thing you show the operator after the
    review pass is the triage table below. It must be the first thing in your message. Do NOT precede it with a
@@ -227,8 +236,8 @@ Hard sequence — do not merge, skip, or reorder these steps. Each is a stop-and
 
    - Include EVERY finding that survived `evidence-first`, blocking or not. Do not pre-filter to "the ones I
      think you'd keep" — the operator makes that call.
-   - Do NOT include the inline-comment body, file paths, line numbers, code suggestions, or verdict rationale
-     inside the table. Those come in step 4.
+   - Do NOT include the inline-comment body, file paths, line numbers, or verdict rationale inside the table.
+     Those come in step 4.
    - Immediately AFTER the table (still in the same message), on one line, state the verdict that follows
      from the `Blocking?` column via the verdict-selection table above (`APPROVE` / `REQUEST_CHANGES`), so the
      operator can override before drafting. One line, no rationale prose.
@@ -240,8 +249,8 @@ Hard sequence — do not merge, skip, or reorder these steps. Each is a stop-and
    count. Silence does not. Do not draft bodies preemptively.
 
 4. DRAFT BODIES — for each kept row, and only for those rows, draft the full inline-comment body (title line
-   + blank + body, with a `suggestion` block when a concrete fix exists). Show the operator the exact body,
-   the file and line it will attach to, and the proposed verdict.
+   + blank + body — brief and concise, no `suggestion` blocks, per the review-comment rules above). Show the
+   operator the exact body, the file and line it will attach to, and the proposed verdict.
 
 5. EDIT — apply changes the operator requests. If they reject a body after seeing it, drop it; do not post it
    anyway or re-draft a near-duplicate to argue.
@@ -287,20 +296,15 @@ Drafting and submission steps:
    gh pr diff "<PR>" --patch | grep -n "<unique text>"
    ```
    Use the returned line number as the `position` parameter.
-3. Every inline comment in the `comments` array MUST include a code suggestion when a fix is possible. Use
-   GitHub's suggestion block format inside the comment `body`:
-   ```suggestion
-   // corrected code here
-   ```
-   This allows the author to apply the fix with one click. Only omit suggestions for observations that have no
-   concrete fix (e.g., questions, design discussions, or findings that require broader refactoring).
+3. Do not include GitHub `suggestion` blocks or other prescriptive code fixes in inline comment bodies. State
+   the concern in one or two sentences of prose and let the author decide how to resolve it.
 4. Preserve Markdown newlines exactly when constructing the API payload. Do not encode newlines manually as literal
    `\n` text inside shell strings. Build the body from a real multiline source, such as a temporary Markdown file read
    with `jq --rawfile`, or another method that proves the JSON string contains actual newline characters.
-5. Set `body` on the review object to the summary, which must:
-    - List what was verified (claims tested, tests run, code paths checked).
-    - Briefly reference the inline findings included in this review (do not repeat full details).
-    - State the overall verdict and reasoning.
+5. Set `body` on the review object to a brief, concise summary that:
+    - Lists what was verified (claims tested, tests run, code paths checked) in one line each.
+    - Briefly references the inline findings included in this review (do not repeat full details).
+    - States the overall verdict and reasoning in one or two sentences.
 6. Set `event` to `APPROVE`, `REQUEST_CHANGES`, or `COMMENT` based on the approved verdict.
 7. Submit the review with one API call. Example template; replace `<owner>`, `<repo>`, `<pull_number>`, and the
    payload contents:
@@ -311,7 +315,7 @@ Drafting and submission steps:
      "body": "<summary>",
      "event": "<APPROVE|REQUEST_CHANGES|COMMENT>",
      "comments": [
-       { "path": "<file>", "line": <n>, "side": "RIGHT", "body": "<inline body with optional suggestion block>" }
+       { "path": "<file>", "line": <n>, "side": "RIGHT", "body": "<brief inline body — no suggestion block>" }
      ]
    }
    JSON

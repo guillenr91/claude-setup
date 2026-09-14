@@ -44,6 +44,13 @@ Applies review breadth, effort, triage, and reporting rules to every code review
    After the run, consolidate findings from every source into one deduplicated list, then apply the evidence-first
    verification pass in step 3 to each finding before drafting output.
 
+   Also verify the change against the `# Engineering standards` block in the loaded global instructions —
+   specifically the reuse scan (`Prefer existing tools`), local-pattern match (`Match local patterns`), and
+   prior-implementation alignment (`Align with prior implementations`), plus the other standards in that block.
+   Violations become findings and go through the falsification and triage passes just like any other finding.
+   Do not restate these rules here — read them from the global instructions so they stay authoritative in one
+   place.
+
 2. Use the highest effort level the task warrants. Default to higher effort when the change touches security,
    data, auth, public APIs, or shared infrastructure.
 3. Falsify every candidate finding before it becomes a review finding. This is a Popperian falsification pass, not

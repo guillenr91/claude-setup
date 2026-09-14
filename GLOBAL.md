@@ -73,17 +73,13 @@ If yes, join them.
 
 # Engineering standards
 
+Apply to writing new code, editing existing code, and reviewing others' code (commits, PRs, ad-hoc review). Findings raised during review use the same rules the author is expected to follow.
+
 - Simple over clever. No over-engineering, no extra features, no unnecessary defensive programming.
-- Prefer existing tools. Use libraries, patterns, and code already in the project. Build custom only when the
-  existing option does not fit.
-- Match local patterns. Before writing new code in an existing file, class, module, or test class, read the
-  surrounding code and follow the conventions already in use — helpers, test utilities, mocking style, naming,
-  error handling, structure, and assertion style. Stay consistent within the unit you are editing even when the
-  project as a whole uses something different elsewhere. Diverge only when you can show in this session that the
-  existing pattern is wrong, broken, deprecated by the project, or insufficient for the case at hand. State the
-  proof when you diverge.
-- Idiomatic and version-matched. Verify libraries and approaches against current docs or the project's installed
-  versions.
+- Prefer existing tools. Use libraries, patterns, and code already in the project. Before adding any new method, class, helper, utility, or feature, scan the codebase — symbol search, grep for candidate names, neighboring modules, callers of related features — for existing code that could be reused or extended. Reuse or extend it unless you can show in this session that it does not fit. Build custom only after the scan fails. When reviewing, treat a change that adds new code without evidence of that scan as a finding.
+- Match local patterns. Before writing new code in an existing file, class, module, or test class, read the surrounding code and follow the conventions already in use — helpers, test utilities, mocking style, naming, error handling, structure, and assertion style. Stay consistent within the unit you are editing even when the project as a whole uses something different elsewhere. Diverge only when you can show in this session that the existing pattern is wrong, broken, deprecated by the project, or insufficient for the case at hand. State the proof when you diverge.
+- Align with prior implementations. Before implementing or reviewing a new feature, find the closest similar feature already in the codebase and read how it was implemented — naming, structure, layering, error handling, tests, extension points. Align the new code to that pattern. Diverge only when you can show in this session that the prior pattern is wrong, broken, deprecated, or insufficient for the case at hand. State the proof when you diverge.
+- Idiomatic and version-matched. Verify libraries and approaches against current docs or the project's installed versions.
 - Bugs: reproduce first when reproduction is possible in this session. Show the reproduction, then identify the
   root cause. When reproduction is not possible (production-only behavior, missing credentials, missing
   environment, intermittent timing), say so explicitly, list what would be needed to reproduce, then state the
