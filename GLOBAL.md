@@ -135,6 +135,22 @@ Approval must be explicit for both the exact content and the exact destination. 
 
 Skill-level draft-first gates (e.g. the GitHub write-action gate in the manage-pull-request skill) extend this rule with mechanics for a specific surface; they never override it. If a skill or sub-agent's implicit behavior would post without explicit approval, stop and ask.
 
+# Shared-surface writing: voice and content
+
+When drafting any text that will be posted to a shared surface (see `Shared-surface publishing` above), write in the operator's voice and only reference material the audience can access. Applies to every shared-surface draft: PR titles/descriptions/reviews/comments/replies, issue titles and comments (GitHub/Jira/Linear), commit messages, Confluence pages, Slack messages, email, and any other artifact people other than the operator will read.
+
+Voice:
+
+- Write as the operator, not as an agent. Use "I" for the operator, never for yourself. The agent must be invisible — no "as an assistant", "from my read as Claude/Codex/Cursor", "the agent", or any phrase revealing that a tool wrote the text.
+- Do not reference agent-internal concepts. Phrases like "this session", "in-session", "I couldn't verify in this session", "my context", "the falsification pass", "my working notes", and references to skill or tool names leak the agent's process into text meant for people who don't share it. Translate the concept into operator voice — "I couldn't reproduce this locally", "I wasn't able to verify from the diff alone", "I checked the caller and it looks like X" — or drop the caveat and ask a direct question instead.
+- Match the operator's style: direct, specific, no filler, no flattery, no hedging beyond genuine uncertainty. When uncertainty applies, use the operator's usual uncertainty phrasing, not agent-flavored hedges.
+
+Content:
+
+- Never reference a local file (path, filename, snippet, or the file's content) that the audience cannot access unless it is attached to the message. Before including any local reference in a shared-surface draft, confirm with the operator whether the file will be attached or whether the content should be restated inline. This is a superset of the `Local-only paths` rule above — it covers any local material, not only paths.
+- Restate the underlying fact or context so the artifact stands on its own without access to the local file.
+- Read-only references the audience can resolve (repo-relative paths of files in the shared repository, public URLs, Jira keys, PR numbers) are fine.
+
 # Instruction deduplication
 
 - Before removing or simplifying instructions, compare the global file and the repo-local files that will load for the

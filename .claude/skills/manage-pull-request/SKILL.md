@@ -169,6 +169,11 @@ Tone for review comments:
   the operator-as-reviewer voice. Example: "I checked the auth middleware and noticed X — could you verify
   whether…". The drafts shown to the operator for approval use this same voice so the operator can edit before
   posting.
+- Apply the global `# Shared-surface writing` rule to every comment body. No agent-internal terminology in the
+  comment — no "in-session", "this session", "my context", "the falsification pass", "my working notes", skill
+  or tool names — translate to operator voice like "I couldn't reproduce this locally" or "I wasn't able to
+  verify from the diff alone". No reference to a local file the author can't access without confirming with
+  the operator that it will be attached or that the content should be restated inline.
 - Frame findings as observations to verify, not asserted facts. The reviewer's context is incomplete; the author
   has context the reviewer doesn't. Write comments that invite verification rather than declare verdicts.
 - Use phrasing like "I want to flag a scenario I couldn't verify on my side", "could you verify whether…",
