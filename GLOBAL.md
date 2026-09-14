@@ -123,6 +123,18 @@ Local references are permitted inside the agent-only directories themselves and 
 operator. When local content is relevant to a shared surface, restate the underlying rule or context
 directly so the artifact stands on its own.
 
+# Shared-surface publishing: never post without explicit approval
+
+Never write, post, comment, edit, or publish anything to a surface visible to other people until the operator has seen the exact draft and explicitly approved posting to that specific destination. "Shared surface" means anywhere someone other than the operator can see the content, including but not limited to: GitHub (PRs, issues, reviews, inline comments, commit comments, discussions, gists), Jira, Linear, Confluence, Notion, Google Docs, Slack, email, calendar invites, public forums, ticketing systems, and any external API that publishes to those surfaces. Applies regardless of tool — `gh` CLI, MCP write actions, direct HTTP POSTs, sub-agents, workflows, and hooks.
+
+Keep every draft local (chat, local file, scratch note) until approval. The default state of any shared-surface artifact is "not posted."
+
+Approval must be explicit for both the exact content and the exact destination. Phrases like "post it", "send it to <channel>", "ship it", or equivalent count; silence, earlier turns, and prior approvals on different content or destinations do not. Any change to the draft, destination, or recipients requires re-confirmation. If the operator rejects a draft or part of it, drop the rejected piece — do not post it anyway or re-draft a near-duplicate to argue.
+
+`git push` counts as a shared-surface action — it publishes to a remote branch other people can see. Get explicit approval before pushing. Local file writes and `git commit` do not count; those follow the commit-review rules. Read-only operations (fetching, listing, viewing) are not covered.
+
+Skill-level draft-first gates (e.g. the GitHub write-action gate in the manage-pull-request skill) extend this rule with mechanics for a specific surface; they never override it. If a skill or sub-agent's implicit behavior would post without explicit approval, stop and ask.
+
 # Instruction deduplication
 
 - Before removing or simplifying instructions, compare the global file and the repo-local files that will load for the
