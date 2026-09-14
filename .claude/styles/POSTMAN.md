@@ -1,6 +1,6 @@
 # Postman Style Guide
 
-Loaded into context when read. Keep concise, explicit, and actionable for AI agents. No decorative formatting around
+Loaded into context when read. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting around
 prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
 
 Use these rules when generating or reviewing Postman collections, requests, environments, and scripts. Apply a rule
@@ -61,8 +61,7 @@ Trigger: a response contains a value a subsequent request needs.
 
 Do: set the variable in the test script. Keep extraction small.
 
-Do not: parse deeply nested structures or add long conditionals. Split the request or move shared logic to a
-collection-level script instead.
+Do not: parse deeply nested structures or add long conditionals. Split the request or move shared logic to a collection-level script.
 
 ```javascript
 const data = pm.response.json();

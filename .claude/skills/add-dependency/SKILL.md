@@ -12,7 +12,7 @@ description: >-
 
 # Add Dependency Skill
 
-Loaded into context when invoked. Keep concise, explicit, and actionable for AI agents. No decorative formatting
+Loaded into context when invoked. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting
 around prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
 
 Gate for introducing new dependencies of any kind.
@@ -20,10 +20,7 @@ Gate for introducing new dependencies of any kind.
 Before adding any package, library, image dependency, CLI tool, OS package, or build/runtime dependency:
 
 1. Identify the exact behavior that requires it.
-2. Verify the minimal dependency set locally when feasible. Vendor docs prove how to install something; they do not
-   prove every package in an example is required here.
+2. Verify the minimal dependency set locally when feasible. Vendor docs prove how to install something; they do not prove every package in an example is required here.
 3. Add extras only after proving the minimal install or existing project tooling cannot satisfy the need.
-4. Default-reject development headers, SDKs, compilers, `*-dev` packages, and build tools in runtime images unless a
-   compile step or runtime behavior proves they are required.
-5. Record proof in ticket notes, durable docs, commit message, or final response: command run, output observed, source
-   inspected, or explicit reason verification was not possible.
+4. Default-reject development headers, SDKs, compilers, `*-dev` packages, and build tools in runtime images unless a compile step or runtime behavior proves they are required.
+5. Record proof in ticket notes, durable docs, commit message, or final response: command run, output observed, source inspected, or explicit reason verification was not possible.

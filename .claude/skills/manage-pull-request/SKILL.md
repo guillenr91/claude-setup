@@ -12,92 +12,60 @@ description: >-
 
 # Manage Pull Request Skill
 
-Loaded into context when invoked. Keep concise, explicit, and actionable for AI agents. No decorative formatting
+Loaded into context when invoked. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting
 around prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
 
-Applies pre-PR review, GitHub write-action draft-first gate, addressing incoming PR feedback, and PR review
-authoring rules.
+Applies pre-PR review, GitHub write-action draft-first gate, addressing incoming PR feedback, and PR review authoring rules.
 
 ## Pre-PR review
 
-Triggers immediately before running `gh pr create`. Also triggers before `gh pr edit` when the edit changes the PR's
-scope or claims (title, description body, base branch). Skip for pure typo fixes to an existing description.
+Triggers immediately before running `gh pr create`. Also triggers before `gh pr edit` when the edit changes the PR's scope or claims (title, description body, base branch). Skip for pure typo fixes to an existing description.
 
-Invoke the `code-review-effort` skill and apply its rules to the changes in the PR — every time, even when the
-change feels small. Use the review output to write the PR description's summary of what was verified.
+Invoke the `code-review-effort` skill and apply its rules to the changes in the PR — every time, even when the change feels small. Use the review output to write the PR description's summary of what was verified.
 
 ## Draft-first gate for GitHub write actions
 
-Applies to every action that creates or modifies content visible on GitHub: opening a PR (`gh pr create`), editing
-a PR title or description (`gh pr edit`), submitting a PR review or any inline review comment (`gh api` POSTs to
-`pulls/.../reviews` or `pulls/.../comments`), replying to existing PR review comments (top-level or threaded), and
-creating or commenting on issues. Local commits and `git push` are governed by the commit-review skill, not this
-gate.
+Applies to every action that creates or modifies content visible on GitHub: opening a PR (`gh pr create`), editing a PR title or description (`gh pr edit`), submitting a PR review or any inline review comment (`gh api` POSTs to `pulls/.../reviews` or `pulls/.../comments`), replying to existing PR review comments, and creating or commenting on issues. Local commits and `git push` are governed by commit-review.
 
-Never call the relevant API or `gh` write command until the operator has seen the exact draft and explicitly
-approved posting. Cover all of:
+Never call the relevant API or `gh` write command until the operator has seen the exact draft and explicitly approved posting. Cover all of:
 
-1. PR creation: draft the title and full body (Summary, Test plan, any other sections) in chat first. Show the
-   target base branch and head branch. Wait for explicit approval before running `gh pr create`. Same rule for
-   `gh pr edit` against an existing PR title or description.
-2. PR review comments: handled by the drafting workflow under `## PR review feedback`. The gate here applies in
-   addition to that workflow.
-3. PR review replies: when replying to an inline comment thread or a top-level review comment, draft the reply in
-   chat first, show which comment it replies to (file, line, original comment text or ID), and wait for explicit
-   approval before posting. Same rule for replying to issue comments.
+1. PR creation: draft the title and full body (Summary, Test plan, any other sections) in chat first. Show the target base and head branch. Wait for explicit approval before running `gh pr create`. Same rule for `gh pr edit`.
+2. PR review comments: handled by the drafting workflow under `## PR review feedback`. The gate here applies in addition.
+3. PR review replies: draft the reply in chat first, show which comment it replies to (file, line, original comment text or ID), and wait for explicit approval before posting. Same rule for issue-comment replies.
 
 Approval rules:
 
-- Approval must be explicit. "Looks good", "go ahead", "post it", "ship it", or equivalent counts. Do not infer
-  approval from silence, from earlier turns, or from prior approvals on different content.
-- Approval of one draft does not extend to later edits. After any non-trivial change to the draft, re-confirm.
-- For PRs, approval of the draft body covers `gh pr create` only if the title, body, base, and head are all
-  unambiguous in the draft. If any of those is missing or ambiguous, confirm separately before posting.
-- For PR reviews, approval of the drafted comments covers the verdict (approve vs. request changes) only if the
-  verdict is unambiguous in the drafts. Otherwise confirm separately.
+- Approval must be explicit. "Looks good", "go ahead", "post it", "ship it", or equivalent counts. Do not infer approval from silence, earlier turns, or prior approvals on different content.
+- Approval of one draft does not extend to later edits. After any non-trivial change, re-confirm.
+- For PRs, approval covers `gh pr create` only if title, body, base, and head are all unambiguous in the draft. Otherwise confirm separately.
+- For PR reviews, approval covers the verdict (approve vs. request changes) only if the verdict is unambiguous in the drafts.
 
-If the operator rejects a draft or any part of it, drop the rejected piece. Do not post it anyway, and do not
-re-draft a near-duplicate to argue the point.
+If the operator rejects a draft or part of it, drop the rejected piece. Do not post it anyway, and do not re-draft a near-duplicate to argue.
 
 ## Addressing incoming PR feedback
 
-Triggers when someone leaves a comment, review, or requested change on a PR the operator owns and the operator asks
-to address it. This is distinct from `## PR review feedback` below, which covers reviews the operator is authoring.
+Triggers when someone leaves a comment, review, or requested change on a PR the operator owns and the operator asks to address it. Distinct from `## PR review feedback` below (reviews the operator is authoring).
 
-Follow this sequence in order. Do not merge or reorder steps. Do not skip because a step looks small.
+Follow in order. Do not merge or reorder steps. Do not skip because a step looks small.
 
-1. Analyze the incoming comment against the affected code. State plainly whether the comment is right, partially
-   right, or wrong, and what the resulting change (if any) is.
+1. Analyze the incoming comment against the affected code. State plainly whether it is right, partially right, or wrong, and what the resulting change (if any) is.
 2. Apply the change locally. Do not commit yet.
-3. Run the fully impacted test suite for the changed file(s) end-to-end (not `--dryrun` alone) and confirm it
-   passes. If local live runs are not available for the project, run the closest verification the project supports
-   and say so. Do not skip verification just because the diff looks small.
-4. Show the operator the diff and the test result. Wait for the operator to approve committing.
-5. Commit locally by invoking the `commit-review` skill (it enforces commit conventions, pre-commit review, and the
-   commit-message approval gate). Do not push. Do not mention reviewers, authors, or any human names in the commit
-   message.
-6. Wait for the operator to review the local commit and push it themselves. Do not push on their behalf unless
-   they explicitly ask you to.
-7. Verify the push landed before drafting any reply. Confirm the commit SHA exists on the remote branch
-   (`git ls-remote origin <branch>` or `gh pr view <n> --json headRefOid`) and matches the local commit. Do not
-   draft or post a reply that cites a SHA that is not yet on the remote.
-8. Only after the push is verified, draft each PR reply in chat. Keep replies brief and concise: acknowledge the
-   point, state the fix in one or two sentences, cite the pushed SHA. Do not restate the full analysis.
+3. Run the fully impacted test suite end-to-end (not `--dryrun` alone) and confirm it passes. If local live runs are unavailable, run the closest verification the project supports and say so. Do not skip verification.
+4. Show the operator the diff and test result. Wait for approval to commit.
+5. Commit locally by invoking `commit-review`. Do not push. Do not mention reviewers, authors, or any human names in the commit message.
+6. Wait for the operator to review the local commit and push it themselves. Do not push unless they explicitly ask.
+7. Verify the push landed before drafting any reply. Confirm the commit SHA exists on the remote branch (`git ls-remote origin <branch>` or `gh pr view <n> --json headRefOid`) and matches the local commit. Do not draft or post a reply citing a SHA not yet on the remote.
+8. Only after push verified, draft each PR reply in chat. Keep replies brief: acknowledge the point, state the fix in one or two sentences, cite the pushed SHA. Do not restate the full analysis.
 9. Get explicit operator approval for each reply. Approval of one reply does not extend to others.
-10. Only after approval, post the replies using the draft-first gate above.
+10. Only after approval, post using the draft-first gate above.
 
-Never post a reply, comment, or review to GitHub until steps 1–9 are complete and the operator has approved the
-exact text of each reply.
+Never post a reply, comment, or review until steps 1–9 are complete and the operator has approved the exact text of each reply.
 
 ## PR review feedback
 
-The goal of every review comment is to help the developer improve their code or solve a detected issue. Comments that
-only point out problems without providing a path forward are not useful. Every comment should enable the developer to
-take immediate action.
+The goal of every review comment is to help the developer improve their code or solve a detected issue. Comments that only point out problems without providing a path forward are not useful. Every comment should enable immediate action.
 
-Invoke the `code-review-effort` skill before posting any feedback: discover the review capabilities available in the
-current environment, use every applicable capability, and use the highest effort level the task warrants. Findings
-posted as PR comments must come from that pass, not from a glance at the diff.
+Invoke the `code-review-effort` skill before posting any feedback: discover the review capabilities available, use every applicable capability, and use the highest effort level the task warrants. Findings posted as PR comments must come from that pass, not from a glance at the diff.
 
 When reviewing a PR:
 

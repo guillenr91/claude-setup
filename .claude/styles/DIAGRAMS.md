@@ -1,6 +1,6 @@
 # Diagrams Style Guide
 
-Loaded into context when read. Keep concise, explicit, and actionable for AI agents. No decorative formatting around
+Loaded into context when read. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting around
 prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
 
 Use this guide when creating, modifying, or reviewing workflow diagrams, architecture diagrams, or any visual
@@ -10,12 +10,11 @@ documentation.
 
 ### Rule: Use diagrams.net as the default diagramming tool
 
-Trigger: Creating any diagram for documentation purposes.
-Do: Use diagrams.net (formerly draw.io) with `.drawio` file format.
+Trigger: Creating any diagram for documentation.
+Do: Use diagrams.net (formerly draw.io) with `.drawio` format.
 Do not: Use PlantUML, Mermaid, or other text-based diagramming tools unless explicitly requested.
 
-Rationale: diagrams.net provides full control over element positioning, supports multi-page documents, and produces
-files that can be edited in the desktop app, web app, or VS Code extension.
+Rationale: diagrams.net provides full control over element positioning, supports multi-page documents, and produces files editable in desktop, web, or VS Code.
 
 ## File Structure
 
@@ -144,18 +143,18 @@ For description text boxes, use individual spacing properties:
 ### Rule: Text must never exceed container bounds
 
 Trigger: Adding or modifying text in any diagram element.
-Do: Ensure all text fits completely within its containing shape with proper margins.
-Do: After any font change, verify text does not overflow the element boundaries.
-Do: Increase element width and/or height when text exceeds bounds - never truncate or allow overflow.
-Do: Account for larger fonts (Verdana is wider than default, Courier New at 14px is larger than regular text).
-Do: Test with the longest text content to ensure the element size accommodates it.
+Do: Ensure all text fits within its containing shape with proper margins.
+Do: After any font change, verify text does not overflow.
+Do: Increase width/height when text exceeds bounds — never truncate or allow overflow.
+Do: Account for larger fonts (Verdana is wider than default; Courier New at 14px is larger than regular text).
+Do: Test with the longest text content.
 
-This rule takes priority over minimum size guidelines - if text requires a larger container, increase the size.
+Takes priority over minimum size guidelines — if text requires a larger container, increase the size.
 
 ### Rule: Size workflow elements to fit content
 
 Trigger: Creating workflow element boxes.
-Do: Size elements to fit their text content with comfortable margins.
+Do: Size elements to fit text content with comfortable margins.
 Do: Make elements wider when they contain code text (Courier New is wider than Verdana).
 Do: Increase height for multi-line labels.
 Do: If text overlaps borders after adding spacing, increase element dimensions rather than reducing spacing.

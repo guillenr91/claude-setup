@@ -1,27 +1,20 @@
 # Context Guide
 
-Loaded into context when read. Keep concise, explicit, and actionable for AI agents. No decorative formatting around
+Loaded into context when read. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting around
 prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
 
-Use this file to decide which project context to load. All paths relative to `.claude/context/`. Keep this file
-portable: limit it to generic routing between `SETUP.md` and `TECHNICAL.md`. Project-specific routing belongs in
-`SETUP.md` or `TECHNICAL.md`, not here.
+Use this file to decide which project context to load. Paths relative to `.claude/context/`. Keep portable: generic routing between `SETUP.md` and `TECHNICAL.md` only. Project-specific routing belongs in `SETUP.md` or `TECHNICAL.md`.
 
 ## Where information goes inside `.claude/context/`
 
 This directory owns project-specific facts. Two sub-buckets, hard boundary:
 
-1. `SETUP.md` and `TECHNICAL.md` — PROJECT-WIDE reference reused across tickets: module names, helper names, table
-   schemas, env URLs, credentials guidance, debugging recipes, reusable building blocks, mappings from generic
-   `styles/` placeholders to this project's actual identifiers.
-2. `tickets/<TICKET_ID>/` — TICKET-SCOPED only: analysis, plan, decisions, reproduction evidence for one piece of
-   work. When a ticket finding turns out to be reusable, extract it into `TECHNICAL.md` (or `SETUP.md`) and leave
-   only the ticket framing in the ticket file.
+1. `SETUP.md` and `TECHNICAL.md` — PROJECT-WIDE reference reused across tickets: module names, helper names, table schemas, env URLs, credentials guidance, debugging recipes, reusable building blocks, mappings from generic `styles/` placeholders to this project's actual identifiers.
+2. `tickets/<TICKET_ID>/` — TICKET-SCOPED only: analysis, plan, decisions, reproduction evidence for one piece of work. When a ticket finding turns out to be reusable, extract it into `TECHNICAL.md` (or `SETUP.md`) and leave only the ticket framing in the ticket file.
 
-Project-agnostic style and convention rules do NOT belong here — they go in `.claude/styles/`. See
-[.claude/styles/CLAUDE.md](../styles/CLAUDE.md).
+Project-agnostic style and convention rules do NOT belong here — they go in `.claude/styles/`. See [.claude/styles/CLAUDE.md](../styles/CLAUDE.md).
 
-Do not duplicate across files; cross-link instead.
+Do not duplicate across files; cross-link.
 
 ## Routing
 
@@ -43,11 +36,9 @@ Update durable project context when you discover information a future assistant 
 - New component behavior → `TECHNICAL.md`.
 - Verified command not yet documented → add the command and observed output.
 - New error and solution → document both.
-- Project-specific secondary context files may be referenced from `SETUP.md` or `TECHNICAL.md`. Keep those routes out
-  of this portable guide.
+- Project-specific secondary context files may be referenced from `SETUP.md` or `TECHNICAL.md`. Keep those routes out of this portable guide.
 
-When you update `SETUP.md` or `TECHNICAL.md`, refresh `last-verified` only for content you re-verified. Before ending
-a session, check whether anything learned should be persisted.
+When updating `SETUP.md` or `TECHNICAL.md`, refresh `last-verified` only for content you re-verified. Before ending a session, check whether anything learned should be persisted.
 
 ## Required structure for SETUP.md and TECHNICAL.md
 
@@ -63,31 +54,24 @@ Both files must:
    ```markdown
    # <Document Title>
 
-   Loaded into context when read. Keep concise, explicit, and actionable for AI agents. No decorative formatting
+   Loaded into context when read. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting
    around prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future
    edit.
    ```
-   The one-sentence purpose statement is required, not optional.
-3. Include a table of contents after the `## Context` header and intro sentence, before the first main section. When
-   updating either file, verify the TOC still matches changed headings; if missing, add one as part of the same update.
-   Do not finish a documentation update that leaves either file without a current TOC.
+   The one-sentence purpose statement is required.
+3. Include a table of contents after the `## Context` header and intro sentence, before the first main section. When updating either file, verify the TOC still matches changed headings; if missing, add one in the same update. Do not finish a doc update that leaves either file without a current TOC.
 
-If `last-verified` is more than a few months old, treat the file as suspect and re-verify before relying on it.
+If `last-verified` is more than a few months old, treat the file as suspect and re-verify.
 
 ## Reusable setup commands and scripts
 
-Apply the global Markdown command efficiency rule. In `SETUP.md` and any setup-focused Markdown files, treat
-ready-to-run commands as operational instructions, not examples. A future agent should be able to replace documented
-values and run the command without guessing.
+Apply the global Markdown command efficiency rule. In `SETUP.md` and setup-focused Markdown files, treat ready-to-run commands as operational instructions, not examples. A future agent should replace documented values and run the command without guessing.
 
-For setup commands, also document dependencies that affect success: account, region, branch, service name, shell, OS,
-installed tool version, current directory, network access, credentials, and permissions. Keep prose short; let verified
-command blocks carry the setup procedure.
+For setup commands, also document dependencies that affect success: account, region, branch, service name, shell, OS, installed tool version, current directory, network access, credentials, permissions. Keep prose short; let verified command blocks carry the procedure.
 
 ## Generating SETUP.md or TECHNICAL.md when missing
 
-Generate from verified project evidence. Every command, path, and configuration must either be verified or marked
-unverified per "Verification Standards" below.
+Generate from verified project evidence. Every command, path, and configuration must be verified or marked unverified per "Verification standards" below.
 
 ### SETUP.md
 
@@ -104,16 +88,13 @@ Generate by:
 
 Verify by:
 
-- Running each command and capturing a success signal (output, exit code, created file, HTTP status, test result, or
-  equivalent).
+- Running each command and capturing a success signal (output, exit code, created file, HTTP status, test result).
 - Testing credential and permission commands with real access.
 - Starting the application and confirming it responds correctly.
 - Reproducing documented errors to capture exact messages.
 - Confirming every command placeholder is explained and every command has verification evidence.
 
-Required sections (in order): Context header & TOC, Prerequisites, Clone and build, Credentials configuration,
-Permission verification commands (with success and failure output), Environment variables, Run commands, Verification
-steps, Reusable commands and scripts, IDE setup, Troubleshooting table, Quick reference table.
+Required sections (in order): Context header & TOC, Prerequisites, Clone and build, Credentials configuration, Permission verification commands (with success and failure output), Environment variables, Run commands, Verification steps, Reusable commands and scripts, IDE setup, Troubleshooting table, Quick reference table.
 
 ### TECHNICAL.md
 
@@ -135,14 +116,11 @@ Verify by:
 - Tracing real API calls to understand auth flow.
 - Testing in each environment when access permits.
 
-Required sections (in order): Context header & TOC, Architecture overview, External integrations, Persistent stores
-(schemas + indexes), Authentication and authorization flow, Environment configurations, Error handling and
-exceptions, Debugging techniques, Permission barriers.
+Required sections (in order): Context header & TOC, Architecture overview, External integrations, Persistent stores (schemas + indexes), Authentication and authorization flow, Environment configurations, Error handling and exceptions, Debugging techniques, Permission barriers.
 
 ## Verification standards
 
-Verify everything you write. When something cannot be verified (missing credentials, services, or env access), mark
-it unverified instead of guessing. Unverified entries are acceptable. Unverified entries presented as fact are defects.
+Verify everything you write. When something cannot be verified (missing credentials, services, or env access), mark it unverified. Unverified entries are acceptable; unverified entries presented as fact are defects.
 
 | Item               | Verification method                   | If unverifiable                    |
 |--------------------|---------------------------------------|------------------------------------|

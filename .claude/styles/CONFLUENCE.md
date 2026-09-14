@@ -1,6 +1,6 @@
 # Confluence Style Guide
 
-Loaded into context when read. Keep concise, explicit, and actionable for AI agents. No decorative formatting around
+Loaded into context when read. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting around
 prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
 
 Use this guide when converting Markdown documentation into Confluence pages or reviewing Confluence-targeted content.
@@ -8,17 +8,12 @@ Use this guide when converting Markdown documentation into Confluence pages or r
 ### Rule: Use the Atlassian MCP plugin for every Confluence read and write
 
 Trigger: any Confluence page read, create, or update.
-Do: use the Atlassian MCP plugin. It is the only supported path, because it accepts a body in a declared content
-format and stores it without reserializing the rest of the page.
-Do: when the plugin is not installed, stop and ask the user to install it. Do not fall back to another tool.
+Do: use the Atlassian MCP plugin. It's the only supported path — accepts a body in a declared content format and stores it without reserializing the rest of the page.
+Do: when the plugin is not installed, stop and ask the user to install it. Do not fall back.
 Do: when the plugin is installed but not authenticated, stop and ask the user to authenticate, then retry.
-Do not: use a general-purpose assistant or other MCP server that exposes Confluence write helpers as a convenience.
-Those tools reserialize the whole stored body on every call and silently degrade it, and they append an attribution
-footer per call, so repeated use leaves a stack of duplicate footers.
-Do not: treat a partial-edit or find-and-replace page helper as safer than a full-body update just because it touches
-fewer characters. The damage is proportional to the stored body, not to the edit.
-Exception: read-only page fetches through another tool are acceptable when the Atlassian plugin is unavailable and the
-content is only being summarized, never written back.
+Do not: use a general-purpose assistant or other MCP server that exposes Confluence write helpers as a convenience. Those tools reserialize the whole stored body on every call and silently degrade it, and append an attribution footer per call.
+Do not: treat a partial-edit or find-and-replace helper as safer than a full-body update because it touches fewer characters. Damage is proportional to the stored body, not the edit.
+Exception: read-only fetches through another tool are acceptable when the Atlassian plugin is unavailable and content is only being summarized, never written back.
 
 ### Rule: Know the degradations a reserializing write tool causes
 
@@ -38,29 +33,22 @@ to avoid.
 
 ### Rule: Round-trip through the structured format, not Markdown
 
-Trigger: editing part of an existing Confluence page rather than authoring a page from scratch.
-Do: fetch the page in the plugin's structured content format, edit that body, and send it back in the same format.
-The structured format is round-trip safe: it preserves inline comments, existing local element IDs, and native
-elements the Markdown representation cannot express.
-Do: use the structured format when the body contains code blocks, nested lists, tables, panels, statuses, expands,
-layouts, task or decision lists, smart cards, media, or macros.
-Do: keep whatever opaque IDs the fetched body carries. Copy them through unchanged, and do not invent new ones.
+Trigger: editing part of an existing Confluence page rather than authoring from scratch.
+Do: fetch the page in the plugin's structured content format, edit that body, and send it back in the same format. Round-trip safe — preserves inline comments, existing local element IDs, and native elements Markdown cannot express.
+Do: use the structured format when the body contains code blocks, nested lists, tables, panels, statuses, expands, layouts, task or decision lists, smart cards, media, or macros.
+Do: keep whatever opaque IDs the fetched body carries. Copy them through unchanged; do not invent new ones.
 Do: reserve the Markdown content format for short, structurally flat bodies with no native elements.
-Do not: fetch as Markdown and write back as Markdown when the page has native elements. The conversion loses them
-silently, and the loss shows up as a formatting regression rather than an error.
+Do not: fetch as Markdown and write back as Markdown when the page has native elements. Conversion loses them silently, showing as formatting regression rather than an error.
 
 ### Rule: Size the page so one full-body update fits in a single response
 
 Trigger: creating a page, or planning an update to a page whose stored body is already long.
-Do: estimate the full body against the response budget before starting, because the Atlassian plugin update takes the
-whole body, so a page that cannot be emitted in one response cannot be safely updated at all.
-Do: split the content across a parent page and child pages when the body will not fit. Each page then stays
-independently updatable.
-Do: prefer a table or a short reference list over a long run of per-row prose and links when a section is what pushes
-the page over the limit.
+Do: estimate the full body against the response budget before starting — the Atlassian plugin update takes the whole body, so a page that cannot be emitted in one response cannot be safely updated at all.
+Do: split content across a parent page and child pages when the body won't fit. Each page stays independently updatable.
+Do: prefer a table or short reference list over a long run of per-row prose and links when a section pushes the page over the limit.
 Do not: start a multi-call sequence that leaves the page truncated between calls. Readers see the intermediate state.
-Do not: patch the remainder with a different tool to finish the job. That reintroduces the degradations above.
-Exception: a first-time page create can be built up across calls, because there is no prior good version to damage.
+Do not: patch the remainder with a different tool. That reintroduces the degradations above.
+Exception: a first-time page create can be built up across calls — no prior good version to damage.
 
 ### Rule: Treat the Confluence title as the document H1
 

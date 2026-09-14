@@ -1,15 +1,11 @@
 # Style Guide Instructions
 
-Loaded into context when read. Keep concise, explicit, and actionable for AI agents. No decorative formatting around
+Loaded into context when read. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting around
 prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
 
-Read this before creating or modifying any Markdown file in `.claude/styles/`. Every guide in this directory is a
-required pre-read before generating or reviewing work in its domain. Name new guides by domain (`JAVA.md`,
-`POSTMAN.md`, etc.) so the matching file is obvious.
+Read this before creating or modifying any Markdown file in `.claude/styles/`. Every guide is a required pre-read before generating or reviewing work in its domain. Name new guides by domain (`JAVA.md`, `POSTMAN.md`, etc.).
 
-Scope rule for this directory: PROJECT-AGNOSTIC style and convention rules only. This is a hard boundary, not a
-preference. Project-specific facts go in `.claude/context/` instead — see
-[.claude/context/CLAUDE.md](../context/CLAUDE.md).
+Scope: PROJECT-AGNOSTIC style and convention rules only. Hard boundary. Project-specific facts go in `.claude/context/` — see [.claude/context/CLAUDE.md](../context/CLAUDE.md).
 
 Forbidden in any file under `.claude/styles/`:
 
@@ -20,14 +16,13 @@ Forbidden in any file under `.claude/styles/`:
 - Real tag values, branch names, ticket IDs, PR numbers.
 - Code examples that reference any of the above.
 
-Allowed in style guides:
+Allowed:
 
 - Generic placeholders (`<TICKET_ID>`, `<aggregator>`, `<area>`, `<service>`, `<env-or-suite-tags>`).
 - Domain-standard concepts (Robot Framework `Suite Setup`, Java `Optional`, HTTP verbs, etc.).
 - Code shapes built from placeholders.
 
-Test before committing: clone a different repo using the same domain (a different Java service, a different Robot
-suite). Would this rule still apply unchanged? If no → it does not belong here, move it to `.claude/context/`.
+Test before committing: clone a different repo using the same domain. Would this rule still apply unchanged? If no → move it to `.claude/context/`.
 
 ## Required header
 
@@ -36,7 +31,7 @@ Every style guide must start with:
 ```markdown
 # <Domain> Style Guide
 
-Loaded into context when read. Keep concise, explicit, and actionable for AI agents. No decorative formatting around
+Loaded into context when read. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting around
 prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
 ```
 

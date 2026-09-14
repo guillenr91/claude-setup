@@ -1,6 +1,6 @@
 # Java Style Guide
 
-Loaded into context when read. Keep concise, explicit, and actionable for AI agents. No decorative formatting around
+Loaded into context when read. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting around
 prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
 
 Use these rules when generating or reviewing Java code. Apply a rule only when its trigger matches. Prefer existing
@@ -46,20 +46,13 @@ formatter conventions.
 
 ### Rule: scan for existing utilities before writing new logic
 
-Trigger: about to write null-safety plumbing, iteration+filter boilerplate, a projection, a small validation, or
-any short piece of logic that "feels generic enough that someone probably wrote it already."
+Trigger: about to write null-safety plumbing, iteration+filter boilerplate, a projection, a small validation, or any short piece of logic that "feels generic enough someone probably wrote it already."
 
-Do: before writing it, scan the project's shared utility packages (`.../utils/`, `.../common/`, `.../helper/`,
-and analogous libjava modules the project depends on). Grep for the noun or verb at the center of what you're
-about to write — collection, stream, non-null, non-empty, optional, retry, parse, validate. If a helper already
-exists, use it directly and take the null-safety, empty-safety, and formatting choices it encodes.
+Do: before writing it, scan the project's shared utility packages (`.../utils/`, `.../common/`, `.../helper/`, and analogous libjava modules). Grep for the noun or verb at the center of what you're about to write — collection, stream, non-null, non-empty, optional, retry, parse, validate. If a helper exists, use it directly and take the null-safety, empty-safety, and formatting choices it encodes.
 
-Do not: reimplement the same shape inline. Repeated ad-hoc `Optional.ofNullable(list).orElse(emptyList()).stream()`,
-`if (x == null) continue`, or `list.stream().filter(Objects::nonNull)` around every call are signs a shared helper
-was skipped.
+Do not: reimplement the same shape inline. Repeated ad-hoc `Optional.ofNullable(list).orElse(emptyList()).stream()`, `if (x == null) continue`, or `list.stream().filter(Objects::nonNull)` around every call are signs a shared helper was skipped.
 
-Exception: build a new helper only when the existing one does not fit the exact shape you need. When you introduce
-a new helper, put it in the shared utility package so the next scan finds it.
+Exception: build a new helper only when the existing one does not fit. When you introduce one, put it in the shared utility package so the next scan finds it.
 
 ```java
 // Do
@@ -75,30 +68,23 @@ for (Location location : locations) {
 }
 ```
 
-This is a "before you write" habit, not a post-hoc cleanup. A quick grep in the shared utility package is cheaper
-than a code review round.
+A "before you write" habit, not post-hoc cleanup. A quick grep is cheaper than a code review round.
 
 ## Null handling
 
 ### Rule: prefer `Optional` chaining over cascading null checks
 
-Trigger: a method threads a value through one or more nullable lookups, transformations, or filters, or returns a
-value derived from a nullable source.
+Trigger: a method threads a value through nullable lookups, transformations, or filters, or returns a value derived from a nullable source.
 
-Do: express the flow as one `Optional` chain when it stays readable. This covers the single-transform-and-return
-case (e.g. look up a value from a map, transform it if present, return `null` when absent) — prefer
-`Optional.ofNullable(source).map(...).orElse(null)` over an imperative `T x = source; if (x == null) return null;
-return f(x);` and over a ternary `source == null ? null : f(source)`.
+Do: express the flow as one `Optional` chain when readable. Covers single-transform-and-return — prefer `Optional.ofNullable(source).map(...).orElse(null)` over imperative `T x = source; if (x == null) return null; return f(x);` and over ternary `source == null ? null : f(source)`.
 
-Do not: write `if (x == null) return ...;` guards in series. Do not introduce a temporary variable and a separate
-null check just to transform-and-return a nullable value.
+Do not: write `if (x == null) return ...;` guards in series. Do not introduce a temporary variable + separate null check to transform-and-return a nullable value.
 
 Exceptions (write the imperative form instead):
-- Trivial identity return: `return x;` after a `null` check where no transformation happens.
+- Trivial identity return: `return x;` after a `null` check with no transformation.
 - Tight loop where allocation pressure has been measured and matters.
-- Steps that must throw distinct exceptions on absence — the chain hides which step produced the absence.
-- Multiple independent guards on different sources that don't compose into one chain (e.g. two unrelated
-  null checks on inputs before the transform).
+- Steps that must throw distinct exceptions on absence — the chain hides which step produced it.
+- Multiple independent guards on different sources that don't compose into one chain.
 
 ```java
 return Optional.ofNullable(index.get(key))
@@ -120,16 +106,13 @@ return findUserId(request)
 
 ### Rule: use `Optional.orElseThrow` when a single null check must throw
 
-Trigger: a call may return `null` and the reaction is to log-and-throw a runtime exception.
+Trigger: a call may return `null` and the reaction is log-and-throw a runtime exception.
 
-Do: write it as `Optional.ofNullable(call(...)).orElseThrow(() -> ...)`. Use a block-body lambda so the exception
-factory can log context before returning the exception.
+Do: write `Optional.ofNullable(call(...)).orElseThrow(() -> ...)`. Use a block-body lambda so the exception factory can log context before returning.
 
-Do not: introduce a local variable followed by `if (value == null) { log(...); throw new ...; }`. That splits one
-guard across three statements and separates the log message from the throw.
+Do not: introduce a local variable followed by `if (value == null) { log(...); throw new ...; }`. That splits one guard across three statements and separates the log message from the throw.
 
-Exception: keep the imperative form when several distinct null/state checks apply to the same value and lifting
-one into `Optional` would leave the others behind in imperative form.
+Exception: keep the imperative form when several distinct null/state checks apply to the same value and lifting one into `Optional` would leave the others in imperative form.
 
 ```java
 private Response fetchThing(final String id) {
@@ -552,16 +535,11 @@ return orders.stream()
 
 ### Rule: never attribute code to a ticket, reviewer, or review pass
 
-Trigger: writing or editing a comment (line comment or Javadoc) that describes why a piece of code exists.
+Trigger: writing or editing a comment (line comment or Javadoc) describing why a piece of code exists.
 
-Do: describe the invariant, business rule, upstream contract, or data quirk the code protects against. Present tense,
-no author. Make the comment understandable to a reader who has never seen the ticket or the review.
+Do: describe the invariant, business rule, upstream contract, or data quirk the code protects against. Present tense, no author.
 
-Do not: name a ticket ID, a reviewer, a review tool, a review pass, or a review round in the comment. Do not preface
-a comment with `// <TICKET-ID>:`, `// <TICKET-ID> pre-commit review:`, `// (<Reviewer name>):`,
-`// (<Reviewer name> review):`, `// per <Reviewer name>'s review`, `// <Bot> PR#<N>:`, or any similar attribution. That
-context belongs in the PR description, the commit message, and the code-review thread — it rots as the codebase
-evolves and misleads a future reader who wasn't part of that review.
+Do not: name a ticket ID, reviewer, review tool, review pass, or review round in the comment. No `// <TICKET-ID>:`, `// <TICKET-ID> pre-commit review:`, `// (<Reviewer name>):`, `// (<Reviewer name> review):`, `// per <Reviewer name>'s review`, `// <Bot> PR#<N>:`, or similar. That context belongs in the PR description, commit message, and code-review thread — it rots as the codebase evolves.
 
 ```java
 // Do
@@ -571,8 +549,7 @@ evolves and misleads a future reader who wasn't part of that review.
 // BE-1234: Legacy trials keep locationAccountEligibility unset (per Mayank's review, PR #827).
 ```
 
-Exception: this rule is about comments in the code. Ticket IDs and reviewer references remain welcome in commit
-messages, PR descriptions, review threads, and any other artifact that lives outside the source tree.
+Exception: this rule is about comments in the code. Ticket IDs and reviewer references remain welcome in commit messages, PR descriptions, review threads, and other artifacts outside the source tree.
 
 ## External calls and resources
 
