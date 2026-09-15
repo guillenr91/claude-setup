@@ -197,6 +197,18 @@ Do not: embed credential values per request.
 
 ## Pre-commit verification
 
+### Rule: prove the call with curl (or equivalent CLI) before authoring the Postman request
+
+Trigger: about to add a new request, or change the method, URL, headers, body, or auth of an existing one.
+
+Do: run the exact HTTP call in `curl` (or another CLI at hand — `httpie`, `xh`, `wget`, a native SDK) against a real environment first. Confirm a successful response and capture the observed status, headers, and body. Only then translate the working call into the Postman request.
+
+Do: record the working curl invocation (endpoint, headers, body, expected status) in the request description under a "Verification" line so the next author can re-run it independently.
+
+Do not: author a Postman request from a spec, docs, or memory without running it end-to-end in a CLI first. Postman-only trial-and-error hides which piece (URL, header, body, auth) is wrong when the request fails.
+
+Exception: when the CLI cannot reach the target (VPN-gated route, mTLS available only in Postman, browser-cookie-scoped auth), state that in the description and fall back to Postman verification with a one-line reason.
+
 ### Rule: a request is not done until it has run and one assertion has failed once
 
 Before adding a request:
