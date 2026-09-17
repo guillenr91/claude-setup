@@ -31,6 +31,17 @@ Do not: introduce temporary variables, separate null checks, or small helper met
 Use the `Optional` pattern in "derive required values from optional helpers" when starting from an existing optional
 helper.
 
+### Rule: consolidate common branch post-processing
+
+Trigger: two branches select between values of the same type, then perform the same post-processing.
+
+Do: assign the selected value to a `final` local using a conditional expression and perform the shared work once.
+
+Do not: duplicate an identical side effect or return structure in both branches.
+
+Exception: keep explicit branches when the branches have distinct side effects, exception handling, logging, or
+multi-step logic that a conditional expression would obscure.
+
 ### Rule: keep formatting compact when it stays readable
 
 Trigger: formatting method calls, lambdas, builders, or exceptions.
@@ -41,6 +52,42 @@ Do not: add vertical space or line breaks just because an expression has multipl
 
 Exception: wrap aggressively when the line hides a condition, repeats long expressions, or exceeds the project's
 formatter conventions.
+
+### Rule: name non-trivial intermediate results once
+
+Trigger: an expression performs a non-trivial lookup, transformation, or selection and its result feeds later decisions, logging, or assembly.
+
+Do: assign the result to a descriptively named local before consuming it. Keep the declaration adjacent to the stage that produces it.
+
+Do not: repeat or nest the expression in later operations when a named value makes the data flow clearer.
+
+Exception: keep a single clear projection inline when naming it adds no information beyond the surrounding method or variable names.
+
+```java
+LatestStatuses latestStatuses = testRunDao.loadLatestStatuses(request);
+Map<Id, Status> selectedStatuses = selectStatuses(latestStatuses, request);
+result.putAll(selectedStatuses);
+```
+
+### Rule: prefer batch external lookups over per-element calls
+
+Trigger: code resolves data for a collection by calling a DAO, service, client, or stored procedure once per element.
+
+Do: use or add a bulk API that accepts the complete set of identifiers when the result can be resolved set-wise. Build an in-memory lookup from the batch result, then map it back to the caller's required order.
+
+Do not: hide an N+1 external-call pattern inside a loop or stream when one set-based request can preserve the same result contract.
+
+Exception: retain a per-element call when each call has required side effects, must observe mutations from earlier elements, or no batch contract can preserve the required semantics.
+
+### Rule: isolate feature-flagged behavior at the selection boundary
+
+Trigger: a feature flag selects between a new implementation and an established fallback.
+
+Do: keep the fallback path behaviorally intact and select the complete result at one boundary. Put new helpers, transformations, and side effects behind the enabled branch. When the flag measures or rolls out a performance change, give both paths comparable DEBUG duration and input/result-count diagnostics.
+
+Do not: partially rewrite the fallback while introducing the flag, or scatter flag checks through shared post-processing. That makes rollback incomplete and prevents an apples-to-apples comparison.
+
+Exception: share code after the selection only when it is demonstrably identical post-processing for both results; use "Rule: consolidate common branch post-processing".
 
 ## Reuse existing helpers first
 
@@ -382,6 +429,42 @@ Prefer a per-item helper that returns a `List<Entry>` (or `Collection<Entry>`) a
 `result.addAll(...)`. A helper that mutates a shared accumulator passed by reference is harder to test and
 reads as a side-effecting procedure.
 
+### Rule: extract non-trivial stream lambdas into named helpers
+
+Trigger: a `map`, `filter`, `flatMap`, or other stream lambda contains local variables, branches, fallback logic, or more than one meaningful operation.
+
+Do: extract the lambda body into a helper whose name describes the per-element decision. Keep the stream pipeline as a method reference or a short lambda that supplies the current element's identifier.
+
+Do not: hide a lookup, validation, and fallback policy inside a block lambda. It prevents readers from scanning the collection flow and makes the per-element contract difficult to find or test.
+
+Exception: keep a lambda inline when it is a single clear projection, predicate, or method call with no branch or local state.
+
+```java
+return entries.stream()
+        .map(entry -> resolveEntryValue(key, entry.id(), overrides))
+        .filter(Objects::nonNull)
+        .toList();
+```
+
+### Rule: separate method stages with purposeful vertical whitespace
+
+Trigger: a method coordinates multiple stages, such as preparation, a database or service lookup, result selection, logging, timing, and return.
+
+Do: separate each logical stage with one blank line. Add one brief comment before a non-obvious stage when it explains the stage's purpose or a preserved business behavior. Keep related statements together, such as a lookup and its immediate result selection.
+
+Do not: add blank lines between statements that form one operation, or comments that merely narrate syntax. Vertical whitespace and comments must make the method's control flow easier to scan.
+
+```java
+LookupPreparation preparation = prepareLookup(request);
+
+// Resolve persisted values while preserving the legacy fallback contract.
+Map<Id, Status> resolvedStatuses = loadAndSelectStatuses(preparation);
+
+logger.debug("Resolved {} statuses", resolvedStatuses.size());
+
+return resolvedStatuses;
+```
+
 ```java
 // Do
 private LookupResponse loadLookup(final String key) {
@@ -490,6 +573,15 @@ Do: add concise record Javadocs and `@param` tags when the fields are part of a 
 
 Do not: document records that only mirror a trivial local tuple, DTO, or test fixture with obvious fields.
 
+### Rule: define each record in its own file
+
+Trigger: creating or moving a Java record.
+
+Do: define the record as a top-level type in a file named after the record. Use package-private visibility when the
+record is internal to its package.
+
+Do not: nest a record inside another class or interface.
+
 ### Rule: comment non-obvious steps; do not comment obvious ones
 
 Add a comment above the step when any of these are true:
@@ -590,6 +682,27 @@ Do not: allow one external call to consume the full job, request, or retry budge
 documented.
 
 ## Streams and collection results
+
+### Rule: prefer streams for collection transformations
+
+Trigger: transforming, filtering, projecting, or collecting every element of an in-memory collection.
+
+Do: use a stream pipeline when it expresses the collection result directly. Keep the source order unless the
+operation explicitly requires a different order.
+
+Do not: use a mutable accumulator and a `for` loop for a pure map/filter/collect operation.
+
+Exception: retain a loop when it needs early exit, checked-exception handling, resource traversal, or coordinated
+mutation of multiple result collections. Do not introduce extra passes, intermediate state, or side-effecting stream
+operations merely to avoid a loop. A sequential stream with `forEach` is allowed when preserving an existing mutable
+collection's identity and order-dependent duplicate suppression requires mutation during traversal.
+
+```java
+return items.stream()
+        .map(Item::value)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+```
 
 ### Rule: default terminal collector is `Stream.toList()` (Java 16+)
 
