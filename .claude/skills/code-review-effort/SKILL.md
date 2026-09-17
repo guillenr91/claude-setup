@@ -26,6 +26,7 @@ Applies review breadth, effort, triage, and reporting rules to every code review
    - Review MCPs / plugins: e.g. `coderabbit`, `code-review`, project-configured static analyzers, IDE diagnostics (`mcp__ide__getDiagnostics`, `mcp__idea__lint_files`, `mcp__idea__get_file_problems`), grep/lint runners.
    - Project scripts: repo-local `test`, `lint`, `check`, `typecheck` commands surfaced by CLAUDE.md, README, or ticket context.
    - Language checks and local verification commands (test suite, compile, static analyzer, formatter --check) when they apply.
+   - Style guides: inspect `.claude/styles/CLAUDE.md`, identify every guide that applies to the changed file domains, read each before reviewing, and verify the diff against its rules.
 
    After the run, consolidate findings into one deduplicated list, then apply the evidence-first verification pass in step 3 to each finding.
 
