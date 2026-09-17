@@ -54,10 +54,11 @@ Follow in order. Do not merge or reorder steps. Do not skip because a step looks
 4. Show the operator the diff and test result. Wait for approval to commit.
 5. Commit locally by invoking `commit-review`. Do not push. Do not mention reviewers, authors, or any human names in the commit message.
 6. Wait for the operator to review the local commit and push it themselves. Do not push unless they explicitly ask.
-7. Verify the push landed before drafting any reply. Confirm the commit SHA exists on the remote branch (`git ls-remote origin <branch>` or `gh pr view <n> --json headRefOid`) and matches the local commit. Do not draft or post a reply citing a SHA not yet on the remote.
-8. Only after push verified, draft each PR reply in chat. Keep replies brief: acknowledge the point, state the fix in one or two sentences, cite the pushed SHA. Do not restate the full analysis.
+7. Verify the push landed before drafting any reply. Confirm the latest pushed change exists on the remote branch (`git ls-remote origin <branch>` or `gh pr view <n> --json headRefOid`) and matches the local commit. Use the SHA only as verification evidence; do not draft or post a reply citing a SHA not yet on the remote.
+8. Only after push verification, draft each PR reply in chat. Keep replies brief: acknowledge the point and state the fix in one or two sentences. Vary the acknowledgement naturally: for an improvement use `Thank you, concern addressed.`, `Thanks, concern addressed.`, or `Appreciate it, concern addressed.` followed by the change; for a verified defect use the corresponding `issue confirmed and fixed` wording followed by the fix. Do not mention a commit by default; cite a SHA or commit link only when the operator explicitly requests it. Do not restate the full analysis or call an issue confirmed unless validation established it as a defect.
 9. Get explicit operator approval for each reply. Approval of one reply does not extend to others.
 10. Only after approval, post using the draft-first gate above.
+11. Resolve a review thread only after its approved reply was posted successfully and the corresponding fix is verified on the remote PR branch. Treat resolution as a separate GitHub write action: obtain explicit approval for the exact threads to resolve, resolve only those threads, and verify each reports `isResolved: true`. Leave unaddressed, partially addressed, disputed, or newly raised threads unresolved.
 
 Never post a reply, comment, or review until steps 1–9 are complete and the operator has approved the exact text of each reply.
 
