@@ -69,7 +69,6 @@ pre-PR review steps; invoke it directly when the user asks for a code review out
 Invoke the `install-agent-context` skill when the user runs `/install-agent-context` or explicitly asks to install
 agent instruction files across agents (Claude, Codex, Copilot CLI, Cursor). Do not run automatically.
 
-Invoke the `reload-agent-context` skill immediately after any agent context file is modified — by you, by another
-tool, by a script, or by a sub-agent — after commands that can rewrite context files (git checkout / pull / rebase
-/ merge / stash pop, patch apply, install-agent-context runs), when the user asks to reload context, and before
-applying rules from a context file that has been changed in-session but not re-read since the change.
+Invoke the `reload-agent-context` skill only when the user runs `/reload-agent-context` or explicitly asks to reload
+agent context. Do not invoke it automatically after file edits, scripts, sub-agent work, Git operations, context
+installation, or before applying changed context rules.

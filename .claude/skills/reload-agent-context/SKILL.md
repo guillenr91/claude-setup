@@ -1,21 +1,10 @@
 ---
 name: reload-agent-context
 description: >-
-  Re-read agent context files from disk after any modification so decisions
-  are not made against a stale in-context representation. Invoke immediately
-  after you or any other tool, sub-agent, script, or workflow modifies an
-  agent context file (root CLAUDE.md / AGENTS.md, every CLAUDE.md / AGENTS.md
-  under .claude/ or .agents/, every SKILL.md under .claude/skills/ or
-  .agents/skills/, files under .claude/styles/ or .agents/styles/, files
-  under .claude/context/ or .agents/context/, .cursor/rules/**, and any
-  per-agent instruction file the operator uses). Also invoke after operations
-  that can rewrite context files (git checkout / pull / rebase / merge / stash
-  pop, patch apply, install-agent-context runs, sub-agent or workflow
-  completions that reported writes), when the operator asks to reload context
-  or names a context file to re-read, and before applying rules from a
-  context file that has been modified in-session but not re-read since the
-  modification. Do not invoke for read-only operations on these files, or for
-  changes to non-context files.
+  Re-read agent context files from disk only when the operator explicitly
+  invokes /reload-agent-context or explicitly asks to reload agent context.
+  Never invoke automatically after file edits, scripts, sub-agent work, Git
+  operations, context installation, or before applying changed context rules.
 ---
 
 # Reload Agent Context Skill
@@ -23,7 +12,7 @@ description: >-
 Loaded into context when invoked. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting
 around prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
 
-Ensures agent context is re-read from disk after any modification so subsequent decisions run against the current file, not an older version cached in prior turns or the initial system prompt.
+Re-reads agent context from disk only when the operator explicitly requests it. It is never an automatic freshness check.
 
 ## What counts as agent context
 
@@ -40,25 +29,17 @@ Any file whose contents define agent behavior, project rules, style, workflow, o
 
 If unsure, treat as agent context and reload.
 
-## Triggers
+## Trigger
 
-Reload immediately after any of:
-
-1. You edited or wrote to a file listed above. The harness's "file state is current in your context" confirmation covers the tracked file state, not your working understanding — earlier turns still hold the older content. Re-read.
-2. Another tool, sub-agent, workflow, or script modified one of those files (install-agent-context runs, publish/deploy scripts, external editors, sub-agent completions that reported writes).
-3. The operator ran a command that can rewrite context files: `git checkout`, `git pull`, `git rebase`, `git merge`, `git stash pop`, `git reset --hard`, `git apply` / `patch`, or an in-place formatter run.
-4. The operator asks to reload context, or names a specific context file to re-read.
-5. Before applying rules from a context file changed in-session but not re-read since the change.
-
-Do not skip because the edit "seemed small" or because you can "remember what changed". The stale representation is what caused the problem.
+Invoke this skill only when the operator runs `/reload-agent-context` or explicitly asks to reload agent context or a named context file. Do not invoke for automatic freshness checks, including after edits, scripts, sub-agent work, Git operations, context installation, or changed context rules.
 
 ## Reload procedure
 
-1. Identify every context file modified since it was last read into your context. Include files you edited yourself — track state and working understanding are not the same thing.
-2. Re-read each changed file end-to-end. Do not read only the changed hunks — the file's rules may reference sections outside your edit.
-3. If a directory-level instruction file (`CLAUDE.md` / `AGENTS.md`) was modified, re-read it AND every child file it routes to.
-4. If a `SKILL.md` was modified for a skill currently loaded in the turn, treat the freshly-read content as authoritative and discard any prior in-context representation of that skill.
-5. After reload, re-verify any in-flight decision that used rules from the reloaded file. If a rule changed in a way that would have altered a prior decision this turn, name the affected decision to the operator and adjust.
+1. Identify the files the operator asked to reload. For `/reload-agent-context` without named files, identify every agent context file modified since the current turn began.
+2. Re-read each selected file end-to-end. Do not read only changed hunks; a rule may reference another section.
+3. If a selected directory-level instruction file (`CLAUDE.md` / `AGENTS.md`) routes to child files, re-read the routed child files.
+4. If a selected `SKILL.md` is currently loaded, treat the newly read content as authoritative.
+5. Re-check any in-flight decision that used a reloaded rule. If it changes the decision, state the impact and adjust.
 
 ## Reporting
 
@@ -69,10 +50,7 @@ After a reload, state which files were re-read and whether any rule changed the 
 
 ## Anti-patterns
 
-- "I just edited it, I know what it says" — the just-edited representation drifts as later turns compress or paraphrase. Re-read.
-- "It was only a typo fix, no need to reload" — you cannot verify the surrounding text is unchanged without reading it.
-- "I'll reload it later when I need it" — later is when the stale rule has already been applied. Reload now.
-- "The write tool's confirmation said file state is current" — that guarantees the tracked file state, not a refreshed working understanding. Re-read.
-- "The operator's IDE just saved something, I saw the notification" — the notification is not a read.
-- "The sub-agent's final message says it edited the file" — trust and verify. Re-read the file.
-- "I re-read the parent `CLAUDE.md` / `AGENTS.md` but not the child files it routes to" — routing changes are load-bearing. Re-read the tree.
+- Invoking after an edit, script, sub-agent change, Git operation, context installation, or rule change without an explicit operator request.
+- Treating this skill as a routine context-freshness check.
+- Reading only changed hunks when the operator asked to reload a file.
+- Re-reading a parent instruction file without its routed child files when the parent is in scope.
