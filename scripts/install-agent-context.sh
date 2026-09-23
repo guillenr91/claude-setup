@@ -98,9 +98,11 @@ transform_references() {
   perl -0pe "
     s#\\.claude/context/CLAUDE\\.md#${target_dir}/context/AGENTS.md#g;
     s#\\.claude/styles/CLAUDE\\.md#${target_dir}/styles/AGENTS.md#g;
+    s#\\.claude/evidence/CLAUDE\\.md#${target_dir}/evidence/AGENTS.md#g;
     s#\\.claude/context/#${target_dir}/context/#g;
     s#\\.claude/skills/#${target_dir}/skills/#g;
     s#\\.claude/styles/#${target_dir}/styles/#g;
+    s#\\.claude/evidence/#${target_dir}/evidence/#g;
     s#\\.claude/#${target_dir}/#g;
     s#\\.\\./context/CLAUDE\\.md#../context/AGENTS.md#g;
     s#\\.\\./styles/CLAUDE\\.md#../styles/AGENTS.md#g;
@@ -407,6 +409,7 @@ case "$AGENT" in
     CONTEXT_TARGET="$TARGET/.claude/context"
     SKILLS_TARGET="$TARGET/.claude/skills"
     STYLES_TARGET="$TARGET/.claude/styles"
+    EVIDENCE_TARGET="$TARGET/.claude/evidence"
     TARGET_DOC_DIR=".claude"
     RENAME_CLAUDE_FILES=0
     ;;
@@ -416,6 +419,7 @@ case "$AGENT" in
     CONTEXT_TARGET="$TARGET/.agents/context"
     SKILLS_TARGET="$TARGET/.agents/skills"
     STYLES_TARGET="$TARGET/.agents/styles"
+    EVIDENCE_TARGET="$TARGET/.agents/evidence"
     TARGET_DOC_DIR=".agents"
     RENAME_CLAUDE_FILES=1
     ;;
@@ -425,6 +429,7 @@ case "$AGENT" in
     CONTEXT_TARGET="$TARGET/.agents/context"
     SKILLS_TARGET="$TARGET/.agents/skills"
     STYLES_TARGET="$TARGET/.agents/styles"
+    EVIDENCE_TARGET="$TARGET/.agents/evidence"
     TARGET_DOC_DIR=".agents"
     RENAME_CLAUDE_FILES=1
     ;;
@@ -437,6 +442,7 @@ case "$AGENT" in
     CONTEXT_TARGET="$TARGET/.agents/context"
     SKILLS_TARGET="$TARGET/.agents/skills"
     STYLES_TARGET="$TARGET/.agents/styles"
+    EVIDENCE_TARGET="$TARGET/.agents/evidence"
     TARGET_DOC_DIR=".agents"
     RENAME_CLAUDE_FILES=1
     ;;
@@ -456,5 +462,6 @@ if [ "$SKIP_REPOSITORY" -eq 0 ]; then
   copy_tree "$SOURCE/.claude/context" "$CONTEXT_TARGET" "$RENAME_CLAUDE_FILES" "$RENAME_CLAUDE_FILES" "$TARGET_DOC_DIR"
   copy_tree "$SOURCE/.claude/skills" "$SKILLS_TARGET" "$RENAME_CLAUDE_FILES" "$RENAME_CLAUDE_FILES" "$TARGET_DOC_DIR"
   copy_tree "$SOURCE/.claude/styles" "$STYLES_TARGET" "$RENAME_CLAUDE_FILES" "$RENAME_CLAUDE_FILES" "$TARGET_DOC_DIR"
+  copy_tree "$SOURCE/.claude/evidence" "$EVIDENCE_TARGET" "$RENAME_CLAUDE_FILES" "$RENAME_CLAUDE_FILES" "$TARGET_DOC_DIR"
   write_fenced_gitignore "$TARGET/.gitignore"
 fi

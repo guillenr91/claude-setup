@@ -2,7 +2,7 @@
 name: install-agent-context
 description: >-
   Install managed agent instruction files (GLOBAL.md, CLAUDE.md, .claude/context/,
-  .claude/skills/, .claude/styles/) from the canonical source to per-agent
+  .claude/skills/, .claude/styles/, .claude/evidence/) from the canonical source to per-agent
   targets (Claude, Codex, Copilot CLI, Cursor). Invoke ONLY when the user runs
   `/install-agent-context` or explicitly asks to install agent context. Do not
   invoke automatically on observed staleness — the user drives this.
@@ -17,16 +17,16 @@ Install managed agent instruction files from the canonical source to per-agent t
 
 ## Scope
 
-Managed source files (canonical source only): `GLOBAL.md`, `CLAUDE.md`, `.claude/context/CLAUDE.md`, `.claude/skills/**`, `.claude/styles/**`.
+Managed source files (canonical source only): `GLOBAL.md`, `CLAUDE.md`, `.claude/context/CLAUDE.md`, `.claude/skills/**`, `.claude/styles/**`, `.claude/evidence/**`.
 
-Managed targets per agent — each line lists: global instructions | repo root | repo context | repo skills | repo styles.
+Managed targets per agent — each line lists: global instructions | repo root | repo context | repo skills | repo styles | reusable evidence.
 
-- Claude: `~/.claude/CLAUDE.md` | `CLAUDE.md` | `.claude/context/CLAUDE.md` | `.claude/skills/**` | `.claude/styles/**`
-- Codex: `~/.codex/AGENTS.md` | `AGENTS.md` | `.agents/context/AGENTS.md` | `.agents/skills/**` | `.agents/styles/**`
-- Copilot CLI: `$HOME/.copilot/copilot-instructions.md` | `AGENTS.md` | `.agents/context/AGENTS.md` | `.agents/skills/**` | `.agents/styles/**`
-- Cursor: `.cursor/rules/global/*.mdc` (per-repo, one file per `GLOBAL.md` section, alwaysApply — see "Cursor global rule as project rule" below) | `AGENTS.md` | `.agents/context/AGENTS.md` | `.agents/skills/**` | `.agents/styles/**`
+- Claude: `~/.claude/CLAUDE.md` | `CLAUDE.md` | `.claude/context/CLAUDE.md` | `.claude/skills/**` | `.claude/styles/**` | `.claude/evidence/**`
+- Codex: `~/.codex/AGENTS.md` | `AGENTS.md` | `.agents/context/AGENTS.md` | `.agents/skills/**` | `.agents/styles/**` | `.agents/evidence/**`
+- Copilot CLI: `$HOME/.copilot/copilot-instructions.md` | `AGENTS.md` | `.agents/context/AGENTS.md` | `.agents/skills/**` | `.agents/styles/**` | `.agents/evidence/**`
+- Cursor: `.cursor/rules/global/*.mdc` (per-repo, one file per `GLOBAL.md` section, alwaysApply — see "Cursor global rule as project rule" below) | `AGENTS.md` | `.agents/context/AGENTS.md` | `.agents/skills/**` | `.agents/styles/**` | `.agents/evidence/**`
 
-For Codex, Copilot CLI, and Cursor, `.agents/context/`, `.agents/skills/`, and `.agents/styles/` are managed project-local support docs. The root `AGENTS.md` must route agents to these support docs.
+For Codex, Copilot CLI, and Cursor, `.agents/context/`, `.agents/skills/`, `.agents/styles/`, and `.agents/evidence/` are managed project-local support docs. The root `AGENTS.md` must route agents to these support docs.
 
 Cursor consumes the same repo-local layout Codex produces. Cursor reads `AGENTS.md` at the repo root and nested subdirectories natively, and discovers skills under `.agents/skills/**/SKILL.md` natively.
 
@@ -40,7 +40,7 @@ Cursor consumes the same repo-local layout Codex produces. Cursor reads `AGENTS.
 3. Copy and migrate only managed files. Preserve relative subdirectories. Migration map:
     - `GLOBAL.md` → the agent's global target. Cursor has no supported way to create a global (User Rule) programmatically or from a file — Cursor's official rule-creation docs at <https://cursor.com/docs/rules#creating-a-rule> list exactly two methods (`/create-rule` in chat and Customize > Rules > Add Rule), both producing Project Rules. For `--agent cursor`, after the script finishes, invoke the `create-rule` skill to split `GLOBAL.md` into one Project Rule per top-level `#` section under `<repo>/.cursor/rules/global/`, each with `alwaysApply: true`. See "Cursor global rule as project rule" below. Do not create User Rules via MCP tools or scripts — those do not surface in Customize > Rules and are not the documented method.
     - `CLAUDE.md` → the agent's repo root. Written INSIDE a fenced region so team-owned content is preserved. See "Fenced root file" below.
-    - `.claude/context/`, `.claude/skills/`, `.claude/styles/` → keep as-is for Claude; rename `.claude/` → `.agents/` for Codex, Copilot CLI, and Cursor.
+    - `.claude/context/`, `.claude/skills/`, `.claude/styles/`, `.claude/evidence/` → keep as-is for Claude; rename `.claude/` → `.agents/` for Codex, Copilot CLI, and Cursor.
 4. Create directories only for managed copies. Do not delete, move, rename, or overwrite unrelated files.
 5. Update references when names change. The script's reference transform rewrites `.claude/` → `.agents/` and `CLAUDE.md` → `AGENTS.md` inside copied files for non-Claude targets.
 6. Keep repo-local root instruction files focused on repo-local concerns (context routing, style routing, dependency policy, commit conventions, review). Do not duplicate global behavior or tone sections.

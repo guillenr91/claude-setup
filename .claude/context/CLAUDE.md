@@ -10,7 +10,7 @@ Use this file to decide which project context to load. Paths relative to `.claud
 This directory owns project-specific facts. Two sub-buckets, hard boundary:
 
 1. `SETUP.md` and `TECHNICAL.md` — PROJECT-WIDE reference reused across tickets: module names, helper names, table schemas, env URLs, credentials guidance, debugging recipes, reusable building blocks, mappings from generic `styles/` placeholders to this project's actual identifiers.
-2. `tickets/<TICKET_ID>/` — TICKET-SCOPED only: analysis, plan, decisions, reproduction evidence for one piece of work. When a ticket finding turns out to be reusable, extract it into `TECHNICAL.md` (or `SETUP.md`) and leave only the ticket framing in the ticket file.
+2. `tickets/<TICKET_ID>/` — TICKET-SCOPED only: analysis, plan, decisions, reproduction evidence, and `evidence/<claim-id>.md` records for one piece of work. When a ticket finding turns out to be reusable, extract it into `TECHNICAL.md` (or `SETUP.md`) and leave only the ticket framing in the ticket file.
 
 Project-agnostic style and convention rules do NOT belong here — they go in `.claude/styles/`. See [.claude/styles/CLAUDE.md](../styles/CLAUDE.md).
 

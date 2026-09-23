@@ -69,6 +69,7 @@ Refer to it as `<TICKET_ID>` for the rest of the skill. Each ticket has its own 
 
 - `ANALYSIS.md` — problem, options, recommendation, decisions.
 - `PLAN.md` — phases, current phase, branch, status.
+- `evidence/<claim-id>.md` — compact reusable proof for an atomic verified claim; use only when `evidence-first` creates or updates a record.
 
 ## Step 2 — Pick the mode
 
