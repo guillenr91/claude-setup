@@ -28,16 +28,15 @@ writing.
 
 ## Style guides
 
-Before creating or modifying style guides, read [.claude/styles/CLAUDE.md](.claude/styles/CLAUDE.md).
+Before generating, modifying, or reviewing work in a domain covered by `.claude/styles/`, read the matching guide first:
 
-Before generating or reviewing work in a domain covered by `.claude/styles/`, read the matching style guide first:
-
+- Style-guide instructions and style-guide edits → [CLAUDE.md](.claude/styles/CLAUDE.md)
+- Confluence pages and Confluence-targeted content → [CONFLUENCE.md](.claude/styles/CONFLUENCE.md)
+- Workflow diagrams, architecture diagrams, and visual documentation → [DIAGRAMS.md](.claude/styles/DIAGRAMS.md)
 - Java code → [JAVA.md](.claude/styles/JAVA.md)
+- Jira issue descriptions, comments, and Jira-targeted drafts → [JIRA.md](.claude/styles/JIRA.md)
+- Markdown files that contain commands, setup steps, or procedures → [MARKDOWN.md](.claude/styles/MARKDOWN.md)
 - Postman collections, requests, environments, scripts → [POSTMAN.md](.claude/styles/POSTMAN.md)
-- Workflow diagrams, architecture diagrams, any visual documentation →
-  [DIAGRAMS.md](.claude/styles/DIAGRAMS.md)
-- Markdown files that contain commands, setup steps, or procedures →
-  [MARKDOWN.md](.claude/styles/MARKDOWN.md)
 - Any other domain with a Markdown file in `.claude/styles/` → that file.
 
 ## Answering with evidence
