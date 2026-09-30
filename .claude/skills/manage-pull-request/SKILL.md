@@ -15,7 +15,7 @@ description: >-
 Loaded into context when invoked. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting
 around prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
 
-Applies pre-PR review, GitHub write-action draft-first gate, addressing incoming PR feedback, and PR review authoring rules.
+Applies pre-PR review, GitHub write-action draft-first gate, addressing incoming PR feedback, PR review eligibility, and PR review authoring rules.
 
 ## Pre-PR review
 
@@ -25,7 +25,7 @@ Invoke the `code-review-effort` skill and apply its rules to the changes in the 
 
 ## Draft-first gate for GitHub write actions
 
-Applies to every action that creates or modifies content visible on GitHub: opening a PR (`gh pr create`), editing a PR title or description (`gh pr edit`), submitting a PR review or any inline review comment (`gh api` POSTs to `pulls/.../reviews` or `pulls/.../comments`), replying to existing PR review comments, and creating or commenting on issues. Local commits and `git push` are governed by commit-review.
+Applies to every action that creates or modifies content visible on GitHub: opening a PR (`gh pr create`), editing a PR title or description (`gh pr edit`), posting a top-level PR status or clarification comment, submitting a PR review or any inline review comment (`gh api` POSTs to `pulls/.../reviews` or `pulls/.../comments`), replying to existing PR review comments, and creating or commenting on issues. Local commits and `git push` are governed by commit-review.
 
 Never call the relevant API or `gh` write command until the operator has seen the exact draft and explicitly approved posting. Cover all of:
 
@@ -62,6 +62,47 @@ Follow in order. Do not merge or reorder steps. Do not skip because a step looks
 
 Never post a reply, comment, or review until steps 1–9 are complete and the operator has approved the exact text of each reply.
 
+## PR review eligibility gate
+
+Run this gate before starting any full PR review, invoking `code-review-effort`, analyzing the diff for findings, or
+drafting a verdict.
+
+1. Fetch the current PR merge state and complete GitHub check rollup with
+   `gh pr view "<PR>" --json headRefOid,mergeable,mergeStateStatus,statusCheckRollup`. Verify that the result belongs
+   to the current head, not an earlier commit.
+2. A PR is eligible for a full review only when it has no merge conflicts and every expected GitHub check is present,
+   complete, and successful. Treat an unknown merge state, missing expected check, pending or in-progress check, or
+   any non-success conclusion as ineligible. Do not treat skipped or neutral checks as green.
+3. When the PR is ineligible, stop before reviewing code. Draft one brief top-level PR comment that names the current
+   blockers — merge conflicts and/or each unsuccessful check with its status — and asks the author to resolve or
+   rerun them. Show the exact draft to the operator and obtain explicit approval under
+   `## Draft-first gate for GitHub write actions`, then post only that comment. Do not submit a GitHub review, verdict,
+   summary, triage table, or inline finding.
+4. After the author reports resolution, fetch the merge state and checks again. Start the full review only after the
+   gate passes on the current head commit.
+
+## Clarification questions during review
+
+A doubt that cannot be 100% verified is not a finding. Never give it `[BUG]`, `[SECURITY]`, `[PERFORMANCE]`,
+`[TEST]`, `[DOCS]`, `[MAINTAINABILITY]`, `[LEGACY BUG]`, or any other finding category. Do not include it in the
+triage table or use it to determine a verdict.
+
+Ask the author only when all locally available code, callers, contracts, configuration, history, and tests have been
+checked and the missing fact is both unavailable to the reviewer and necessary to complete the review. Otherwise,
+drop the doubt.
+
+When clarification is necessary:
+
+1. Draft one brief top-level PR comment containing the required question or questions. Use no bracketed category.
+   State the verified observation, identify the exact missing fact, and ask a neutral question without implying that
+   a defect exists.
+2. Show the exact draft to the operator and obtain explicit approval under
+   `## Draft-first gate for GitHub write actions` before posting.
+3. Post only the approved clarification comment and pause the review. Do not produce a triage table, inline finding,
+   summary, or verdict until the author answers.
+4. After the answer, verify it against the code and resume falsification. Promote the candidate to a categorized
+   finding only if it then survives falsification with direct evidence; otherwise drop it.
+
 ## PR review feedback
 
 The goal of every review comment is to help the developer improve their code or solve a detected issue. Comments that only point out problems without providing a path forward are not useful. Every comment should enable immediate action.
@@ -70,10 +111,17 @@ Invoke the `code-review-effort` skill before posting any feedback: discover the 
 
 When reviewing a PR:
 
+- Treat every concern as a candidate until it survives a deliberate attempt to disprove it. For every candidate,
+  identify evidence that would make it invalid, collect that evidence, and test the concern against the actual PR
+  code, callers, contracts, configuration, and relevant tests. Only real, valid concerns supported by direct evidence
+  may reach the operator or GitHub. Drop assumptions, inferences, guesses, concerns that were falsified, and concerns
+  whose falsifying evidence cannot be obtained. If author-only context is necessary to complete the review, route it
+  through `## Clarification questions during review`; it remains a question, not a finding.
+
 - Verdict selection is mechanical, not stylistic. After the `code-review-effort` pass, classify every surviving
   (evidence-first-verified) finding as blocking or non-blocking, then apply the table below. Do not default to
-  `COMMENT` to hedge — an unverified concern is not a blocker, and a non-blocking observation does not downgrade
-  approval.
+  `COMMENT` to hedge — an unverified concern is not a finding and must be dropped, and a non-blocking observation
+  does not downgrade approval.
 
   | Verified blockers? | Non-blocking findings? | Verdict         |
   |--------------------|------------------------|-----------------|
@@ -82,7 +130,7 @@ When reviewing a PR:
   | No                 | No                     | APPROVE         |
 
   A blocker is a VERIFIED (evidence-first-passed) finding that causes clear breakage, security risk, data loss, or
-  behavior likely to harm a supported workflow — see the `[BUG]` vs `[POSSIBLE ISSUE]` rules below. Edge cases,
+  behavior likely to harm a supported workflow — see the category rules below. Edge cases,
   hardening, polish, doc gaps, and low-risk maintainability are non-blocking unless evidence shows they break a
   supported workflow. Reserve `COMMENT` for genuinely-ambiguous cases where the operator explicitly declined to
   pick a side; state that reason in the summary if you use it.
@@ -91,14 +139,13 @@ When reviewing a PR:
   likely to harm a workflow. Edge cases, hardening, polish, doc gaps, and low-risk maintainability are non-blocking
   unless evidence shows they break a supported workflow. For additive PRs that don't break existing behavior, state
   the risk plainly and say whether it should block.
-- Prefix every comment title with an uppercase category in brackets: `[BUG]`, `[POSSIBLE ISSUE]`, `[SECURITY]`,
+- Prefix every finding comment title with an uppercase category in brackets: `[BUG]`, `[SECURITY]`,
   `[PERFORMANCE]`, `[TEST]`, `[DOCS]`, `[MAINTAINABILITY]`. Use `[LEGACY BUG]` for pre-existing issues — note
   them, but they don't block approval unless the PR makes them worse.
 
   Category selection — pick by the primary axis of concern, not the reviewer's convenience:
 
-  - `[BUG]` / `[POSSIBLE ISSUE]` — correctness. `[BUG]` = verified in-session to break; `[POSSIBLE ISSUE]` =
-    plausible defect, unverified.
+  - `[BUG]` — correctness defect verified to break a supported workflow.
   - `[SECURITY]` — exploitable weakness (auth, injection, secret exposure, sandbox escape, etc.).
   - `[PERFORMANCE]` — extra CPU, memory, I/O, latency, or cost with no correctness impact. Use for redundant
     reads, duplicate work, missing caches, hot-path allocations. Do NOT use `[MAINTAINABILITY]` for these —
@@ -108,12 +155,10 @@ When reviewing a PR:
   - `[MAINTAINABILITY]` — future readability, name/structure clarity, dead code, non-obvious invariants that
     should be commented. Reserve for concerns that only affect readers, not runtime behavior or cost.
 
-- Use `[BUG]` only when the issue has been VERIFIED in-session to block existing or new code (reproduced, traced
-  through the code path, or confirmed by test output). If the issue is a plausible defect you have not verified
-  blocks a workflow, use `[POSSIBLE ISSUE]` instead — it reflects that the concern is unverified. Do not upgrade
-  `[POSSIBLE ISSUE]` to `[BUG]` on suspicion alone. The same verification rule applies to `[PERFORMANCE]`: if the
-  regression is measured or traced in-session, state that; if it is a plausible-cost concern without a
-  measurement, keep the `[PERFORMANCE]` prefix but frame the body as an unverified concern to be confirmed.
+- Use `[BUG]` only when the issue has been verified to break existing or new code by reproduction, a complete trace
+  through the affected path, or test output. Drop plausible defects that cannot be verified. Apply the same standard
+  to every category: a `[PERFORMANCE]` concern requires a measurement or complete cost-path trace; `[SECURITY]`,
+  `[TEST]`, `[DOCS]`, and `[MAINTAINABILITY]` findings require direct evidence and a completed falsification attempt.
 - Start every inline comment with a brief title line, then a blank line, then the body. The title must include the
   category prefix and summarize the issue in one short sentence.
 - Start every summary review body with a brief title line, then a blank line, then the body. The summary title must
@@ -135,29 +180,21 @@ Tone for review comments:
 - Voice: write every comment in first person as the operator (the repository owner). Use "I" to refer to the
   operator, not to yourself. The reviewer agent must be invisible — never let the agent's identity leak (e.g.
   "I (Claude)", "I (Codex)", "I (Cursor)", "the agent", "from my read as an assistant") or anything that breaks
-  the operator-as-reviewer voice. Example: "I checked the auth middleware and noticed X — could you verify
-  whether…". The drafts shown to the operator for approval use this same voice so the operator can edit before
-  posting.
+  the operator-as-reviewer voice. Example: "I traced the auth path and confirmed X bypasses Y when Z; could you
+  preserve Y in this branch?". The drafts shown to the operator for approval use this same voice so the operator can
+  edit before posting.
 - Apply the global `# Shared-surface writing` rule to every comment body. No agent-internal terminology in the
   comment — no "in-session", "this session", "my context", "the falsification pass", "my working notes", skill
-  or tool names — translate to operator voice like "I couldn't reproduce this locally" or "I wasn't able to
-  verify from the diff alone". No reference to a local file the author can't access without confirming with
-  the operator that it will be attached or that the content should be restated inline.
-- Frame findings as observations to verify, not asserted facts. The reviewer's context is incomplete; the author
-  has context the reviewer doesn't. Write comments that invite verification rather than declare verdicts.
-- Use phrasing like "I want to flag a scenario I couldn't verify on my side", "could you verify whether…",
-  "from my read it looks like…", "I noticed X — was that intentional?". Avoid "this is broken", "this will
-  fail", "this introduces a bug" unless you have reproduced the failure in this session.
-- When you cannot reproduce a concern in-session, say so explicitly and ask the author to confirm or refute.
-  State what you'd need to verify it yourself if relevant.
+  or tool names. No reference to a local file the author can't access without confirming with the operator that it
+  will be attached or that the content should be restated inline.
+- Categorized findings must state the verified observation and evidence-backed impact. Never disguise an unverified
+  doubt as a softened finding or ask the author to validate it inside a categorized comment. Use
+  `## Clarification questions during review` when an answer is necessary to complete the review.
 - Suggestions are offers, not orders. "Would you consider…", "up to you — happy to keep it inline if you prefer
   minimal churn" is fine for non-blocking polish. Reserve direct imperative phrasing for issues you have evidence
   for.
-- Keep the category prefix (`[BUG]`, `[POSSIBLE ISSUE]`, `[TEST]`, etc.) on inline comments — the prefix signals
-  severity AND verification state; the body should still invite verification rather than declare it.
-- The category encodes verification. `[BUG]` means verified-blocking; `[POSSIBLE ISSUE]` means unverified. If you
-  cannot reproduce or trace the failure in-session, the correct prefix is `[POSSIBLE ISSUE]`, not `[BUG]` softened
-  with hedging language.
+- Keep the category prefix (`[BUG]`, `[TEST]`, etc.) on inline comments. Every category means the finding survived
+  falsification and is supported by direct evidence; the category identifies its primary impact, not uncertainty.
 
 Posting review comments:
 
@@ -167,15 +204,16 @@ Drafting workflow for review comments:
 
 Hard sequence — do not merge, skip, or reorder these steps. Each is a stop-and-wait gate.
 
-1. GATHER + VALIDATE — collect every candidate finding surfaced by the `code-review-effort` pass, then validate
+1. GATHER + FALSIFY + VALIDATE — collect every candidate finding surfaced by the `code-review-effort` pass, then validate
    each one against the actual code on the PR (the diff plus any file, caller, contract, or config the finding
    depends on) BEFORE the triage table exists. A finding reaches the triage table only when in-session evidence
-   from the PR code confirms it is a real, valid concern. Also run the falsification step (`code-review-effort`
-   Rule 3): name the evidence that would prove the finding WRONG and go collect it. Drop any finding that fails
-   validation against the PR code, that the falsification pass actually falsified, or whose falsifying evidence
-   you cannot obtain in-session. Do NOT include "I could not verify but wanted to flag" findings — go verify
-   against the PR code first, or drop. The operator's triage input in step 2 is the validated-and-survived list
-   only.
+   from the PR code confirms it is a real, valid concern. Run the falsification step (`code-review-effort` Rule 3)
+   for EVERY candidate: name the evidence that would prove the finding WRONG, actively collect it, and record why
+   the candidate survived. Drop any finding that fails validation, is disproved, relies on an assumption or
+   inference, or lacks obtainable falsifying evidence. Do NOT include "I could not verify but wanted to flag"
+   findings. If a missing author-only fact is necessary to complete the review, follow
+   `## Clarification questions during review` and stop before step 2 until the author answers. The operator's triage
+   input in step 2 is the validated-and-survived list only.
 
 2. TRIAGE TABLE (mandatory, FIRST operator interaction) — the very next thing you show the operator after the
    review pass is the triage table below. It must be the first thing in your message. Do NOT precede it with a
