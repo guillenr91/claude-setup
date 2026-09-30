@@ -53,6 +53,36 @@ Do not: add vertical space or line breaks just because an expression has multipl
 Exception: wrap aggressively when the line hides a condition, repeats long expressions, or exceeds the project's
 formatter conventions.
 
+### Rule: import types used in declarations
+
+Trigger: a declaration uses a type outside the current package.
+
+Do: import the type and use its simple name in the declaration.
+
+Do not: use a fully qualified type name in a parameter, return type, field, local, or generic signature when an import expresses the dependency clearly.
+
+Exception: use a fully qualified name when two required types share the same simple name and an import would make the declaration ambiguous.
+
+### Rule: omit unused checked exceptions
+
+Trigger: a method signature declares a checked exception.
+
+Do: declare the exception only when the method body or its contract can throw it to callers.
+
+Do not: retain `throws Exception` after the throwing operation has been removed or handled.
+
+Exception: preserve an inherited, implemented, or externally specified method contract.
+
+### Rule: use switch expressions for value dispatch
+
+Trigger: Java 17+ code selects a value from a finite set of keys and each branch returns or yields a value.
+
+Do: use a switch expression with arrow cases; use a block and `yield` only when a case has required side effects before its value.
+
+Do not: use statement-style switch fall-through or mutable temporary values solely to return one selected value.
+
+Exception: use an `if` chain when predicates are ranges, type tests, or other non-discrete conditions.
+
 ### Rule: name non-trivial intermediate results once
 
 Trigger: an expression performs a non-trivial lookup, transformation, or selection and its result feeds later decisions, logging, or assembly.
@@ -437,6 +467,14 @@ Do: extract the lambda body into a helper whose name describes the per-element d
 
 Do not: hide a lookup, validation, and fallback policy inside a block lambda. It prevents readers from scanning the collection flow and makes the per-element contract difficult to find or test.
 
+For an object-copy mapping, name the helper after the copy invariant and use a method reference in the stream.
+
+```java
+return sources.stream()
+        .map(this::copyWithoutOwner)
+        .collect(Collectors.toSet());
+```
+
 Exception: keep a lambda inline when it is a single clear projection, predicate, or method call with no branch or local state.
 
 ```java
@@ -528,6 +566,36 @@ all — an empty Javadoc block is worse than none.
  */
 private static final long UNIT_BOUNDARY = 1_000_000_000_000L;
 ```
+
+### Rule: document non-trivial methods
+
+Trigger: adding or modifying a method with more than three lines.
+
+Do: add concise Javadoc directly above the method that explains its purpose, the essential approach, and the reason the method or its non-obvious behavior is needed.
+
+Do not: make a reader infer an invariant, object-ownership boundary, or intentional omission from the method body alone.
+
+Exception: omit Javadoc for test methods, or for a method of three lines or fewer when its purpose, operation, and reason are obvious from its name, parameters, and body.
+
+### Rule: explain complex test scenarios in code
+
+Trigger: a test needs multi-step setup, uses fakes, proxies, or mocks, or has assertions whose connection to the regression behavior is not immediately obvious.
+
+Do: add concise comments before the relevant setup and assertion stages that explain the scenario being modeled, why it matters, and how the setup or assertion proves the expected behavior.
+
+Do not: add Javadoc solely because a test is complex, or narrate self-evident test syntax.
+
+Exception: omit comments when the setup and assertions already make the scenario, purpose, and proof obvious.
+
+### Rule: name methods with an action and result subject
+
+Trigger: adding or renaming a method.
+
+Do: use a brief action-result name that distinguishes construction from copying and names the produced or affected subject, such as `createPerson` or `createPersonCopy`.
+
+Do not: use vague verbs (`process`, `handle`, `manage`) or names that hide whether a method creates, copies, transforms, loads, validates, or removes its subject.
+
+Exception: preserve established framework callbacks, JavaBean accessors, and interface methods whose names are fixed by their contract.
 
 ### Rule: use Javadoc for Java contracts that newcomers must understand
 
