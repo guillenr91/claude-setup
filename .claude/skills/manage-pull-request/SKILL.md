@@ -38,7 +38,8 @@ Approval rules:
 - Approval must be explicit. "Looks good", "go ahead", "post it", "ship it", or equivalent counts. Do not infer approval from silence, earlier turns, or prior approvals on different content.
 - Approval of one draft does not extend to later edits. After any non-trivial change, re-confirm.
 - For PRs, approval covers `gh pr create` only if title, body, base, and head are all unambiguous in the draft. Otherwise confirm separately.
-- For PR reviews, approval covers the verdict (approve vs. request changes) only if the verdict is unambiguous in the drafts.
+- For PR reviews, approval covers the verdict or no-verdict `COMMENT` event only if the selected event is unambiguous
+  in the drafts.
 
 If the operator rejects a draft or part of it, drop the rejected piece. Do not post it anyway, and do not re-draft a near-duplicate to argue.
 
@@ -132,8 +133,8 @@ When reviewing a PR:
   A blocker is a VERIFIED (evidence-first-passed) finding that causes clear breakage, security risk, data loss, or
   behavior likely to harm a supported workflow — see the category rules below. Edge cases,
   hardening, polish, doc gaps, and low-risk maintainability are non-blocking unless evidence shows they break a
-  supported workflow. Reserve `COMMENT` for genuinely-ambiguous cases where the operator explicitly declined to
-  pick a side; state that reason in the summary if you use it.
+  supported workflow. Use the no-verdict `COMMENT` event only when the operator explicitly chooses to submit inline
+  comments without approving or requesting changes. Do not select it merely to hedge.
 
 - Calibrate state to impact. `REQUEST_CHANGES` only for clear breakage, security risk, data loss, or behavior
   likely to harm a workflow. Edge cases, hardening, polish, doc gaps, and low-risk maintainability are non-blocking
@@ -163,7 +164,8 @@ When reviewing a PR:
   category prefix and summarize the issue in one short sentence.
 - Start every summary review body with a brief title line, then a blank line, then the body. The summary title must
   not include a category prefix. It should state the review verdict, such as `Approved`, `Approved with comments`,
-  `Requesting changes`, or `Commenting for visibility`.
+  or `Requesting changes`. Exception: when submitting inline comments with the no-verdict `COMMENT` event, use the
+  exact summary body `Added comments, please review.` with no additional verdict text.
 - Each comment must be actionable: state what you observed, explain why it matters, and offer a path forward. The
   developer should be able to resolve the comment without further clarification.
 - Do not call a change unsafe, broken, or workflow-impacting unless the evidence supports that severity.
@@ -204,16 +206,25 @@ Drafting workflow for review comments:
 
 Hard sequence — do not merge, skip, or reorder these steps. Each is a stop-and-wait gate.
 
-1. GATHER + FALSIFY + VALIDATE — collect every candidate finding surfaced by the `code-review-effort` pass, then validate
-   each one against the actual code on the PR (the diff plus any file, caller, contract, or config the finding
-   depends on) BEFORE the triage table exists. A finding reaches the triage table only when in-session evidence
-   from the PR code confirms it is a real, valid concern. Run the falsification step (`code-review-effort` Rule 3)
-   for EVERY candidate: name the evidence that would prove the finding WRONG, actively collect it, and record why
-   the candidate survived. Drop any finding that fails validation, is disproved, relies on an assumption or
-   inference, or lacks obtainable falsifying evidence. Do NOT include "I could not verify but wanted to flag"
-   findings. If a missing author-only fact is necessary to complete the review, follow
+1. READ DISCUSSION + GATHER + FALSIFY + VALIDATE — before producing findings, fetch all visible top-level PR
+   comments, submitted reviews, inline review comments, replies, and review threads from every participant. Read the
+   complete discussion, including resolved and outdated threads. Use the top-level issue-comments, pull-request
+   reviews, and pull-request review-comments API endpoints with pagination, or an equivalent connector that proves
+   all three sets were retrieved; do not infer completeness from one endpoint. Then collect every candidate finding
+   surfaced by the `code-review-effort` pass and validate each one against the actual code on the PR (the diff plus
+   any file, caller, contract, or config the finding depends on) BEFORE the triage table exists. A finding reaches
+   the triage table only when in-session evidence from the PR code confirms it is a real, valid concern. Run the
+   falsification step (`code-review-effort` Rule 3) for EVERY candidate: name the evidence that would prove the
+   finding WRONG, actively collect it, and record why the candidate survived. Drop any finding that fails validation,
+   is disproved, relies on an assumption or inference, or lacks obtainable falsifying evidence. Do NOT include
+   "I could not verify but wanted to flag" findings. Compare each survivor with the existing discussion by root
+   cause, trigger, and impact, not wording or exact line. If the same concern already appears anywhere in the existing
+   discussion, drop the duplicate from the triage table and do not create a new inline comment. Record the existing
+   comment URL or ID in working notes.
+   Re-fetch the discussion immediately before step 2 and repeat the duplicate check so comments added during the
+   review are not repeated. If a missing author-only fact is necessary to complete the review, follow
    `## Clarification questions during review` and stop before step 2 until the author answers. The operator's triage
-   input in step 2 is the validated-and-survived list only.
+   input in step 2 is the validated, unique, survived list only.
 
 2. TRIAGE TABLE (mandatory, FIRST operator interaction) — the very next thing you show the operator after the
    review pass is the triage table below. It must be the first thing in your message. Do NOT precede it with a
@@ -252,7 +263,7 @@ Hard sequence — do not merge, skip, or reorder these steps. Each is a stop-and
      Those come in step 4.
    - Immediately AFTER the table (still in the same message), on one line, state the verdict that follows
      from the `Blocking?` column via the verdict-selection table above (`APPROVE` / `REQUEST_CHANGES`), so the
-     operator can override before drafting. One line, no rationale prose.
+     operator can override or choose a no-verdict `COMMENT` event before drafting. One line, no rationale prose.
    - If additional context is required for the operator to decide (e.g. a review capability failed to run),
      add ONE short line after the verdict line naming what was skipped and why. Do not expand into a status
      narrative.
@@ -262,18 +273,19 @@ Hard sequence — do not merge, skip, or reorder these steps. Each is a stop-and
 
 4. DRAFT BODIES — for each kept row, and only for those rows, draft the full inline-comment body (title line
    + blank + body — brief and concise, no `suggestion` blocks, per the review-comment rules above). Show the
-   operator the exact body, the file and line it will attach to, and the proposed verdict.
+   operator the exact body, the file and line it will attach to, and the proposed verdict or no-verdict `COMMENT`
+   event. Re-fetch existing discussion first and drop any finding whose concern appeared since step 1.
 
 5. EDIT — apply changes the operator requests. If they reject a body after seeing it, drop it; do not post it
    anyway or re-draft a near-duplicate to argue.
 
-6. POST — only after explicit approval on the final drafts AND the verdict, run the posting steps below.
+6. POST — only after explicit approval on the final drafts AND the review event, run the posting steps below.
 
 After approval:
 
 All inline comments and the summary MUST be posted as a single grouped GitHub review — one `POST` to
 `/repos/{owner}/{repo}/pulls/{pull_number}/reviews` that embeds every inline comment in the `comments` array
-and includes the summary in `body` and the verdict in `event`. Do not call
+and includes the summary in `body` and the approved review event in `event`. Do not call
 `/repos/{owner}/{repo}/pulls/{pull_number}/comments` per finding; that creates ungrouped top-level review
 comments instead of a single review.
 
@@ -285,7 +297,7 @@ Endpoint and payload schema, verified against the GitHub REST docs for "Create a
 - `event` accepts one of: `APPROVE`, `REQUEST_CHANGES`, `COMMENT`. Omitting `event` creates a `PENDING` review
   that must be submitted later; do not omit it for a normal review submission.
 - `body` (top level) is required when `event` is `REQUEST_CHANGES` or `COMMENT`. It may be omitted for `APPROVE`,
-  but include it anyway so the verdict carries the summary.
+  but include it anyway so the review carries the summary.
 - Each entry in `comments[]` requires `path` and `body`. Positioning fields:
     - `line` (integer) — the file line in the diff to attach the comment to. For multi-line comments, this is
       the last line of the range.
@@ -313,11 +325,12 @@ Drafting and submission steps:
 4. Preserve Markdown newlines exactly when constructing the API payload. Do not encode newlines manually as literal
    `\n` text inside shell strings. Build the body from a real multiline source, such as a temporary Markdown file read
    with `jq --rawfile`, or another method that proves the JSON string contains actual newline characters.
-5. Set `body` on the review object to a brief, concise summary that:
-    - Lists what was verified (claims tested, tests run, code paths checked) in one line each.
-    - Briefly references the inline findings included in this review (do not repeat full details).
-    - States the overall verdict and reasoning in one or two sentences.
-6. Set `event` to `APPROVE`, `REQUEST_CHANGES`, or `COMMENT` based on the approved verdict.
+5. Set `body` on the review object:
+    - For `APPROVE` or `REQUEST_CHANGES`, use a brief, concise summary that lists what was verified in one line each,
+      briefly references the included inline findings without repeating them, and states the verdict and reasoning in
+      one or two sentences.
+    - For a no-verdict `COMMENT` review containing inline comments, use exactly `Added comments, please review.`
+6. Set `event` to the explicitly approved `APPROVE`, `REQUEST_CHANGES`, or no-verdict `COMMENT` event.
 7. Submit the review with one API call. Example template; replace `<owner>`, `<repo>`, `<pull_number>`, and the
    payload contents:
    ```bash
