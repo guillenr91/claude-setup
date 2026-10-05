@@ -1,7 +1,6 @@
 # Skill Instructions
 
-Loaded into context when invoked. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting
-around prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
+Apply the global `# Context` brevity and formatting rules to this file.
 
 Use this file before creating or modifying any skill in `.claude/skills/`. Each skill lives in its own directory as
 `.claude/skills/<skill-name>/SKILL.md` and is loaded only when triggered.
@@ -21,8 +20,7 @@ description: >-
 
 # <Skill Title>
 
-Loaded into context when invoked. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting
-around prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
+Apply the global `# Context` brevity and formatting rules to this file.
 ```
 
 After the standard opening line, add one short sentence stating the skill's purpose.
@@ -38,7 +36,6 @@ After the standard opening line, add one short sentence stating the skill's purp
 
 ## Updating skills
 
-- Update an existing rule in place when the behavior already belongs to it.
-- Add a new section only when it changes a decision the agent makes.
+- Apply the global `# Instruction deduplication` rules.
 - When pruning, preserve every actionable rule. Cosmetic phrasing changes are fine; rule drops require deliberate judgment.
 - Preserve the required header (YAML frontmatter + title + standard opening line) when editing existing skills.

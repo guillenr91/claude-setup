@@ -12,10 +12,20 @@ description: >-
 
 # Sync Ticket Context Skill
 
-Loaded into context when invoked. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting
-around prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
+Apply the global `# Context` brevity and formatting rules to this file.
 
 On-demand refresh of ticket-scoped files and project-level reference files based on what was learned this session. Writes ticket-scope facts to `.claude/context/tickets/<TICKET_ID>/` (or `.agents/context/tickets/<TICKET_ID>/` for non-Claude agents), and durable project-scope facts to `SETUP.md` / `TECHNICAL.md`.
+
+## Contents
+
+- [Boundary with the `ticket` skill](#boundary-with-the-ticket-skill)
+- [Step 0 — Establish the active ticket](#step-0--establish-the-active-ticket)
+- [Step 1 — Collect what changed](#step-1--collect-what-changed)
+- [Step 2 — Classify each finding](#step-2--classify-each-finding)
+- [Step 3 — Update ticket files](#step-3--update-ticket-files)
+- [Step 4 — Extract durable findings to project files](#step-4--extract-durable-findings-to-project-files)
+- [Step 5 — Report](#step-5--report)
+- [Hard rules](#hard-rules)
 
 ## Boundary with the `ticket` skill
 
@@ -96,7 +106,7 @@ After all writes:
 
 ## Hard rules
 
-- Never write a finding you did not verify this session as fact. Apply the evidence-first skill's rules to every persisted claim.
+- Apply `evidence-first` to every persisted claim.
 - Never overwrite a decisions-log entry to make it look right in hindsight. Append a corrective entry.
 - Never edit project-agnostic style/convention files under `.claude/styles/` (or `.agents/styles/`) from this skill. See `.claude/styles/CLAUDE.md` (or `.agents/styles/AGENTS.md`).
 - Never persist ticket ID, temporary tags, or disposable resource names into `SETUP.md` / `TECHNICAL.md`. Those belong in ticket files.

@@ -1,9 +1,31 @@
 # Confluence Style Guide
 
-Loaded into context when read. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting around
-prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
+Apply the global `# Context` brevity and formatting rules to this file.
 
 Use this guide when converting Markdown documentation into Confluence pages or reviewing Confluence-targeted content.
+
+## Contents
+
+- [Rule: Use the Atlassian MCP plugin for every Confluence read and write](#rule-use-the-atlassian-mcp-plugin-for-every-confluence-read-and-write)
+- [Rule: Know the degradations a reserializing write tool causes](#rule-know-the-degradations-a-reserializing-write-tool-causes)
+- [Rule: Round-trip through the structured format, not Markdown](#rule-round-trip-through-the-structured-format-not-markdown)
+- [Rule: Size the page so one full-body update fits in a single response](#rule-size-the-page-so-one-full-body-update-fits-in-a-single-response)
+- [Rule: Treat the Confluence title as the document H1](#rule-treat-the-confluence-title-as-the-document-h1)
+- [Rule: Promote body sections one level after removing the title](#rule-promote-body-sections-one-level-after-removing-the-title)
+- [Rule: Use the native Confluence table of contents](#rule-use-the-native-confluence-table-of-contents)
+- [Rule: Keep Confluence pages self-contained](#rule-keep-confluence-pages-self-contained)
+- [Rule: Replace local setup assumptions with reader location](#rule-replace-local-setup-assumptions-with-reader-location)
+- [Rule: Preserve linear guide flow](#rule-preserve-linear-guide-flow)
+- [Rule: Explain what each step does before commands](#rule-explain-what-each-step-does-before-commands)
+- [Rule: Keep configuration minimal](#rule-keep-configuration-minimal)
+- [Rule: Prefer concise success signals over test transcripts](#rule-prefer-concise-success-signals-over-test-transcripts)
+- [Rule: Use Confluence-friendly code blocks](#rule-use-confluence-friendly-code-blocks)
+- [Rule: Prefer ADF only when the structured HTML format cannot express the content](#rule-prefer-adf-only-when-the-structured-html-format-cannot-express-the-content)
+- [Rule: Use tables for compact reference data](#rule-use-tables-for-compact-reference-data)
+- [Rule: Use bullets for short outcomes and records](#rule-use-bullets-for-short-outcomes-and-records)
+- [Rule: Use links that survive Confluence conversion](#rule-use-links-that-survive-confluence-conversion)
+- [Rule: Keep Confluence page titles concise](#rule-keep-confluence-page-titles-concise)
+- [Rule: Fetch after publishing](#rule-fetch-after-publishing)
 
 ### Rule: Use the Atlassian MCP plugin for every Confluence read and write
 

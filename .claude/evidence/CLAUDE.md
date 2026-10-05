@@ -1,6 +1,6 @@
 # Evidence Record Guide
 
-Loaded into context when read. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting around prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
+Apply the global `# Context` brevity and formatting rules to this file.
 
 Stores project-level evidence only when no ticket is active. For ticket work, store records in `.claude/context/tickets/<TICKET_ID>/evidence/`. The `evidence-first` skill owns verification and reuse decisions.
 

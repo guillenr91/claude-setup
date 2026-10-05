@@ -12,10 +12,18 @@ description: >-
 
 # Manage Pull Request Skill
 
-Loaded into context when invoked. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting
-around prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
+Apply the global `# Context` brevity and formatting rules to this file.
 
 Applies pre-PR review, GitHub write-action draft-first gate, addressing incoming PR feedback, PR review eligibility, and PR review authoring rules.
+
+## Contents
+
+- [Pre-PR review](#pre-pr-review)
+- [Draft-first gate for GitHub write actions](#draft-first-gate-for-github-write-actions)
+- [Addressing incoming PR feedback](#addressing-incoming-pr-feedback)
+- [PR review eligibility gate](#pr-review-eligibility-gate)
+- [Clarification questions during review](#clarification-questions-during-review)
+- [PR review feedback](#pr-review-feedback)
 
 ## Pre-PR review
 
@@ -27,21 +35,11 @@ Invoke the `code-review-effort` skill and apply its rules to the changes in the 
 
 Applies to every action that creates or modifies content visible on GitHub: opening a PR (`gh pr create`), editing a PR title or description (`gh pr edit`), posting a top-level PR status or clarification comment, submitting a PR review or any inline review comment (`gh api` POSTs to `pulls/.../reviews` or `pulls/.../comments`), replying to existing PR review comments, and creating or commenting on issues. Local commits and `git push` are governed by commit-review.
 
-Never call the relevant API or `gh` write command until the operator has seen the exact draft and explicitly approved posting. Cover all of:
+Apply the global `# Shared-surface publishing` rule. GitHub-specific approval scope:
 
-1. PR creation: draft the title and full body (Summary, Test plan, any other sections) in chat first. Show the target base and head branch. Wait for explicit approval before running `gh pr create`. Same rule for `gh pr edit`.
-2. PR review comments: handled by the drafting workflow under `## PR review feedback`. The gate here applies in addition.
-3. PR review replies: draft the reply in chat first, show which comment it replies to (file, line, original comment text or ID), and wait for explicit approval before posting. Same rule for issue-comment replies.
-
-Approval rules:
-
-- Approval must be explicit. "Looks good", "go ahead", "post it", "ship it", or equivalent counts. Do not infer approval from silence, earlier turns, or prior approvals on different content.
-- Approval of one draft does not extend to later edits. After any non-trivial change, re-confirm.
-- For PRs, approval covers `gh pr create` only if title, body, base, and head are all unambiguous in the draft. Otherwise confirm separately.
-- For PR reviews, approval covers the verdict or no-verdict `COMMENT` event only if the selected event is unambiguous
-  in the drafts.
-
-If the operator rejects a draft or part of it, drop the rejected piece. Do not post it anyway, and do not re-draft a near-duplicate to argue.
+- PR creation or edit: draft the title and full body; show the base and head branches.
+- PR review: follow `## PR review feedback`; approval must cover the verdict or no-verdict `COMMENT` event.
+- PR or issue reply: show the target comment's file, line, text, or ID with the draft.
 
 ## Addressing incoming PR feedback
 
@@ -60,8 +58,6 @@ Follow in order. Do not merge or reorder steps. Do not skip because a step looks
 9. Get explicit operator approval for each reply. Approval of one reply does not extend to others.
 10. Only after approval, post using the draft-first gate above.
 11. Resolve a review thread only after its approved reply was posted successfully and the corresponding fix is verified on the remote PR branch. Treat resolution as a separate GitHub write action: obtain explicit approval for the exact threads to resolve, resolve only those threads, and verify each reports `isResolved: true`. Leave unaddressed, partially addressed, disputed, or newly raised threads unresolved.
-
-Never post a reply, comment, or review until steps 1–9 are complete and the operator has approved the exact text of each reply.
 
 ## PR review eligibility gate
 
@@ -112,12 +108,9 @@ Invoke the `code-review-effort` skill before posting any feedback: discover the 
 
 When reviewing a PR:
 
-- Treat every concern as a candidate until it survives a deliberate attempt to disprove it. For every candidate,
-  identify evidence that would make it invalid, collect that evidence, and test the concern against the actual PR
-  code, callers, contracts, configuration, and relevant tests. Only real, valid concerns supported by direct evidence
-  may reach the operator or GitHub. Drop assumptions, inferences, guesses, concerns that were falsified, and concerns
-  whose falsifying evidence cannot be obtained. If author-only context is necessary to complete the review, route it
-  through `## Clarification questions during review`; it remains a question, not a finding.
+- Apply `code-review-effort` Rule 3 to every candidate. Only findings that survive falsification with direct evidence
+  may reach the operator or GitHub. Route necessary author-only facts through
+  `## Clarification questions during review`; they remain questions, not findings.
 
 - Verdict selection is mechanical, not stylistic. After the `code-review-effort` pass, classify every surviving
   (evidence-first-verified) finding as blocking or non-blocking, then apply the table below. Do not default to
@@ -136,10 +129,6 @@ When reviewing a PR:
   supported workflow. Use the no-verdict `COMMENT` event only when the operator explicitly chooses to submit inline
   comments without approving or requesting changes. Do not select it merely to hedge.
 
-- Calibrate state to impact. `REQUEST_CHANGES` only for clear breakage, security risk, data loss, or behavior
-  likely to harm a workflow. Edge cases, hardening, polish, doc gaps, and low-risk maintainability are non-blocking
-  unless evidence shows they break a supported workflow. For additive PRs that don't break existing behavior, state
-  the risk plainly and say whether it should block.
 - Prefix every finding comment title with an uppercase category in brackets: `[BUG]`, `[SECURITY]`,
   `[PERFORMANCE]`, `[TEST]`, `[DOCS]`, `[MAINTAINABILITY]`. Use `[LEGACY BUG]` for pre-existing issues — note
   them, but they don't block approval unless the PR makes them worse.
@@ -179,16 +168,7 @@ When reviewing a PR:
 
 Tone for review comments:
 
-- Voice: write every comment in first person as the operator (the repository owner). Use "I" to refer to the
-  operator, not to yourself. The reviewer agent must be invisible — never let the agent's identity leak (e.g.
-  "I (Claude)", "I (Codex)", "I (Cursor)", "the agent", "from my read as an assistant") or anything that breaks
-  the operator-as-reviewer voice. Example: "I traced the auth path and confirmed X bypasses Y when Z; could you
-  preserve Y in this branch?". The drafts shown to the operator for approval use this same voice so the operator can
-  edit before posting.
-- Apply the global `# Shared-surface writing` rule to every comment body. No agent-internal terminology in the
-  comment — no "in-session", "this session", "my context", "the falsification pass", "my working notes", skill
-  or tool names. No reference to a local file the author can't access without confirming with the operator that it
-  will be attached or that the content should be restated inline.
+- Apply the global `# Shared-surface writing` rule to every comment and draft.
 - Categorized findings must state the verified observation and evidence-backed impact. Never disguise an unverified
   doubt as a softened finding or ask the author to validate it inside a categorized comment. Use
   `## Clarification questions during review` when an answer is necessary to complete the review.
@@ -206,21 +186,12 @@ Drafting workflow for review comments:
 
 Hard sequence — do not merge, skip, or reorder these steps. Each is a stop-and-wait gate.
 
-1. READ DISCUSSION + GATHER + FALSIFY + VALIDATE — before producing findings, fetch all visible top-level PR
-   comments, submitted reviews, inline review comments, replies, and review threads from every participant. Read the
-   complete discussion, including resolved and outdated threads. Use the top-level issue-comments, pull-request
-   reviews, and pull-request review-comments API endpoints with pagination, or an equivalent connector that proves
-   all three sets were retrieved; do not infer completeness from one endpoint. Then collect every candidate finding
-   surfaced by the `code-review-effort` pass and validate each one against the actual code on the PR (the diff plus
-   any file, caller, contract, or config the finding depends on) BEFORE the triage table exists. A finding reaches
-   the triage table only when in-session evidence from the PR code confirms it is a real, valid concern. Run the
-   falsification step (`code-review-effort` Rule 3) for EVERY candidate: name the evidence that would prove the
-   finding WRONG, actively collect it, and record why the candidate survived. Drop any finding that fails validation,
-   is disproved, relies on an assumption or inference, or lacks obtainable falsifying evidence. Do NOT include
-   "I could not verify but wanted to flag" findings. Compare each survivor with the existing discussion by root
-   cause, trigger, and impact, not wording or exact line. If the same concern already appears anywhere in the existing
-   discussion, drop the duplicate from the triage table and do not create a new inline comment. Record the existing
-   comment URL or ID in working notes.
+1. READ DISCUSSION + GATHER + FALSIFY + VALIDATE — fetch all visible top-level PR comments, submitted reviews,
+   inline comments, replies, and review threads, including resolved and outdated threads. Use the issue-comments,
+   pull-request reviews, and pull-request review-comments endpoints with pagination, or an equivalent connector that
+   proves all three sets are complete. Apply `code-review-effort` Rule 3 and `evidence-first` to every candidate before
+   triage. Compare each survivor with the existing discussion by root cause, trigger, and impact; drop duplicates and
+   record the existing comment URL or ID in working notes.
    Re-fetch the discussion immediately before step 2 and repeat the duplicate check so comments added during the
    review are not repeated. If a missing author-only fact is necessary to complete the review, follow
    `## Clarification questions during review` and stop before step 2 until the author answers. The operator's triage

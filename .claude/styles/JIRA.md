@@ -1,10 +1,20 @@
 # Jira Style Guide
 
-Loaded into context when read. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting around
-prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
+Apply the global `# Context` brevity and formatting rules to this file.
 
 Read before creating or editing Jira issue descriptions, Jira comments (new or updated), or drafts intended to be
 posted to Jira via API or MCP tools. Applies to Jira Cloud (`*.atlassian.net`).
+
+## Contents
+
+- [Rule: Use the Atlassian MCP plugin for every Jira read and write](#rule-use-the-atlassian-mcp-plugin-for-every-jira-read-and-write)
+- [Rule: Match the markup to the write path's content format](#rule-match-the-markup-to-the-write-paths-content-format)
+- [Rule: Map every formatting need to a wiki-markup token](#rule-map-every-formatting-need-to-a-wiki-markup-token)
+- [Rule: Verify the stored body after any API post or edit](#rule-verify-the-stored-body-after-any-api-post-or-edit)
+- [Rule: Keep comments scoped to what the audience can act on](#rule-keep-comments-scoped-to-what-the-audience-can-act-on)
+- [Rule: Use the project's QE handoff template when one exists](#rule-use-the-projects-qe-handoff-template-when-one-exists)
+- [Rule: Prefer editing one canonical comment over stacking new comments](#rule-prefer-editing-one-canonical-comment-over-stacking-new-comments)
+- [Rule: Never restate the requester in the comment body](#rule-never-restate-the-requester-in-the-comment-body)
 
 ### Rule: Use the Atlassian MCP plugin for every Jira read and write
 

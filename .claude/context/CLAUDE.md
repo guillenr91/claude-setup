@@ -1,9 +1,18 @@
 # Context Guide
 
-Loaded into context when read. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting around
-prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
+Apply the global `# Context` brevity and formatting rules to this file.
 
 Use this file to decide which project context to load. Paths relative to `.claude/context/`. Keep portable: generic routing between `SETUP.md` and `TECHNICAL.md` only. Project-specific routing belongs in `SETUP.md` or `TECHNICAL.md`.
+
+## Contents
+
+- [Where information goes inside `.claude/context/`](#where-information-goes-inside-claudecontext)
+- [Routing](#routing)
+- [Keep documentation in sync](#keep-documentation-in-sync)
+- [Required structure for SETUP.md and TECHNICAL.md](#required-structure-for-setupmd-and-technicalmd)
+- [Reusable setup commands and scripts](#reusable-setup-commands-and-scripts)
+- [Generating SETUP.md or TECHNICAL.md when missing](#generating-setupmd-or-technicalmd-when-missing)
+- [Verification standards](#verification-standards)
 
 ## Where information goes inside `.claude/context/`
 
@@ -54,18 +63,16 @@ Both files must:
    ```markdown
    # <Document Title>
 
-   Loaded into context when read. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting
-   around prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future
-   edit.
+   Apply the global `# Context` brevity and formatting rules to this file.
    ```
    The one-sentence purpose statement is required.
-3. Include a table of contents after the `## Context` header and intro sentence, before the first main section. When updating either file, verify the TOC still matches changed headings; if missing, add one in the same update. Do not finish a doc update that leaves either file without a current TOC.
+3. Include a `Contents` section after the `## Context` intro even when the file is 100 lines or fewer. Follow the global `# Markdown files` rule for links and maintenance.
 
 If `last-verified` is more than a few months old, treat the file as suspect and re-verify.
 
 ## Reusable setup commands and scripts
 
-Apply the global Markdown command efficiency rule. In `SETUP.md` and setup-focused Markdown files, treat ready-to-run commands as operational instructions, not examples. A future agent should replace documented values and run the command without guessing.
+Apply the command rules in [MARKDOWN.md](../styles/MARKDOWN.md). In `SETUP.md` and setup-focused Markdown files, treat ready-to-run commands as operational instructions, not examples. A future agent should replace documented values and run the command without guessing.
 
 For setup commands, also document dependencies that affect success: account, region, branch, service name, shell, OS, installed tool version, current directory, network access, credentials, permissions. Keep prose short; let verified command blocks carry the procedure.
 
@@ -120,7 +127,8 @@ Required sections (in order): Context header & TOC, Architecture overview, Exter
 
 ## Verification standards
 
-Verify everything you write. When something cannot be verified (missing credentials, services, or env access), mark it unverified. Unverified entries are acceptable; unverified entries presented as fact are defects.
+Apply the global `# Core behavior` evidence rules and the `evidence-first` skill to every persisted claim. When proof
+requires unavailable credentials, services, or environments, mark the entry unverified and state what is missing.
 
 | Item               | Verification method                   | If unverifiable                    |
 |--------------------|---------------------------------------|------------------------------------|

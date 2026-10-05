@@ -1,7 +1,6 @@
 # Style Guide Instructions
 
-Loaded into context when read. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting around
-prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
+Apply the global `# Context` brevity and formatting rules to this file.
 
 Read this before creating or modifying any Markdown file in `.claude/styles/`. Every guide is a required pre-read before generating or reviewing work in its domain. Name new guides by domain (`JAVA.md`, `POSTMAN.md`, etc.).
 
@@ -31,8 +30,7 @@ Every style guide must start with:
 ```markdown
 # <Domain> Style Guide
 
-Loaded into context when read. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting around
-prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
+Apply the global `# Context` brevity and formatting rules to this file.
 ```
 
 After the header, add one short sentence explaining when to use the guide.
@@ -48,7 +46,6 @@ After the header, add one short sentence explaining when to use the guide.
 
 ## Updating rules
 
-- Update an existing rule in place when the behavior already belongs to it.
-- Add a new rule only when it changes a generation or review decision.
+- Apply the global `# Instruction deduplication` rules.
 - Keep examples short and specific to the rule.
 - Preserve the required header.

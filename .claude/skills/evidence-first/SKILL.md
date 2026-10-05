@@ -19,11 +19,24 @@ description: >-
 
 # Evidence First Skill
 
-Loaded into context when invoked. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting
-around prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
+Apply the global `# Context` brevity and formatting rules to this file.
 
 Applies the global `# Core behavior` evidence requirements and defines how to verify, preserve, cite, and re-check
 evidence.
+
+## Contents
+
+- [Rule 1 — enumerate every factual claim before drafting](#rule-1--enumerate-every-factual-claim-before-drafting)
+- [Rule 2 — verify each claim by direct evidence](#rule-2--verify-each-claim-by-direct-evidence)
+- [Rule 2A — reusable evidence records](#rule-2a--reusable-evidence-records)
+- [Record template](#record-template)
+- [Rule 2B — issue investigations require complete causal proof](#rule-2b--issue-investigations-require-complete-causal-proof)
+- [Rule 3 — attach evidence inline in the reply](#rule-3--attach-evidence-inline-in-the-reply)
+- [Rule 4 — do not carry premises across drafts](#rule-4--do-not-carry-premises-across-drafts)
+- [Rule 5 — when the operator asks "are you sure?" / "have you verified?"](#rule-5--when-the-operator-asks-are-you-sure--have-you-verified)
+- [Rule 6 — pre-send checklist](#rule-6--pre-send-checklist)
+- [Rule 7 — reporting structure](#rule-7--reporting-structure)
+- [Anti-patterns to catch in yourself](#anti-patterns-to-catch-in-yourself)
 
 ## Rule 1 — enumerate every factual claim before drafting
 

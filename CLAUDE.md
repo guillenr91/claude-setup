@@ -1,7 +1,6 @@
 # Project Instructions
 
-Loaded into context. Keep concise, explicit, and actionable for AI agents. No decorative formatting around prose
-(no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
+Apply the global `# Context` brevity and formatting rules to this file.
 
 ## Context routing
 

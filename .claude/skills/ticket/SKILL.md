@@ -10,10 +10,23 @@ description: >-
 
 # Ticket Skill
 
-Loaded into context when invoked. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting
-around prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
+Apply the global `# Context` brevity and formatting rules to this file.
 
 Create, resume, and maintain ticket context under `.claude/context/tickets/<TICKET_ID>/`.
+
+## Contents
+
+- [Execution contract](#execution-contract)
+- [Writing principle](#writing-principle)
+- [Boundary with general context](#boundary-with-general-context)
+- [Step 0 — Confirm intent on ambiguous triggers](#step-0--confirm-intent-on-ambiguous-triggers)
+- [Step 1 — Establish the ticket ID](#step-1--establish-the-ticket-id)
+- [Step 2 — Pick the mode](#step-2--pick-the-mode)
+- [Mode A — Create the analysis file](#mode-a--create-the-analysis-file)
+- [Mode B — Resume work from existing analysis](#mode-b--resume-work-from-existing-analysis)
+- [Mode C — Update the analysis file with new findings](#mode-c--update-the-analysis-file-with-new-findings)
+- [Hard rules](#hard-rules)
+- [Ticket commit rules](#ticket-commit-rules)
 
 ## Execution contract
 

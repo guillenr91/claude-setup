@@ -10,10 +10,18 @@ description: >-
 
 # Install Agent Context Skill
 
-Loaded into context when invoked. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting
-around prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
+Apply the global `# Context` brevity and formatting rules to this file.
 
 Install managed agent instruction files from the canonical source to per-agent targets.
+
+## Contents
+
+- [Scope](#scope)
+- [Process](#process)
+- [Fenced root file](#fenced-root-file)
+- [Cursor global rule as project rule](#cursor-global-rule-as-project-rule)
+- [Gitignore for sync-owned files](#gitignore-for-sync-owned-files)
+- [GitHub Copilot code review](#github-copilot-code-review)
 
 ## Scope
 

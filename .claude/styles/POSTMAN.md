@@ -1,10 +1,19 @@
 # Postman Style Guide
 
-Loaded into context when read. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting around
-prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
+Apply the global `# Context` brevity and formatting rules to this file.
 
 Use these rules when generating or reviewing Postman collections, requests, environments, and scripts. Apply a rule
 only when its trigger matches. Prefer existing collection conventions when they are more specific.
+
+## Contents
+
+- [Collection structure](#collection-structure)
+- [Environment variables](#environment-variables)
+- [Request descriptions](#request-descriptions)
+- [Test scripts](#test-scripts)
+- [URLs](#urls)
+- [Headers](#headers)
+- [Pre-commit verification](#pre-commit-verification)
 
 ## Collection structure
 

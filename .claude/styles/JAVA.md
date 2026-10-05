@@ -1,10 +1,20 @@
 # Java Style Guide
 
-Loaded into context when read. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting around
-prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
+Apply the global `# Context` brevity and formatting rules to this file.
 
 Use these rules when generating or reviewing Java code. Apply a rule only when its trigger matches. Prefer existing
 project patterns when they conflict with a rule here.
+
+## Contents
+
+- [Simplicity](#simplicity)
+- [Reuse existing helpers first](#reuse-existing-helpers-first)
+- [Null handling](#null-handling)
+- [Runtime entrypoints and config](#runtime-entrypoints-and-config)
+- [Helpers and comments](#helpers-and-comments)
+- [External calls and resources](#external-calls-and-resources)
+- [Streams and collection results](#streams-and-collection-results)
+- [Unit and magic-number conversions](#unit-and-magic-number-conversions)
 
 ## Simplicity
 

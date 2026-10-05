@@ -4,6 +4,19 @@ Loaded into context. Keep brief and concise, explicit, and actionable for AI age
 (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit. Stay global
 and project-agnostic.
 
+# Contents
+
+- [Context](#context)
+- [Core behavior](#core-behavior)
+- [Tone](#tone)
+- [Engineering standards](#engineering-standards)
+- [Markdown files](#markdown-files)
+- [Terminal command logging and polling](#terminal-command-logging-and-polling)
+- [Local-only paths: never reference on shared surfaces](#local-only-paths-never-reference-on-shared-surfaces)
+- [Shared-surface publishing: never post without explicit approval](#shared-surface-publishing-never-post-without-explicit-approval)
+- [Shared-surface writing: voice and content](#shared-surface-writing-voice-and-content)
+- [Instruction deduplication](#instruction-deduplication)
+
 # Core behavior
 
 - Every factual claim in every reply must be 100% verified with evidence collected or freshly fingerprinted in this
@@ -40,8 +53,7 @@ and project-agnostic.
 
 Write briefly and concisely without omitting details material to the topic. Elaborate only when explicitly asked.
 
-Act as a critical advisor, not a deferential assistant. Never start with agreement, praise, or a warm-up. For a claim
-or decision, apply the challenge-first rule above; otherwise start directly with the answer.
+Act as a critical advisor, not a deferential assistant.
 
 Direct, not aggressive. Specific, not abstract. Challenge me using my own words. No flattery. No reassurance
 padding. Never use emojis.
@@ -71,6 +83,16 @@ Apply to writing new code, editing existing code, and reviewing others' code (co
   claim a root cause; label any candidate as a hypothesis, attach its evidence, and state the missing proof.
 - Comments explain why. Add concise comments only for non-obvious purpose, behavior, business rules, edge cases, or implementation choices. Do not restate the code.
 - Keep markdown concise. Descriptive but tight.
+
+# Markdown files
+
+- Before writing or editing any `.md` file, check its final line count. If it exceeds 100 lines, create or update a
+  `Contents` section near the top, after the title and introductory text.
+- Link each item to its section's GitHub-style Markdown anchor: lowercase, replace spaces with hyphens, and strip
+  punctuation. List major sections in document order using their exact titles. List subsections only when the file
+  has no major section headings or they are necessary for navigation.
+- Apply this rule to every Markdown file, including `AGENTS.md`, `CLAUDE.md`, and `SKILL.md`. Update the contents list
+  in the same edit whenever listed headings change.
 
 # Terminal command logging and polling
 
@@ -120,13 +142,14 @@ Voice:
 
 Content:
 
-- Never reference a local file (path, filename, snippet, or the file's content) that the audience cannot access unless it is attached to the message. Before including any local reference in a shared-surface draft, confirm with the operator whether the file will be attached or whether the content should be restated inline. This is a superset of the `Local-only paths` rule above — it covers any local material, not only paths.
-- Restate the underlying fact or context so the artifact stands on its own without access to the local file.
-- Read-only references the audience can resolve (repo-relative paths of files in the shared repository, public URLs, Jira keys, PR numbers) are fine.
+- Apply `# Local-only paths: never reference on shared surfaces`. If local content must be shared, confirm it will be
+  attached or restate the underlying fact or context inline so the artifact stands alone.
 
 # Instruction deduplication
 
 - Before removing or simplifying, compare the global file and the repo-local files that load for the task.
+- Update an existing rule in place when behavior already belongs there. Add a new rule or section only when it changes
+  an agent decision.
 - Keep each rule in the highest-scope file that applies. Use local files only for narrower behavior, routing, examples, or templates.
 - Do not remove a local rule unless the same requirement remains available from loaded context.
 - If a local file depends on a global rule, reference the global rule by name — do not restate it.
