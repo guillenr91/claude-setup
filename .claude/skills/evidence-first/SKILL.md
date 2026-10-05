@@ -22,7 +22,8 @@ description: >-
 Loaded into context when invoked. Keep brief and concise, explicit, and actionable for AI agents. Preserve every concrete instruction and action; cut verbose prose. No decorative formatting
 around prose (no `**bold**`, `*italic*`, `_italic_`, `> blockquote`). Preserve these standards in every future edit.
 
-Prevents inference, guessing, pattern-matching, model recall, and prior-session memory from being stated as fact. Every factual claim in every reply — substantive, conversational, status, single-line — must be backed by direct in-session evidence or a reusable evidence record whose source fingerprint matches in this session, or flagged with the operator's exact uncertainty phrasing from the global agent instruction file (`CLAUDE.md` / `AGENTS.md`). No exceptions, no size threshold.
+Applies the global `# Core behavior` evidence requirements and defines how to verify, preserve, cite, and re-check
+evidence.
 
 ## Rule 1 — enumerate every factual claim before drafting
 
@@ -59,8 +60,8 @@ Match the method to the claim type. Reasoning about code shape is not a substitu
 | "Earlier in this session we did E"        | Scroll and quote the earlier turn. Do not reconstruct.           |
 | "The library/version supports F"          | Fetch current docs or read the installed source; do not recall.  |
 
-If a claim cannot be verified this session, do not state it as fact. Use the exact uncertainty phrasing from the operator's global agent instruction file (`CLAUDE.md` / `AGENTS.md`):
-"The following information has not been validated, 100% verified, nor fact-checked: <item>. To validate it I would need to <steps>."
+If a claim cannot be verified this session, do not state it as fact. Use the exact uncertainty disclosure from the
+global `# Core behavior` rules.
 
 ## Rule 2A — reusable evidence records
 
@@ -96,6 +97,27 @@ proof: <≤40 words or ≤5 code lines; redact sensitive values>
 ---
 ```
 
+## Rule 2B — issue investigations require complete causal proof
+
+Do not declare an issue understood or name a root cause until the investigation is 100% verified with no material
+assumptions, doubts, or gaps.
+
+1. Enumerate every relevant evidence surface available for the issue: executing code, callers, tests, logs, database
+   records, cloud resources such as AWS, configuration, deployment/runtime state, and authoritative docs. Inspect each
+   source that could confirm or refute a load-bearing fact. Availability does not grant new access or mutation authority.
+2. Reproduce the reported symptom under its actual trigger and capture the output. If direct reproduction is
+   impossible, obtain authoritative runtime evidence of the same symptom. A related passing test is not reproduction.
+3. Prove the complete causal chain from trigger to faulty state or operation to observed symptom with direct evidence.
+   Actively test competing explanations and record the evidence that rules them out.
+4. When safe and within scope, confirm the causal claim with a control: remove or neutralize the alleged cause, or
+   apply the minimal fix, then rerun the reproduction and show that the symptom disappears.
+5. Continue researching while any safe, relevant verification path remains. Do not stop at correlation, a plausible
+   hypothesis, or a partial explanation. Declare the root cause only when every load-bearing fact is verified and no
+   material doubt or gap remains.
+6. If required access, data, environment, authority, or reproducibility is unavailable after safe alternatives are
+   exhausted, the root cause is not verified. Use the exact uncertainty phrasing from Rule 2 and state precisely what
+   is required to continue. Never convert a blocker into a conclusion.
+
 ## Rule 3 — attach evidence inline in the reply
 
 Every factual claim ships with its evidence in the same reply. The operator must be able to audit without opening another tool.
@@ -126,17 +148,17 @@ Re-verify the specific claim being questioned, not adjacent facts. Verifying a l
 
 ## Rule 6 — pre-send checklist
 
-Before sending, walk this checklist. If any answer is no, the reply is not ready.
+Before sending, require yes for each applicable item:
 
-1. Have I enumerated every factual claim in the reply?
-2. For each, have I directly verified the source in this session, or reused a record with a fresh exact fingerprint match?
-3. Is the evidence attached inline so the operator can audit it without another tool call?
-4. Have I flagged any claim I could not verify with the exact uncertainty phrasing?
-5. Have I separated verified facts from judgment ("my read" / "I'd recommend" / "opinion:")?
-6. For every reused record, did I run its fingerprint command this session and confirm an exact match?
-7. Am I about to use any banned hedge below in place of verification?
+1. Rules 1–3 are satisfied for every claim, including inline evidence.
+2. Every reused record has a fresh exact fingerprint match.
+3. Every unverifiable claim uses the global exact uncertainty disclosure; facts and judgments are separated.
+4. For issue investigations, Rule 2B is complete: exact symptom observed, causal chain proved, alternatives falsified,
+   relevant evidence surfaces checked, and no material gap remains.
 
-Banned in place of verification: "probably", "likely", "should work", "I think", "must be", "usually", "typically", "in most cases", "the pattern is", "it looks like", "seems to", "appears to", "I believe". These are guesses dressed as claims. Either verify and state plainly with evidence attached, or use the exact uncertainty phrasing from Rule 2. Judgment phrases ("my read", "I'd recommend") are allowed only for clearly-labeled opinions, never for factual claims.
+Never substitute hedges such as "probably", "likely", "should work", "I think", "usually", "it looks like", or
+"seems to" for verification. Verify, or use the global exact uncertainty disclosure. Opinion markers apply only to
+judgment, never factual claims.
 
 ## Rule 7 — reporting structure
 
@@ -148,19 +170,9 @@ Structure every reply so the operator can audit verification at a glance:
 
 Do not mix categories inside a single sentence. A sentence that reads as a fact must be a verified fact with evidence attached.
 
-## Cost model
-
-Reading a method body is 1 tool call. Fetching a doc is 1 tool call. Running a command is 1 tool call. A matching reusable record replaces repeated direct verification with one fingerprint check. Posting a wrong claim costs a retraction, a re-draft, operator trust, and — for PR review comments — reviewer trust and potentially a revert. When verification takes fewer than 3 tool calls, always verify. When impossible, use the uncertainty phrasing; never bridge the gap with a hedge word.
-
 ## Anti-patterns to catch in yourself
 
 - "This probably works like X because the surrounding structure looks like Y" — stop, read X.
-- "The legacy code must have done Z since Z is what the docs describe" — stop, blame + read.
-- "The operator asked me to verify, so I re-ran the grep that found the line number" — not what they asked. Re-verify the behavior claim, not the line-number claim.
-- "Three drafts in and the operator is still pushing back" — go back to the source. The next draft is not the fix.
-- "I'll add a hedge word so I don't have to verify" — hedges are not verification. Verify or use the uncertainty phrasing.
-- "I remember this from a prior session" — prior-session memory is not in-session evidence. Re-read the source.
-- "The evidence record exists, so the source is still valid" — run the stored fingerprint command and require an exact match.
-- "The test passed before, so I can reuse the result" — runtime results are not reusable records. Run the test again.
-- "The tool/skill description said X, so X is guaranteed" — descriptions can drift from implementation. If X is load-bearing, verify by running the tool or reading the source.
+- "I re-ran the grep that found the line" — re-verify the behavior claim, not its location.
+- "The record exists, so it is valid" — require the fresh fingerprint; rerun mutable/runtime evidence.
 - "It's just a short reply, verification is overkill" — reply size does not change the verification bar. Every factual claim gets evidence.
