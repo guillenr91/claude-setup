@@ -38,7 +38,7 @@ For ticket-specific conventions beyond these, see the ticket skill when it exist
 
 Triggers immediately before running `git commit` or `git push`.
 
-Invoke the `code-review-effort` skill and apply its rules to the pending changes — every time, even when the change feels small. Complete the review (including any fixes triaged from findings) before drafting the commit message.
+Invoke the `code-review-rigor` skill and apply its rules to the pending changes — every time, even when the change feels small. It owns review capability discovery, reuse audit, style-guide selection, falsification, and verified-concerns triage. Complete that review before drafting the commit message.
 
 ## Commit-message approval gate
 
@@ -46,7 +46,7 @@ Never run `git commit` until the operator has seen the exact commit message and 
 
 1. Draft the full commit message (subject and body) in chat, formatted per `## Commit conventions`.
 2. Show which files will be staged and which pending changes will be left out.
-3. Include the review summary produced by `code-review-effort` (what was reviewed, findings, what was fixed, what was deferred) in the commit body or alongside the draft.
+3. Include the review summary produced by `code-review-rigor` (what was reviewed, findings, what was fixed, what was deferred) in the commit body or alongside the draft.
 4. Wait for explicit approval. "Looks good", "go ahead", "commit it", "ship it", or equivalent counts. Do not infer approval from silence, earlier turns, or prior approvals on different content.
 5. Approval of one draft does not extend to later edits. After any change to the message or staged file set, re-confirm.
 6. If the operator rejects the draft or any part of it, drop the rejected piece. Do not commit anyway or re-draft a near-duplicate to argue.

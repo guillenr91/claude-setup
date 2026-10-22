@@ -29,7 +29,7 @@ Applies pre-PR review, GitHub write-action draft-first gate, addressing incoming
 
 Triggers immediately before running `gh pr create`. Also triggers before `gh pr edit` when the edit changes the PR's scope or claims (title, description body, base branch). Skip for pure typo fixes to an existing description.
 
-Invoke the `code-review-effort` skill and apply its rules to the changes in the PR — every time, even when the change feels small. Use the review output to write the PR description's summary of what was verified.
+Invoke the `code-review-rigor` skill and apply its rules to the changes in the PR — every time, even when the change feels small. Use the review output to write the PR description's summary of what was verified.
 
 ## Draft-first gate for GitHub write actions
 
@@ -61,7 +61,7 @@ Follow in order. Do not merge or reorder steps. Do not skip because a step looks
 
 ## PR review eligibility gate
 
-Run this gate before starting any full PR review, invoking `code-review-effort`, analyzing the diff for findings, or
+Run this gate before starting any full PR review, invoking `code-review-rigor`, analyzing the diff for findings, or
 drafting a verdict.
 
 1. Fetch the current PR merge state and complete GitHub check rollup with
@@ -97,37 +97,31 @@ When clarification is necessary:
    `## Draft-first gate for GitHub write actions` before posting.
 3. Post only the approved clarification comment and pause the review. Do not produce a triage table, inline finding,
    summary, or verdict until the author answers.
-4. After the answer, verify it against the code and resume falsification. Promote the candidate to a categorized
-   finding only if it then survives falsification with direct evidence; otherwise drop it.
+4. After the answer, verify it against the code and return it to `code-review-rigor` for its evidence and falsification pass. Promote it to a categorized finding only if it survives that pass; otherwise drop it.
 
 ## PR review feedback
 
 The goal of every review comment is to help the developer improve their code or solve a detected issue. Comments that only point out problems without providing a path forward are not useful. Every comment should enable immediate action.
 
-Invoke the `code-review-effort` skill before posting any feedback: discover the review capabilities available, use every applicable capability, and use the highest effort level the task warrants. Findings posted as PR comments must come from that pass, not from a glance at the diff.
+Invoke the `code-review-rigor` skill before posting any feedback. It owns review capability discovery, reuse audit, style-guide selection, candidate falsification, and the validated-concerns table. Findings posted as PR comments must come from that completed pass, not from a glance at the diff.
 
 When reviewing a PR:
 
-- Apply `code-review-effort` Rule 3 to every candidate. Only findings that survive falsification with direct evidence
-  may reach the operator or GitHub. Route necessary author-only facts through
-  `## Clarification questions during review`; they remain questions, not findings.
+- Use only concerns that survive the completed `code-review-rigor` pass. Route necessary author-only facts through `## Clarification questions during review`; they remain questions, not findings.
 
-- Verdict selection is mechanical, not stylistic. After the `code-review-effort` pass, classify every surviving
-  (evidence-first-verified) finding as blocking or non-blocking, then apply the table below. Do not default to
-  `COMMENT` to hedge — an unverified concern is not a finding and must be dropped, and a non-blocking observation
-  does not downgrade approval.
+- The table below is the recommended PR event after the `code-review-rigor` pass. The operator has the final word: present the triage table, ask which concerns to keep or ignore, and ask the operator to choose or override the recommended event before drafting or posting feedback.
 
-  | Verified blockers? | Non-blocking findings? | Verdict         |
-  |--------------------|------------------------|-----------------|
-  | Yes (≥1)           | any                    | REQUEST_CHANGES |
-  | No                 | Yes                    | APPROVE         |
-  | No                 | No                     | APPROVE         |
+  | Verified blockers? | Non-blocking findings? | Verdict              |
+  |--------------------|------------------------|----------------------|
+  | Yes (≥1)           | any                    | REQUEST_CHANGES      |
+  | No                 | Yes                    | COMMENT (no verdict) |
+  | No                 | No                     | APPROVE              |
 
   A blocker is a VERIFIED (evidence-first-passed) finding that causes clear breakage, security risk, data loss, or
   behavior likely to harm a supported workflow — see the category rules below. Edge cases,
   hardening, polish, doc gaps, and low-risk maintainability are non-blocking unless evidence shows they break a
-  supported workflow. Use the no-verdict `COMMENT` event only when the operator explicitly chooses to submit inline
-  comments without approving or requesting changes. Do not select it merely to hedge.
+  supported workflow. When one or more selected, verified non-blocking concerns remain and no verified blockers
+  remain, recommend the no-verdict `COMMENT` event. Do not approve in that case unless the operator explicitly chooses `APPROVE`.
 
 - Prefix every finding comment title with an uppercase category in brackets: `[BUG]`, `[SECURITY]`,
   `[PERFORMANCE]`, `[TEST]`, `[DOCS]`, `[MAINTAINABILITY]`. Use `[LEGACY BUG]` for pre-existing issues — note
@@ -186,71 +180,28 @@ Drafting workflow for review comments:
 
 Hard sequence — do not merge, skip, or reorder these steps. Each is a stop-and-wait gate.
 
-1. READ DISCUSSION + GATHER + FALSIFY + VALIDATE — fetch all visible top-level PR comments, submitted reviews,
+1. READ DISCUSSION + GATHER — fetch all visible top-level PR comments, submitted reviews,
    inline comments, replies, and review threads, including resolved and outdated threads. Use the issue-comments,
    pull-request reviews, and pull-request review-comments endpoints with pagination, or an equivalent connector that
-   proves all three sets are complete. Apply `code-review-effort` Rule 3 and `evidence-first` to every candidate before
-   triage. Compare each survivor with the existing discussion by root cause, trigger, and impact; drop duplicates and
+   proves all three sets are complete. Send every candidate through the completed `code-review-rigor` pass before
+   triage. Compare each verified survivor with the existing discussion by root cause, trigger, and impact; drop duplicates and
    record the existing comment URL or ID in working notes.
    Re-fetch the discussion immediately before step 2 and repeat the duplicate check so comments added during the
    review are not repeated. If a missing author-only fact is necessary to complete the review, follow
    `## Clarification questions during review` and stop before step 2 until the author answers. The operator's triage
    input in step 2 is the validated, unique, survived list only.
 
-2. TRIAGE TABLE (mandatory, FIRST operator interaction) — the very next thing you show the operator after the
-   review pass is the triage table below. It must be the first thing in your message. Do NOT precede it with a
-   summary paragraph, capabilities recap, verdict prose, or any other framing content. Skill/tool status
-   updates go AFTER the table, not before. If you have nothing else to say, say nothing — the table is
-   sufficient by itself.
+2. TRIAGE TABLE + WAIT — use the table and PR-review waiting rules from `code-review-rigor` Rule 4. Do not draft comment bodies before the operator selects rows.
 
-   Table shape — exactly this Markdown, one row per surviving finding, `#` starts at 1:
-
-   ```markdown
-   | # | Comment | Trigger | Impact | Blocking? |
-   |---|---------|---------|--------|-----------|
-   | 1 | <2–4 word slug> | <concrete condition to hit it> | <what breaks / degrades / mis-attributes> | <Yes/No — one-line reason> |
-   ```
-
-   Column discipline (enforce every row):
-
-   - `#` — 1-indexed integer so the operator can say "keep 1 and 3, drop 2".
-   - `Comment` — 2–4 words TOTAL, no backticks, no code identifiers. This is a slug the operator scans, not a
-     description. If you cannot fit the finding in 4 words, the slug is wrong — pick a different noun phrase.
-     Examples of correct slugs: "duplicate subscription read", "wire schema coupling", "dedup key null
-     formatting". Examples of WRONG slugs (too long / code-heavy): "Duplicate getUserSubscriptions read on
-     post-expiry send path", "`locationId` camelCase vs `plan_code` snake_case".
-   - `Trigger` — the concrete condition that produces the issue: specific inputs, state, config, or code path.
-     One sentence. No file paths or line numbers in this column (they belong in the inline body later).
-   - `Impact` — what actually goes wrong when the trigger fires. Behavior change, wrong data, extra cost,
-     silent drop, mis-attributed metric. One sentence, concrete outcome.
-   - `Blocking?` — `Yes — <reason>` for verified blockers (per the verdict-selection table above), `No —
-     <reason>` for non-blocking. Reason must explain WHY it does or does not block; do not just repeat "No".
-
-   Table rules:
-
-   - Include EVERY finding that survived `evidence-first`, blocking or not. Do not pre-filter to "the ones I
-     think you'd keep" — the operator makes that call.
-   - Do NOT include the inline-comment body, file paths, line numbers, or verdict rationale inside the table.
-     Those come in step 4.
-   - Immediately AFTER the table (still in the same message), on one line, state the verdict that follows
-     from the `Blocking?` column via the verdict-selection table above (`APPROVE` / `REQUEST_CHANGES`), so the
-     operator can override or choose a no-verdict `COMMENT` event before drafting. One line, no rationale prose.
-   - If additional context is required for the operator to decide (e.g. a review capability failed to run),
-     add ONE short line after the verdict line naming what was skipped and why. Do not expand into a status
-     narrative.
-
-3. WAIT — stop and wait for the operator to select rows. "Keep 1 and 3" / "all of them" / "drop 2 and 5" all
-   count. Silence does not. Do not draft bodies preemptively.
-
-4. DRAFT BODIES — for each kept row, and only for those rows, draft the full inline-comment body (title line
+3. DRAFT BODIES — for each kept row, and only for those rows, draft the full inline-comment body (title line
    + blank + body — brief and concise, no `suggestion` blocks, per the review-comment rules above). Show the
    operator the exact body, the file and line it will attach to, and the proposed verdict or no-verdict `COMMENT`
    event. Re-fetch existing discussion first and drop any finding whose concern appeared since step 1.
 
-5. EDIT — apply changes the operator requests. If they reject a body after seeing it, drop it; do not post it
+4. EDIT — apply changes the operator requests. If they reject a body after seeing it, drop it; do not post it
    anyway or re-draft a near-duplicate to argue.
 
-6. POST — only after explicit approval on the final drafts AND the review event, run the posting steps below.
+5. POST — only after explicit approval on the final drafts AND the review event, run the posting steps below.
 
 After approval:
 

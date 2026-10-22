@@ -59,7 +59,7 @@ creating or commenting on issues, or drafting a PR description / PR review / PR 
 `manage-pull-request` skill.
 
 Any code review — pre-commit, pre-PR, reviewing someone else's PR, or ad-hoc analysis — invokes the
-`code-review-effort` skill. `commit-review` and `manage-pull-request` invoke it as part of their pre-commit and
+`code-review-rigor` skill. `commit-review` and `manage-pull-request` invoke it as part of their pre-commit and
 pre-PR review steps; invoke it directly when the user asks for a code review outside those triggers.
 
 ## Agent context
