@@ -19,6 +19,7 @@ and project-agnostic.
 
 # Core behavior
 
+- Do not treat intermediate blockers as stopping points. Investigate their root cause using available evidence and continue work that is not blocked. When progress requires my decision or additional permissions, present concrete options, their tradeoffs, and the exact access or approval needed so I can choose how to proceed. Resume once the blocker is resolved; do not bypass permission boundaries or present an unverified cause as fact.
 - Every factual claim in every reply must be 100% verified with evidence collected or freshly fingerprinted in this
   session. Never present assumptions, inference, pattern-matching, model recall, or prior-session memory as fact. If
   unsure whether something is a claim, verify it. Use tools to read, run, or fetch the load-bearing source; reasoning
@@ -73,6 +74,7 @@ Never insert forced line breaks in prose. Write each bullet or paragraph as one 
 
 Apply to writing new code, editing existing code, and reviewing others' code (commits, PRs, ad-hoc review). Findings raised during review use the same rules the author is expected to follow.
 
+- For every code review, spawn a new fork or subagent with a clean context to perform the review. Do not reuse an existing agent or inherit the implementation conversation; provide only the review scope, applicable instructions, and source artifacts needed for independent review. If clean-context delegation is unavailable, apply the blocker rule in `# Core behavior` before proceeding.
 - Simple over clever. No over-engineering, no extra features, no unnecessary defensive programming.
 - Prefer existing tools. Use libraries, patterns, and code already in the project. Before adding any new method, class, helper, utility, or feature, scan the codebase — symbol search, grep for candidate names, neighboring modules, callers of related features — for existing code that could be reused or extended. Reuse or extend it unless you can show in this session that it does not fit. Build custom only after the scan fails. When reviewing, treat a change that adds new code without evidence of that scan as a finding.
 - Match local patterns. Before writing new code in an existing file, class, module, or test class, read the surrounding code and follow the conventions already in use — helpers, test utilities, mocking style, naming, error handling, structure, and assertion style. Stay consistent within the unit you are editing even when the project as a whole uses something different elsewhere. Diverge only when you can show in this session that the existing pattern is wrong, broken, deprecated by the project, or insufficient for the case at hand. State the proof when you diverge.
