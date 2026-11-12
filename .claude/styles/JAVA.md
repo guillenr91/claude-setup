@@ -18,6 +18,24 @@ project patterns when they conflict with a rule here.
 
 ## Simplicity
 
+### Rule: prefer instance methods over static methods
+
+Trigger: adding or modifying a Java method.
+
+Do: use an instance method and pass dependencies explicitly so behavior can be tested and extended through object contracts.
+
+Do not: introduce static methods for application behavior or helpers.
+
+Exception: retain a static method when a runtime or framework contract requires it, such as `main`. This rule does not prohibit calling existing library utilities or declaring constants.
+
+### Rule: avoid reflection
+
+Trigger: accessing fields, invoking methods, constructing objects, or inspecting types in application or test code.
+
+Do: use typed APIs, interfaces, constructors, and explicit accessors.
+
+Do not: use reflection to discover or invoke members, bypass visibility, or access private state in tests.
+
 ### Rule: choose the simplest readable shape
 
 Trigger: multiple valid ways to express the same Java behavior.
@@ -638,7 +656,7 @@ mechanics.
  * @param config validated preflight settings
  * @return service endpoint URI
  */
-private static URI serviceUri(Config config) {
+private URI serviceUri(Config config) {
     ...
 }
 ```
