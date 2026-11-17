@@ -595,13 +595,23 @@ all — an empty Javadoc block is worse than none.
 private static final long UNIT_BOUNDARY = 1_000_000_000_000L;
 ```
 
+### Rule: omit obvious class Javadocs
+
+Trigger: adding or modifying a class, interface, enum, record, or implementation.
+
+Do: add class-level Javadoc only when it documents a non-obvious project role, cross-layer contract, lifecycle constraint, or invariant that a reader cannot learn from the type name, implemented contract, constructor dependencies, and method Javadocs.
+
+Do not: add one-line class Javadocs that restate an obvious type name or implementation role. Omit the Javadoc when it adds no material information.
+
+Exception: retain concise class-level Javadoc when it explains a construction boundary, transaction ownership rule, feature-selection rule, or other fact that is essential to use or safely change the type.
+
 ### Rule: document non-trivial methods
 
 Trigger: adding or modifying a method with more than three lines.
 
 Do: add concise Javadoc directly above the method that explains its purpose, the essential approach, and the reason the method or its non-obvious behavior is needed.
 
-Do not: make a reader infer an invariant, object-ownership boundary, or intentional omission from the method body alone.
+Do not: make a reader infer an invariant, object-ownership boundary, or intentional omission from the method body alone. Do not use a one-line `/** ... */` Javadoc for a non-trivial method; use a multi-line standard Javadoc block with a summary, required contract tags, and spacing between the summary and tags.
 
 Exception: omit Javadoc for test methods, or for a method of three lines or fewer when its purpose, operation, and reason are obvious from its name, parameters, and body.
 
@@ -660,6 +670,16 @@ private URI serviceUri(Config config) {
     ...
 }
 ```
+
+### Rule: inherit unchanged interface contracts
+
+Trigger: an implementation overrides an interface or superclass method whose Javadoc already defines the complete caller contract.
+
+Do: omit implementation Javadoc when the inherited contract is complete. Use a multi-line `/** ... */` Javadoc block beginning with `{@inheritDoc}` only when the implementation adds a caller-relevant behavior, transaction boundary, failure mode, or invariant not defined by the inherited contract; document that addition after `{@inheritDoc}`.
+
+Do not: repeat the interface method's summary, parameter tags, return tags, or exception tags in every implementation. Do not add a standalone `{@inheritDoc}` block: JavaDoc already inherits the interface contract by default.
+
+Exception: write a complete implementation Javadoc when there is no inherited contract, or when the implementation changes a caller-relevant contract that cannot be expressed as a short addition to `{@inheritDoc}`.
 
 ### Rule: document records as contracts
 
